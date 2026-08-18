@@ -1090,7 +1090,137 @@ window.LM_PORTFOLIO = {
     "reportableAccidents": null,
     "cumulativeManHoursLabel": ""
   },
-  "rfsDelivery": [],
+  "rfsDelivery": [
+    {
+      "month": "2026-03",
+      "items": [
+        {
+          "project": "KTP-D1 1F (D, E, F）",
+          "phase": "RFS 1",
+          "date": "2026-03-30",
+          "mw": 5
+        },
+        {
+          "project": "NDP-C2",
+          "phase": "RFS 1",
+          "date": "2026-03-30",
+          "mw": 38
+        }
+      ]
+    },
+    {
+      "month": "2026-04",
+      "items": [
+        {
+          "project": "KTP-C1 （GF, 1F)",
+          "phase": "RFS1–RFS2",
+          "date": "2026-04-16",
+          "mw": 21.6,
+          "verify": true
+        },
+        {
+          "project": "KTP-B + B3",
+          "phase": "RFS 1 - 3",
+          "date": "2026-04-30",
+          "mw": 64.8,
+          "verify": true
+        },
+        {
+          "project": "NTP-J2",
+          "phase": "RFS 1– 3",
+          "date": "2026-04-30",
+          "mw": 14,
+          "verify": true
+        }
+      ]
+    },
+    {
+      "month": "2026-05",
+      "items": [
+        {
+          "project": "KTP-J2",
+          "phase": "J2",
+          "date": "2026-05-15",
+          "mw": 29.6
+        },
+        {
+          "project": "NTP-J1",
+          "phase": "RFS 4",
+          "date": "2026-05-27",
+          "mw": 24
+        },
+        {
+          "project": "CTP-B",
+          "phase": "B1",
+          "date": "2026-05-30",
+          "mw": 36.4,
+          "verify": true
+        }
+      ]
+    },
+    {
+      "month": "2026-06",
+      "items": [
+        {
+          "project": "CTP-B",
+          "phase": "B2",
+          "date": "2026-06-30",
+          "mw": 36.4,
+          "verify": true
+        }
+      ]
+    },
+    {
+      "month": "2026-07",
+      "items": [
+        {
+          "project": "NTP-J2",
+          "phase": "RFS 5",
+          "date": "2026-07-30",
+          "mw": 8
+        }
+      ]
+    },
+    {
+      "month": "2026-08",
+      "items": [
+        {
+          "project": "KTP-J1",
+          "phase": "J1",
+          "date": "2026-08-07",
+          "mw": 28
+        },
+        {
+          "project": "KTP-G2",
+          "phase": "RFS 1",
+          "date": "2026-08-15",
+          "mw": 32
+        }
+      ]
+    },
+    {
+      "month": "2026-09",
+      "items": [
+        {
+          "project": "KTP-G1",
+          "phase": "RFS 2",
+          "date": "2026-09-10",
+          "mw": 32
+        }
+      ]
+    },
+    {
+      "month": "2026-12",
+      "items": [
+        {
+          "project": "KITP-A",
+          "phase": "RFS",
+          "date": "2026-12-30",
+          "mw": 120
+        }
+      ]
+    }
+  ],
   "confirmedDelivery2025Mw": null
 };
 
@@ -1198,13 +1328,13 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "BD",
     "scope": "MBW, BBMEP, DCMEP",
-    "capacityMW": 52.0,
+    "capacityMW": 52,
     "owners": {
       "lead": "叶锦维",
       "owner1": "叶锦维 /吕慧娴",
       "owner2": "刘思孝"
     },
-    "status": "nodata",
+    "status": "amber",
     "milestones": [
       {
         "name": "BOMBA",
@@ -1234,7 +1364,7 @@ window.LM_SEED_KTP = [
         "group": "",
         "planned": "2026-05-15",
         "actual": "2026-05-15",
-        "capacityMW": 24.0,
+        "capacityMW": 24,
         "phaseLabel": "J2"
       },
       {
@@ -1253,7 +1383,7 @@ window.LM_SEED_KTP = [
             "at": null
           }
         ],
-        "capacityMW": 28.0,
+        "capacityMW": 28,
         "phaseLabel": "J1"
       },
       {
@@ -1273,11 +1403,12 @@ window.LM_SEED_KTP = [
       }
     ],
     "dataQuality": [
-      "本项目由导入器于周 45 新建，基础数据待补"
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "计划进度与状态来自周报站（2026-08-11 更新）；实际进度以统筹表为准。"
     ],
     "progress": {
       "actual": 0.998,
-      "planned": null,
+      "planned": 1.0,
       "spi": 0.998
     },
     "commercial": [
@@ -1289,7 +1420,7 @@ window.LM_SEED_KTP = [
       {
         "currency": "USD",
         "contractValue": 34401547.06,
-        "collected": 0.0
+        "collected": 0
       }
     ]
   },
@@ -1351,7 +1482,7 @@ window.LM_SEED_KTP = [
     "commercial": [
       {
         "currency": "RM",
-        "contractValue": 126200000.0,
+        "contractValue": 126200000,
         "collected": 59782117.28
       }
     ]
@@ -1370,7 +1501,7 @@ window.LM_SEED_KTP = [
       "owner1": "张帆",
       "owner2": "薛志宏"
     },
-    "status": "nodata",
+    "status": "red",
     "milestones": [
       {
         "name": "RFS 1",
@@ -1397,11 +1528,12 @@ window.LM_SEED_KTP = [
       }
     ],
     "dataQuality": [
-      "本项目由导入器于周 45 新建，基础数据待补"
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "计划进度与状态来自周报站（2026-08-10 更新）；实际进度以统筹表为准。"
     ],
     "progress": {
       "actual": 0.9,
-      "planned": null,
+      "planned": 1.0,
       "spi": 0.9
     }
   },
@@ -1413,13 +1545,13 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "O",
     "scope": "MBW, BBMEP",
-    "capacityMW": 64.0,
+    "capacityMW": 64,
     "owners": {
       "lead": "吴锋艳",
       "owner1": "Joey 祖儿",
       "owner2": "王保凤"
     },
-    "status": "nodata",
+    "status": "green",
     "milestones": [
       {
         "name": "BOMBA",
@@ -1466,7 +1598,7 @@ window.LM_SEED_KTP = [
         "group": "",
         "planned": "2026-08-15",
         "actual": null,
-        "capacityMW": 32.0,
+        "capacityMW": 32,
         "phaseLabel": "G2"
       },
       {
@@ -1475,7 +1607,7 @@ window.LM_SEED_KTP = [
         "group": "",
         "planned": "2026-09-10",
         "actual": null,
-        "capacityMW": 32.0,
+        "capacityMW": 32,
         "phaseLabel": "G1"
       },
       {
@@ -1495,11 +1627,12 @@ window.LM_SEED_KTP = [
       }
     ],
     "dataQuality": [
-      "本项目由导入器于周 45 新建，基础数据待补"
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "计划进度与状态来自周报站（2026-08-09 更新）；实际进度以统筹表为准。"
     ],
     "progress": {
       "actual": 0.9212,
-      "planned": null,
+      "planned": 0.9462,
       "spi": 1.042907
     },
     "commercial": [
@@ -1511,7 +1644,7 @@ window.LM_SEED_KTP = [
       {
         "currency": "USD",
         "contractValue": 36035212.15,
-        "collected": 0.0
+        "collected": 0
       }
     ]
   },
@@ -1580,7 +1713,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "MSFT",
     "scope": "DCMEP",
-    "capacityMW": 56.0,
+    "capacityMW": 56,
     "owners": {
       "lead": "赵慧光",
       "owner1": "林俊伟",
@@ -1615,7 +1748,7 @@ window.LM_SEED_KTP = [
         "group": "",
         "planned": "2026-10-30",
         "actual": null,
-        "capacityMW": 24.0,
+        "capacityMW": 24,
         "phaseLabel": "F1"
       },
       {
@@ -1624,7 +1757,7 @@ window.LM_SEED_KTP = [
         "group": "",
         "planned": "2026-04-15",
         "actual": null,
-        "capacityMW": 32.0,
+        "capacityMW": 32,
         "phaseLabel": "F2"
       },
       {
@@ -1661,7 +1794,7 @@ window.LM_SEED_KTP = [
       {
         "currency": "USD",
         "contractValue": 62952910.69,
-        "collected": 0.0
+        "collected": 0
       }
     ]
   },
@@ -1716,7 +1849,7 @@ window.LM_SEED_KTP = [
       {
         "currency": "RM",
         "contractValue": 197971037.5186,
-        "collected": 0.0
+        "collected": 0
       }
     ]
   },
@@ -1728,7 +1861,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "O",
     "scope": "MBW, BBMEP, DCMEP",
-    "capacityMW": 160.0,
+    "capacityMW": 160,
     "owners": {
       "lead": "吴锋艳",
       "owner1": "叶锦维/吴绍仟",
@@ -1805,13 +1938,13 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "T",
     "scope": "DCMEP",
-    "capacityMW": 12.0,
+    "capacityMW": 12,
     "owners": {
       "lead": "张帆",
       "owner1": "王德晔",
       "owner2": "王联运"
     },
-    "status": "nodata",
+    "status": "amber",
     "milestones": [
       {
         "name": "IST",
@@ -1856,11 +1989,12 @@ window.LM_SEED_KTP = [
       }
     ],
     "dataQuality": [
-      "本项目由导入器于周 45 新建，基础数据待补"
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "计划进度与状态来自周报站（2026-08-10 更新）；实际进度以统筹表为准。"
     ],
     "progress": {
       "actual": 0.9896,
-      "planned": null,
+      "planned": 0.9907,
       "spi": 0.9896
     }
   },
@@ -1907,9 +2041,9 @@ window.LM_SEED_KTP = [
       "本项目由导入器于周 45 新建，基础数据待补"
     ],
     "progress": {
-      "actual": 0.0,
+      "actual": 0,
       "planned": null,
-      "spi": 0.0
+      "spi": 0
     }
   },
   {
@@ -1920,7 +2054,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "MSFT",
     "scope": "BBMEP， DCMEP",
-    "capacityMW": 96.0,
+    "capacityMW": 96,
     "owners": {
       "lead": "刘宏维",
       "owner1": "Joey 祖儿",
@@ -1962,14 +2096,14 @@ window.LM_SEED_KTP = [
       "本项目由导入器于周 45 新建，基础数据待补"
     ],
     "progress": {
-      "actual": 0.0,
+      "actual": 0,
       "planned": null,
-      "spi": 0.0
+      "spi": 0
     },
     "commercial": [
       {
         "currency": "RM",
-        "contractValue": 533000000.0,
+        "contractValue": 533000000,
         "collected": null
       }
     ]
@@ -1982,13 +2116,13 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "MSFT",
     "scope": "BBMEP， DCMEP",
-    "capacityMW": 32.0,
+    "capacityMW": 32,
     "owners": {
       "lead": "张帆",
       "owner1": "刘思孝",
       "owner2": "薛志宏"
     },
-    "status": "nodata",
+    "status": "notstarted",
     "milestones": [
       {
         "name": "CCC",
@@ -2021,17 +2155,18 @@ window.LM_SEED_KTP = [
       }
     ],
     "dataQuality": [
-      "本项目由导入器于周 45 新建，基础数据待补"
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "计划进度与状态来自周报站（2026-08-11 更新）；实际进度以统筹表为准。"
     ],
     "progress": {
-      "actual": 0.0,
-      "planned": null,
-      "spi": 0.0
+      "actual": 0,
+      "planned": 0.0,
+      "spi": 0
     },
     "commercial": [
       {
         "currency": "RM",
-        "contractValue": 203300000.0,
+        "contractValue": 203300000,
         "collected": null
       }
     ]
@@ -2127,7 +2262,7 @@ window.LM_SEED_KTP = [
     "defectPlan": "2026-10-31",
     "closeout": {
       "asBuilt": {
-        "pct": 1.0
+        "pct": 1
       },
       "trainingManual": {
         "pct": 0.85
@@ -2152,7 +2287,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "MSFT",
     "scope": "DCMEP",
-    "capacityMW": 24.0,
+    "capacityMW": 24,
     "owners": {
       "lead": "",
       "owner1": "Hennry 张文豪",
@@ -2205,7 +2340,7 @@ window.LM_SEED_KTP = [
       },
       {
         "currency": "RM",
-        "contractValue": 46920000.0,
+        "contractValue": 46920000,
         "collected": 39521043.39
       }
     ]
@@ -2218,7 +2353,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "BD",
     "scope": "DCMEP",
-    "capacityMW": 38.0,
+    "capacityMW": 38,
     "owners": {
       "lead": "",
       "owner1": "Azizi",
@@ -2255,10 +2390,10 @@ window.LM_SEED_KTP = [
     "defectPlan": "2026-10-31",
     "closeout": {
       "asBuilt": {
-        "pct": 1.0
+        "pct": 1
       },
       "trainingManual": {
-        "pct": 1.0
+        "pct": 1
       },
       "omm": {
         "pct": 0.65
@@ -2336,7 +2471,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "KS",
     "scope": "DCMEP",
-    "capacityMW": 3.0,
+    "capacityMW": 3,
     "owners": {
       "lead": "",
       "owner1": "Azizi",
@@ -2416,7 +2551,7 @@ window.LM_SEED_KTP = [
     "dataQuality": [
       "本项目由导入器于周 45 新建，基础数据待补"
     ],
-    "defectProgress": 0.0,
+    "defectProgress": 0,
     "closeout": {
       "asBuilt": {
         "pct": 0.41
@@ -2488,7 +2623,7 @@ window.LM_SEED_KTP = [
       {
         "currency": "USD",
         "contractValue": 35564330.25,
-        "collected": 0.0
+        "collected": 0
       }
     ]
   },
@@ -2557,7 +2692,7 @@ window.LM_SEED_KTP = [
         "pct": 0.34
       },
       "omm": {
-        "pct": 0.0
+        "pct": 0
       }
     },
     "commercial": [
@@ -2581,7 +2716,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "T",
     "scope": "DCMEP",
-    "capacityMW": 5.0,
+    "capacityMW": 5,
     "owners": {
       "lead": "",
       "owner1": "Azizi",
@@ -2618,7 +2753,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "KS",
     "scope": "DCMEP",
-    "capacityMW": 3.0,
+    "capacityMW": 3,
     "owners": {
       "lead": "",
       "owner1": "",
@@ -2685,7 +2820,7 @@ window.LM_SEED_KTP = [
     "nameZh": "",
     "tenant": "BD",
     "scope": "MBW, BBMEP, DCMEP",
-    "capacityMW": 52.0,
+    "capacityMW": 52,
     "owners": {
       "lead": "",
       "owner1": "叶锦维",
@@ -2725,7 +2860,7 @@ window.LM_SEED_KTP = [
     "defectPlan": "2026-08-15",
     "closeout": {
       "asBuilt": {
-        "pct": 0.0
+        "pct": 0
       },
       "trainingManual": {
         "pct": 0.19
@@ -2756,7 +2891,7 @@ window.LM_SEED_NTP = [
       "owner1": "翟风起",
       "owner2": "常文明"
     },
-    "status": "nodata",
+    "status": "amber",
     "milestones": [
       {
         "name": "IST",
@@ -2795,11 +2930,12 @@ window.LM_SEED_NTP = [
       }
     ],
     "dataQuality": [
-      "本项目由导入器于周 45 新建，基础数据待补"
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "计划进度与状态来自周报站（2026-08-11 更新）；实际进度以统筹表为准。"
     ],
     "progress": {
       "actual": 0.9735,
-      "planned": null,
+      "planned": 1.0,
       "spi": 0.9735
     },
     "commercial": [
@@ -2818,13 +2954,13 @@ window.LM_SEED_NTP = [
     "nameZh": "",
     "tenant": "A\nT",
     "scope": "DCMEP",
-    "capacityMW": 24.0,
+    "capacityMW": 24,
     "owners": {
       "lead": "",
       "owner1": "翟风起",
       "owner2": "常文明"
     },
-    "status": "nodata",
+    "status": "amber",
     "milestones": [
       {
         "name": "IST",
@@ -2859,11 +2995,12 @@ window.LM_SEED_NTP = [
       }
     ],
     "dataQuality": [
-      "本项目由导入器于周 45 新建，基础数据待补"
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "计划进度与状态来自周报站（2026-08-11 更新）；实际进度以统筹表为准。"
     ],
     "progress": {
       "actual": 0.9943,
-      "planned": null,
+      "planned": 1.0,
       "spi": 0.9943
     },
     "commercial": [
@@ -2917,14 +3054,14 @@ window.LM_SEED_NTP = [
       "本项目由导入器于周 45 新建，基础数据待补"
     ],
     "progress": {
-      "actual": 1.0,
+      "actual": 1,
       "planned": null,
-      "spi": 1.0
+      "spi": 1
     },
     "commercial": [
       {
         "currency": "RM",
-        "contractValue": 14450000.0,
+        "contractValue": 14450000,
         "collected": 14449999.997
       }
     ]
@@ -2937,7 +3074,7 @@ window.LM_SEED_NTP = [
     "nameZh": "",
     "tenant": "O",
     "scope": "MBW, BBMEP, DCMEP",
-    "capacityMW": 56.0,
+    "capacityMW": 56,
     "owners": {
       "lead": "",
       "owner1": "Carlos",
@@ -3084,7 +3221,7 @@ window.LM_SEED_NTP = [
     "commercial": [
       {
         "currency": "RM",
-        "contractValue": 18000000.0,
+        "contractValue": 18000000,
         "collected": 8068065.52
       }
     ]
@@ -3097,7 +3234,7 @@ window.LM_SEED_NTP = [
     "nameZh": "",
     "tenant": "O",
     "scope": "DCMEP",
-    "capacityMW": 160.0,
+    "capacityMW": 160,
     "owners": {
       "lead": "",
       "owner1": "刘继泽",
@@ -3149,7 +3286,7 @@ window.LM_SEED_NTP = [
       "本项目由导入器于周 45 新建，基础数据待补"
     ],
     "progress": {
-      "actual": 0.0,
+      "actual": 0,
       "planned": null,
       "spi": null
     }
@@ -3162,7 +3299,7 @@ window.LM_SEED_NTP = [
     "nameZh": "",
     "tenant": "BD",
     "scope": "DCMEP",
-    "capacityMW": 28.0,
+    "capacityMW": 28,
     "owners": {
       "lead": "",
       "owner1": "张凤斌",
@@ -3188,7 +3325,7 @@ window.LM_SEED_NTP = [
     "nameZh": "",
     "tenant": "BD\nA / BIGO",
     "scope": "DCMEP",
-    "capacityMW": 119.0,
+    "capacityMW": 119,
     "owners": {
       "lead": "巫有展",
       "owner1": "巫有展",
@@ -3218,10 +3355,10 @@ window.LM_SEED_NTP = [
     ],
     "closeout": {
       "asBuilt": {
-        "pct": 1.0
+        "pct": 1
       },
       "omm": {
-        "pct": 1.0
+        "pct": 1
       }
     },
     "commercial": [
@@ -3232,8 +3369,8 @@ window.LM_SEED_NTP = [
       },
       {
         "currency": "USD",
-        "contractValue": 1084260.0,
-        "collected": 1029498.0
+        "contractValue": 1084260,
+        "collected": 1029498
       }
     ]
   },
@@ -3294,7 +3431,7 @@ window.LM_SEED_NTP = [
     "nameZh": "",
     "tenant": "BD",
     "scope": "DCMEP",
-    "capacityMW": 48.0,
+    "capacityMW": 48,
     "owners": {
       "lead": "",
       "owner1": "Syahdan",
@@ -3324,20 +3461,20 @@ window.LM_SEED_NTP = [
     "defectPlan": "2026-08-30",
     "closeout": {
       "asBuilt": {
-        "pct": 0.0
+        "pct": 0
       },
       "trainingManual": {
         "pct": 0.5
       },
       "omm": {
-        "pct": 0.0
+        "pct": 0
       }
     },
     "commercial": [
       {
         "currency": "RM",
-        "contractValue": 81600000.0,
-        "collected": 67200000.0
+        "contractValue": 81600000,
+        "collected": 67200000
       }
     ]
   },
@@ -3349,7 +3486,7 @@ window.LM_SEED_NTP = [
     "nameZh": "",
     "tenant": "BD",
     "scope": "DCMEP",
-    "capacityMW": 16.0,
+    "capacityMW": 16,
     "owners": {
       "lead": "",
       "owner1": "Rizal",
@@ -3378,13 +3515,13 @@ window.LM_SEED_NTP = [
     ],
     "closeout": {
       "asBuilt": {
-        "pct": 0.0
+        "pct": 0
       },
       "trainingManual": {
         "pct": 0.63
       },
       "omm": {
-        "pct": 0.0
+        "pct": 0
       }
     },
     "commercial": [
@@ -3440,7 +3577,7 @@ window.LM_SEED_NTP = [
     "nameZh": "",
     "tenant": "BD",
     "scope": "DCMEP",
-    "capacityMW": 28.0,
+    "capacityMW": 28,
     "owners": {
       "lead": "",
       "owner1": "",
@@ -3472,8 +3609,8 @@ window.LM_SEED_NTP = [
     "commercial": [
       {
         "currency": "RM",
-        "contractValue": 99200000.0,
-        "collected": 94240000.0
+        "contractValue": 99200000,
+        "collected": 94240000
       }
     ]
   },
@@ -3531,13 +3668,13 @@ window.LM_SEED_NTP = [
     ],
     "closeout": {
       "asBuilt": {
-        "pct": 0.0
+        "pct": 0
       },
       "trainingManual": {
         "pct": 0.79
       },
       "omm": {
-        "pct": 0.0
+        "pct": 0
       }
     },
     "commercial": [
@@ -3603,13 +3740,13 @@ window.LM_SEED_NTP = [
     ],
     "closeout": {
       "asBuilt": {
-        "pct": 0.0
+        "pct": 0
       },
       "trainingManual": {
-        "pct": 0.0
+        "pct": 0
       },
       "omm": {
-        "pct": 0.0
+        "pct": 0
       }
     },
     "commercial": [
@@ -3635,7 +3772,7 @@ window.LM_SEED_OTHER = [
     "nameZh": "",
     "tenant": "Firmus",
     "scope": "DCMEP",
-    "capacityMW": 120.0,
+    "capacityMW": 120,
     "owners": {
       "lead": "王先贞",
       "owner1": "李洋",
@@ -3678,9 +3815,9 @@ window.LM_SEED_OTHER = [
       "本项目由导入器于周 45 新建，基础数据待补"
     ],
     "progress": {
-      "actual": 0.0,
+      "actual": 0,
       "planned": null,
-      "spi": 0.0
+      "spi": 0
     }
   },
   {
@@ -3691,7 +3828,7 @@ window.LM_SEED_OTHER = [
     "nameZh": "",
     "tenant": "O",
     "scope": "DCMEP",
-    "capacityMW": 2.0,
+    "capacityMW": 2,
     "owners": {
       "lead": "Terry / 王东亚",
       "owner1": "Fikri",
@@ -3729,13 +3866,13 @@ window.LM_SEED_OTHER = [
     "defectPlan": "2026-07-15",
     "closeout": {
       "asBuilt": {
-        "pct": 1.0
+        "pct": 1
       },
       "trainingManual": {
         "pct": 0.95
       },
       "omm": {
-        "pct": 1.0
+        "pct": 1
       }
     },
     "commercial": [
@@ -3754,7 +3891,7 @@ window.LM_SEED_OTHER = [
     "nameZh": "",
     "tenant": "O",
     "scope": "DCMEP",
-    "capacityMW": 38.0,
+    "capacityMW": 38,
     "owners": {
       "lead": "",
       "owner1": "Fikri",
@@ -3807,7 +3944,7 @@ window.LM_SEED_OTHER = [
     "nameZh": "",
     "tenant": "BD",
     "scope": "DCMEP",
-    "capacityMW": 10.0,
+    "capacityMW": 10,
     "owners": {
       "lead": "",
       "owner1": "Alex 张永雄",
@@ -3828,7 +3965,7 @@ window.LM_SEED_OTHER = [
         "group": "",
         "planned": "2027-02-01",
         "actual": null,
-        "capacityMW": 24.0,
+        "capacityMW": 24,
         "phaseLabel": "A1"
       },
       {
@@ -3837,7 +3974,7 @@ window.LM_SEED_OTHER = [
         "group": "",
         "planned": "2028-02-01",
         "actual": null,
-        "capacityMW": 24.0,
+        "capacityMW": 24,
         "phaseLabel": "A2"
       },
       {
@@ -3905,7 +4042,7 @@ window.LM_SEED_OTHER = [
     "progress": {
       "actual": null,
       "planned": null,
-      "spi": 0.0
+      "spi": 0
     }
   },
   {
