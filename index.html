@@ -778,6 +778,8 @@ table.ed-tbl tr.ms-stage-row td {
 }
 .stage-pipe i.done { background: var(--good); border-color: var(--good); }
 .stage-pipe i.cur { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 25%, transparent); }
+.stage-pipe i.late { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 30%, transparent); }
+.stg-date { width: 96px; font-size: 12px; padding: 3px 6px; font-variant-numeric: tabular-nums; }
 .stage-pipe b { font-size: 12px; font-weight: 600; color: var(--ink-muted); margin-left: 2px; white-space: nowrap; }
 
 /* lapsed status override — needs a decision, so it reads as a warning */
@@ -2777,9 +2779,13 @@ window.LM_SEED = {
         else a.lapsedAck = hit;          /* expired with the period — still open */
         return;
       }
-      /* A waiver exists for this milestone but for a different planned date. */
+      /* A waiver exists for this node/stage but for a different planned
+         date — the stale lookup must stay within its own key family, so a
+         milestone's old ack never shadows a stage alarm or vice versa. */
       if (a.milestone) {
-        var prefix = 'ms|' + a.milestone.name + '|';
+        var prefix = a.stage
+          ? 'stg|' + a.milestone.name + '|' + a.stage.label + '|'
+          : 'ms|' + a.milestone.name + '|';
         var stale = list.find(function (x) { return x.key.indexOf(prefix) === 0; });
         if (stale) a.staleAck = stale;
       }
@@ -2844,6 +2850,39 @@ window.LM_SEED = {
             detail: ms.name
           });
         }
+      });
+
+      /* Stage-level deadlines — only stages someone gave a 计划日 alarm,
+         so the chain stays visibility-only until a date makes it a promise.
+         The alarm rides the same machinery as milestone alarms (severity
+         bands, per-period acks bound to the stage's planned date). */
+      (p.milestones || []).forEach(function (ms) {
+        if (ms.type === 'DLP' || ms.actual) return;
+        (ms.stages || []).forEach(function (st) {
+          if (st.done || !st.planned) return;
+          var sdue = parseDate(st.planned);
+          if (sdue === null) return;
+          var akey = 'stg|' + ms.name + '|' + st.label + '|' + st.planned;
+          if (sdue < today) {
+            var sover = daysBetween(sdue, today);
+            out.push({
+              kind: 'delay', project: p, milestone: ms, stage: st,
+              ackKey: akey, date: st.planned, days: sover,
+              severity: severityForOverdue(sover),
+              label: '逾期 ' + sover + ' 天 Overdue',
+              detail: ms.name + ' · 阶段「' + st.label + '」'
+            });
+          } else if (sdue <= horizon) {
+            var sin = daysBetween(today, sdue);
+            out.push({
+              kind: 'incoming', project: p, milestone: ms, stage: st,
+              ackKey: akey, date: st.planned, days: sin,
+              severity: severityForIncoming(sin),
+              label: sin === 0 ? '今日到期 Due today' : sin + ' 天后 In ' + sin + 'd',
+              detail: ms.name + ' · 阶段「' + st.label + '」'
+            });
+          }
+        });
       });
 
       /* Progress variance — only for on-going projects that actually reported numbers. */
@@ -5662,12 +5701,20 @@ window.LM_SEED = {
      the report date it passed), amber ring = current, hollow = pending.
      Achievement stays `actual`-only, so a fully ticked chain without an
      actual date is surfaced as a rule conflict rather than shown done. */
-  function stagePipeHtml(ms) {
+  function stagePipeHtml(ms, reportDate) {
     var sum = M.stageSummary(ms);
     if (!sum || ms.actual) return '';
+    var today = M.parseDate(reportDate);
     var dots = ms.stages.map(function (st, i) {
-      var cls = st.done ? 'done' : (ms.stages.findIndex(function (x) { return !x.done; }) === i ? 'cur' : '');
-      return '<i class="' + cls + '" title="' + esc(st.label + (st.done ? ' · ' + M.fmtDate(st.done) + ' 通过' : '')) + '"></i>';
+      var late = !st.done && st.planned && M.parseDate(st.planned) !== null &&
+        M.parseDate(st.planned) < today;
+      var cls = st.done ? 'done'
+        : (ms.stages.findIndex(function (x) { return !x.done; }) === i ? 'cur' : '');
+      if (late) cls += ' late';
+      var tip = st.label +
+        (st.done ? ' · ' + M.fmtDate(st.done) + ' 通过'
+          : st.planned ? ' · 计划 ' + M.fmtDate(st.planned) + (late ? ' · 已逾期' : '') : '');
+      return '<i class="' + cls + '" title="' + esc(tip) + '"></i>';
     }).join('');
     var body = '<span class="stage-pipe">' + dots + '<b>' + sum.done + '/' + sum.total +
       (sum.current ? ' · 当前：' + esc(sum.current) : '') + '</b></span>';
@@ -5690,9 +5737,9 @@ window.LM_SEED = {
       return chain + '<span class="' + (late ? 'bad' : '') + '">' + M.fmtDate(ms.planned) + '</span>' +
         (late ? ' <span class="tag tag-red">逾期 ' + M.daysBetween(t, today) + ' 天</span>' : '') +
         (ms.note ? ' <span class="muted">' + esc(ms.note) + '</span>' : '') +
-        stagePipeHtml(ms);
+        stagePipeHtml(ms, reportDate);
     }
-    return '<span class="muted">' + esc(ms.dateText || '待定') + '</span>' + stagePipeHtml(ms);
+    return '<span class="muted">' + esc(ms.dateText || '待定') + '</span>' + stagePipeHtml(ms, reportDate);
   }
 
   function slipDays(m) {
@@ -6146,6 +6193,8 @@ window.LM_SEED = {
               '" data-stgtoggle="' + i + '" data-stg="' + si + '" title="' +
               (st.done ? '已于周报日 ' + esc(st.done) + ' 通过，点击取消' : '点击标记为已通过（盖当期报告日）') + '">' +
               (st.done ? '✓ ' : '') + esc(st.label) + '</button>' +
+              '<input class="stg-date" data-path="milestones.' + i + '.stages.' + si + '.planned" data-kind="date" ' +
+              'placeholder="计划日" title="阶段计划日期——填了才进预警" value="' + esc(st.planned || '') + '">' +
               '<button class="icon-btn danger xs" data-stgdel="' + i + '" data-stg="' + si + '" aria-label="删除此阶段">✕</button></span>';
           }).join('') +
           '<span class="stage-add"><input placeholder="新阶段名" data-stgnew="' + i + '">' +
@@ -6423,7 +6472,9 @@ window.LM_SEED = {
     h.hidden = false;
     document.body.classList.add('modal-open');
 
-    var what = alarm.milestone ? alarm.milestone.name : '进度偏差';
+    var what = alarm.stage
+      ? alarm.milestone.name + ' · 阶段「' + alarm.stage.label + '」'
+      : alarm.milestone ? alarm.milestone.name : '进度偏差';
     var when = alarm.date ? M.fmtDate(alarm.date) : '';
     var scope = '仅本期（周报 ' + D.current.meta.week + '）有效。进入下一期后此确认自动失效，' +
       '该预警重新计入，需要重新确认。' +
