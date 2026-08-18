@@ -320,6 +320,39 @@ table.tbl tr.total td { font-weight: 700; }
    Fixed layout with a colgroup, so every group shares one set of column
    edges. Auto width made each column start wherever its own longest cell
    happened to end. */
+/* Progress board — page one. A fat bar per project (colour = the variance
+   rule, the same encoding the campus charts use), the number large, and a
+   one-line answer to "where is it" beneath the bar. */
+.progress-board { padding-top: 20px; }
+.pb-cols { columns: 2; column-gap: 48px; }
+.pb-row {
+  display: grid; grid-template-columns: 190px minmax(0, 1fr) 96px;
+  gap: 18px; align-items: center; padding: 12px 0;
+  break-inside: avoid;
+}
+.pb-name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.pb-name a { font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
+.pb-track {
+  position: relative; height: 12px; border-radius: 6px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+.pb-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 6px; }
+.pb-tick {
+  position: absolute; top: -3px; bottom: -3px; width: 2px;
+  background: var(--ink); transform: translateX(-1px); border-radius: 1px;
+}
+.pb-stage { font-size: 12.5px; color: var(--ink-muted); margin-top: 6px; }
+.pb-stage b { color: var(--ink); font-weight: 650; }
+.pb-stage.bad, .pb-stage.bad b { color: var(--bad); }
+.pb-pct { text-align: right; }
+.pb-pct b {
+  display: block; font-size: 20px; font-weight: 700; line-height: 1.15;
+  font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+}
+.pb-pct b.muted { color: var(--ink-muted); font-weight: 600; }
+.pb-pct span { font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+@media (max-width: 1150px) { .pb-cols { columns: 1; } }
+
 /* Alarm list — one container per severity band. The tinted header makes the
    band's single colour statement; rows inside stay ink and hairline, and
    urgency reads from the countdown pill. */
@@ -4703,6 +4736,8 @@ window.LM_SEED = {
       '销项管理中', null, 'phase = completed 的项目计数', null));
     h.push(kpi(roll.ytdDeliveredMw.toFixed(2) + ' MW', '2026 已交付容量', 'RFS CAPACITY YTD',
       '截至 ' + M.fmtDate(d.meta.reportDate), null, '每月 RFS 交付表的单项容量累加', null));
+    h.push(kpi(roll.avgProgress === null ? '待补' : (roll.avgProgress * 100).toFixed(1) + '%',
+      '平均进度', 'AVG PROGRESS', '仅计已填报项目', null, '在施工项目实际进度的算术平均', null));
     h.push(kpi(String(roll.alarmTotal), '预警总数', 'ACTIVE ALARMS',
       roll.alarmOverdue + ' 逾期 · ' + roll.alarmIncoming + ' 即将到期' +
       (roll.alarmAcked ? ' · 另 ' + roll.alarmAcked + ' 条已确认' : ''),
@@ -4712,6 +4747,15 @@ window.LM_SEED = {
     h.push('</div>');
     h.push(M.legendHtml());
     h.push('</section>');
+
+    /* ── band: 项目进度 — what this dashboard exists for. Leadership reads
+       where every project stands (completion + which stage) BEFORE anything
+       about what is wrong. ── */
+    h.push('<div class="band">');
+    h.push('<div class="band-head"><h2>项目进度</h2>' +
+      '<p>' + roll.ongoingCount + ' 个在施工项目 · 条形 = 实际进度 · 竖线 = 计划 · 颜色按 ≤5% / >5% 偏差规则</p></div>');
+    h.push(progressBoard(d, roll));
+    h.push('</div>');
 
     /* ── band: 本期概览 — the two things that decide where attention goes ── */
     h.push('<div class="band">');
@@ -4969,6 +5013,88 @@ window.LM_SEED = {
     return h.join('');
   }
   V.alarmTable = alarmTable;
+
+  /* ── the progress board — page one, before anything else ─────────────
+     One row per on-going project: a fat bar (colour = the 周报's own
+     ≤5% / >5% variance rule, same encoding as the campus charts), the
+     completion number large, and beneath the bar WHERE the project is —
+     its stage chain when one is tracked, otherwise the next dated node. */
+  function progressBoard(d, roll) {
+    var today = M.parseDate(d.meta.reportDate);
+    var h = ['<section class="card progress-board"><div class="pb-cols">'];
+    var completed = 0;
+    d.campuses.forEach(function (camp) {
+      d.projects.forEach(function (p) {
+        if (p.campus !== camp.id) return;
+        if (p.phase !== 'ongoing') { completed++; return; }
+        h.push(pbRow(p, today));
+      });
+    });
+    h.push('</div>');
+    if (completed) {
+      h.push('<p class="note">另有 ' + completed + ' 个已完成项目在销项管理中，进度见各园区页。</p>');
+    }
+    h.push('</section>');
+    return h.join('');
+  }
+
+  function pbRow(p, today) {
+    var pr = p.progress || {};
+    var a = typeof pr.actual === 'number' ? pr.actual : null;
+    var pl = typeof pr.planned === 'number' ? pr.planned : null;
+    var key = (a !== null && pl !== null) ? M.varianceStatus(a - pl) : 'nodata';
+    var fill = a !== null
+      ? '<i class="pb-fill" style="width:' + Math.min(100, a * 100) + '%;background:' + C.status(key) + '"></i>'
+      : '';
+    var tick = pl !== null
+      ? '<b class="pb-tick" style="left:' + Math.min(100, pl * 100) + '%"></b>'
+      : '';
+    var stage = pbStage(p, today);
+    return '<div class="pb-row">' +
+      '<div class="pb-name"><a href="#/project/' + p.id + '">' + esc(p.name) + '</a>' +
+      '<span class="al-campus-tag">' + esc(p.campus) + '</span></div>' +
+      '<div class="pb-main"><div class="pb-track">' + fill + tick + '</div>' +
+      '<div class="pb-stage' + (stage.cls ? ' ' + stage.cls : '') + '">' + stage.html + '</div></div>' +
+      '<div class="pb-pct">' + (a === null
+        ? '<b class="muted">—</b><span>未填报</span>'
+        : '<b>' + (a * 100).toFixed(1) + '%</b><span>' + (pl === null ? '计划待补' : '计划 ' + (pl * 100).toFixed(1) + '%') + '</span>') +
+      '</div></div>';
+  }
+
+  /* Where the project is: prefer a tracked stage chain, else the next
+     dated milestone, else the most overdue one. */
+  function pbStage(p, today) {
+    var hit = null;
+    (p.milestones || []).some(function (m) {
+      if (m.actual || !(m.stages || []).length) return false;
+      var s = M.stageSummary(m);
+      if (s && s.current) { hit = { m: m, s: s }; return true; }
+      return false;
+    });
+    if (hit) {
+      return { html: '阶段 <b>' + hit.s.done + '/' + hit.s.total + ' · ' +
+        esc(hit.s.current.split(' ')[0]) + '</b>（' + esc(shortName(hit.m.name)) + '）', cls: '' };
+    }
+    /* the honest "next node" is the EARLIEST unachieved dated node —
+       if that date is already past, the project is stuck there */
+    var next = null;
+    (p.milestones || []).forEach(function (m) {
+      if (m.actual || m.type === 'DLP') return;
+      var t = M.parseDate(m.planned);
+      if (t === null) return;
+      if (!next || t < next.t) next = { t: t, m: m };
+    });
+    if (next && next.t < today) {
+      return { html: '卡在 ' + esc(shortName(next.m.name)) + ' · 原计划 ' + M.fmtDate(next.m.planned), cls: 'bad' };
+    }
+    if (next) return { html: '下一节点 ' + esc(shortName(next.m.name)) + ' · ' + M.fmtDate(next.m.planned), cls: '' };
+    return { html: '无带日期的未完成节点', cls: 'muted' };
+  }
+
+  function shortName(s) {
+    s = String(s || '');
+    return s.length > 22 ? s.slice(0, 21) + '…' : s;
+  }
 
   /* One container per severity band: a tinted header owns the colour
      statement, rows inside stay ink-and-hairline, urgency reads from the
