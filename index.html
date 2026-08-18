@@ -320,58 +320,52 @@ table.tbl tr.total td { font-weight: 700; }
    Fixed layout with a colgroup, so every group shares one set of column
    edges. Auto width made each column start wherever its own longest cell
    happened to end. */
-table.alarm-tbl { table-layout: fixed; width: 100%; min-width: 780px; }
-.alarm-tbl col.c-proj { width: 250px; }
-.alarm-tbl col.c-when { width: 156px; }
-.alarm-tbl col.c-owner { width: 150px; }
-/* c-item takes the remainder */
-
-table.alarm-tbl td {
+/* Alarm list — one container per severity band. The tinted header makes the
+   band's single colour statement; rows inside stay ink and hairline, and
+   urgency reads from the countdown pill. */
+.al-groups { display: grid; gap: 14px; min-width: 760px; }
+.al-group { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+.al-group-head {
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 18px; font-size: 13.5px; font-weight: 700; letter-spacing: .01em;
   border-bottom: 1px solid var(--line);
-  padding: 13px 14px 13px 0; vertical-align: top;
-  line-height: 1.5;       /* shared, so the first line of every column aligns */
 }
-table.alarm-tbl tr:last-child td { border-bottom: 0; }
-tr.al-row:hover td { background: color-mix(in srgb, var(--ink) 2.5%, transparent); }
-/* a quiet severity accent on the row's leading edge */
-tr.al-row td:first-child { padding-left: 12px; }
-tr.al-row.al-sev-critical td:first-child { box-shadow: inset 3px 0 0 var(--bad); }
-tr.al-row.al-sev-high td:first-child,
-tr.al-row.al-sev-medium td:first-child { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--warn) 70%, transparent); }
-tr.al-row.al-sev-low td:first-child { box-shadow: inset 3px 0 0 var(--line); }
+.al-group-head i { font-style: normal; font-weight: 500; font-size: 12.5px; color: var(--ink-muted); }
+.al-g-critical .al-group-head { color: var(--bad); background: color-mix(in srgb, var(--bad) 4.5%, var(--surface)); }
+.al-g-high .al-group-head,
+.al-g-medium .al-group-head { color: var(--warn); background: color-mix(in srgb, var(--warn) 5.5%, var(--surface)); }
+.al-g-low .al-group-head { color: var(--ink-muted); background: color-mix(in srgb, var(--ink) 3%, var(--surface)); }
 
-/* group heading rides inside the table so it cannot shift the columns */
-.alarm-tbl tr.grp > td { border-bottom: 0; padding: 26px 0 9px; }
-.alarm-tbl tr.grp.first > td { padding-top: 4px; }
-.sev-head {
-  display: inline-flex; align-items: center; gap: 9px;
-  font-size: 14.5px; font-weight: 700; line-height: 1.4;
-  letter-spacing: .01em;
+.al-list { list-style: none; margin: 0; padding: 0; }
+.al-li {
+  display: grid; grid-template-columns: minmax(0, 1fr) 150px 128px 138px;
+  gap: 18px; align-items: center; padding: 13px 18px;
+  border-top: 1px solid var(--line);
 }
-.sev-head i { font-style: normal; font-weight: 500; font-size: 12.5px; color: var(--ink-muted); }
-.sev-head.sev-critical { color: var(--bad); }
-.sev-head.sev-high, .sev-head.sev-medium { color: var(--warn); }
-.sev-head.sev-low { color: var(--ink-muted); }
+.al-list .al-li:first-child { border-top: 0; }
+.al-li:hover { background: color-mix(in srgb, var(--ink) 2.5%, transparent); }
 
-.al-proj { overflow-wrap: anywhere; }
-.al-proj a { font-size: 14.5px; font-weight: 650; }
-.al-campus {
-  display: block; font-size: 11.5px; letter-spacing: .06em;
-  color: var(--ink-muted); margin-top: 3px;
+.al-title { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.al-title a { font-size: 14.5px; font-weight: 650; overflow-wrap: anywhere; }
+.al-campus-tag {
+  font-size: 11px; letter-spacing: .07em; color: var(--ink-muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px;
+  flex: none;
 }
-.al-item { font-size: 13.5px; overflow-wrap: anywhere; }
-.al-when { text-align: right; }
-.al-date { display: block; font-size: 13.5px; font-variant-numeric: tabular-nums; }
-.al-state { display: block; font-size: 13px; font-weight: 650; margin-top: 3px; }
-.al-state.red { color: var(--bad); }
-.al-state.amber { color: var(--warn); }
-.al-owner { font-size: 13px; overflow-wrap: anywhere; }
-.alarm-tbl col.c-act2 { width: 128px; }
-.al-act { white-space: nowrap; }
-.al-act .btn + .btn { margin-left: 4px; }
-.al-act { text-align: right; }
-.al-act .btn { opacity: .7; }
-tr:hover .al-act .btn { opacity: 1; }
+.al-what { font-size: 13.5px; margin-top: 4px; line-height: 1.5; overflow-wrap: anywhere; }
+.al-due { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.al-pill {
+  font-size: 12.5px; font-weight: 650; white-space: nowrap;
+  padding: 3px 11px; border-radius: 999px;
+}
+.al-pill.red { color: var(--bad); background: color-mix(in srgb, var(--bad) 11%, transparent); }
+.al-pill.amber { color: var(--warn); background: color-mix(in srgb, var(--warn) 13%, transparent); }
+.al-date { font-size: 12.5px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+.al-who { font-size: 13px; overflow-wrap: anywhere; }
+.al-ops { text-align: right; white-space: nowrap; }
+.al-ops .btn + .btn { margin-left: 4px; }
+.al-ops .btn { opacity: .7; }
+.al-li:hover .al-ops .btn { opacity: 1; }
 
 /* Acknowledged: still on the page, visibly set aside. Collapsed by default so
    it never competes with what is actually open. */
@@ -384,8 +378,9 @@ tr:hover .al-act .btn { opacity: 1; }
 .ack-block > summary::after { content: '▸'; margin-left: 4px; font-size: 10px; }
 .ack-block[open] > summary::after { content: '▾'; }
 .ack-block > summary i { font-style: normal; font-weight: 400; }
-.alarm-tbl.is-acked { opacity: .7; }
-.alarm-tbl.is-acked .al-proj a { font-weight: 500; }
+.al-groups.is-acked { opacity: .75; }
+.al-groups.is-acked .al-title a { font-weight: 500; }
+.al-groups.is-acked .al-pill { background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink-muted); }
 .ack-why {
   display: block; margin-top: 4px; font-size: 12.5px; line-height: 1.5;
   color: var(--ink-muted);
@@ -4975,62 +4970,68 @@ window.LM_SEED = {
   }
   V.alarmTable = alarmTable;
 
+  /* One container per severity band: a tinted header owns the colour
+     statement, rows inside stay ink-and-hairline, urgency reads from the
+     countdown pill. The detail sits under the project name, so the row's
+     whitespace is breathing room inside one column, not a void between
+     columns. */
   function alarmRows(list, isAcked) {
     var order = ['critical', 'high', 'medium', 'low'];
     var groups = order.map(function (k) {
       return { key: k, items: list.filter(function (a) { return a.severity === k; }) };
     }).filter(function (g) { return g.items.length; });
 
-    var h = ['<div class="table-scroll"><table class="tbl alarm-tbl' + (isAcked ? ' is-acked' : '') + '">' +
-      '<colgroup><col class="c-proj"><col class="c-item"><col class="c-when"><col class="c-owner"><col class="c-act2"></colgroup>' +
-      '<tbody>'];
-    groups.forEach(function (g, gi) {
-      h.push('<tr class="grp' + (gi === 0 ? ' first' : '') + '"><td colspan="5">' +
-        '<span class="sev-head sev-' + g.key + '">' +
+    var h = ['<div class="table-scroll"><div class="al-groups' + (isAcked ? ' is-acked' : '') + '">'];
+    groups.forEach(function (g) {
+      h.push('<section class="al-group al-g-' + g.key + '">');
+      h.push('<header class="al-group-head">' +
         '<span class="dot" style="background:' + C.severity(g.key) + '"></span>' +
-        esc(M.SEVERITY_LABEL[g.key]) + '<i>' + g.items.length + ' 条</i></span></td></tr>');
+        esc(M.SEVERITY_LABEL[g.key]) + '<i>' + g.items.length + ' 条</i></header>');
+      h.push('<ul class="al-list">');
       g.items.forEach(function (a) {
-        h.push('<tr class="al-row al-sev-' + g.key + '">' +
-          '<td class="al-proj"><a href="#/project/' + a.project.id + '">' + esc(a.project.name) + '</a>' +
-          '<span class="al-campus">' + esc(a.project.campus) + '</span></td>' +
-          '<td class="al-item">' + esc(a.detail) +
+        h.push('<li class="al-li">' +
+          '<div class="al-main">' +
+          '<div class="al-title"><a href="#/project/' + a.project.id + '">' + esc(a.project.name) + '</a>' +
+          '<span class="al-campus-tag">' + esc(a.project.campus) + '</span></div>' +
+          '<div class="al-what">' + esc(a.detail) +
           (a.ack ? '<span class="ack-why">本期已确认 ' + M.fmtDate(a.ack.at) + ' · ' +
             esc(a.ack.reason || '未填写理由') + '</span>' : '') +
           (a.lapsedAck ? '<span class="ack-why stale">上期（周报 ' + esc(String(a.lapsedAck.week)) +
             '）曾确认：' + esc(a.lapsedAck.reason || '未填写理由') + ' — 本期需重新确认</span>' : '') +
           (a.staleAck ? '<span class="ack-why stale">此节点原有确认（' + esc(a.staleAck.reason || '未填写理由') +
             '），因计划日期已变更而失效</span>' : '') +
-          '</td>' +
-          '<td class="al-when">' + whenCell(a) + '</td>' +
-          '<td class="al-owner">' + esc((a.project.owners && (a.project.owners.owner1 || a.project.owners.lead)) || '—') + '</td>' +
-          '<td class="al-act">' +
+          '</div></div>' +
+          '<div class="al-due">' + whenCell(a) + '</div>' +
+          '<div class="al-who">' + esc((a.project.owners && (a.project.owners.owner1 || a.project.owners.lead)) || '—') + '</div>' +
+          '<div class="al-ops">' +
           (a.lapsedAck
             ? '<button class="btn xs" data-action="renew-alarm" data-project="' + a.project.id +
               '" data-ackkey="' + esc(a.ackKey) + '" title="沿用上期理由，重新确认本期">沿用上期</button>'
             : '') +
           '<button class="btn xs ghost" data-action="' + (a.ack ? 'unack' : 'ack') + '-alarm" ' +
           'data-project="' + a.project.id + '" data-ackkey="' + esc(a.ackKey) + '">' +
-          (a.ack ? '撤销' : '确认') + '</button></td>' +
-          '</tr>');
+          (a.ack ? '撤销' : '确认') + '</button></div>' +
+          '</li>');
       });
+      h.push('</ul></section>');
     });
-    h.push('</tbody></table></div>');
+    h.push('</div></div>');
     return h.join('');
   }
 
-  /* Date and status in one cell: the type of alarm is implied by the phrasing. */
+  /* Urgency as a pill, the date as quiet fact beneath it. */
   function whenCell(a) {
     if (a.kind === 'variance') {
       /* Carry the actual gap, not the word "进度偏差" repeated once per row. */
-      return '<span class="al-state ' + (a.variancePct > 0.05 ? 'red' : 'amber') + '">落后 ' +
+      return '<span class="al-pill ' + (a.variancePct > 0.05 ? 'red' : 'amber') + '">落后 ' +
         M.pct(a.variancePct, 1) + '</span>';
     }
     var date = a.date ? '<span class="al-date">' + M.fmtDate(a.date) + '</span>' : '';
     if (a.kind === 'delay') {
-      return date + '<span class="al-state red">逾期 ' + a.days + ' 天</span>';
+      return '<span class="al-pill red">逾期 ' + a.days + ' 天</span>' + date;
     }
-    return date + '<span class="al-state amber">' +
-      (a.days === 0 ? '今日到期' : a.days + ' 天后') + '</span>';
+    return '<span class="al-pill amber">' +
+      (a.days === 0 ? '今日到期' : a.days + ' 天后') + '</span>' + date;
   }
 
 })(window.LM = window.LM || {});
