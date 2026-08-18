@@ -870,6 +870,7 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
       <span class="menu-wrap">
         <button class="btn flat icon" id="btn-more" aria-haspopup="menu" aria-expanded="false" aria-label="更多">⋯</button>
         <div class="menu" id="menu-more" role="menu" hidden>
+          <button role="menuitem" id="btn-add-project">添加项目</button>
           <button role="menuitem" id="btn-print">打印 / 存 PDF</button>
           <hr>
           <button role="menuitem" class="danger" id="btn-reset">恢复原始数据</button>
@@ -4896,7 +4897,8 @@ window.LM_SEED = {
 
     h.push('<section class="hero">');
     h.push('<div class="hero-head"><h1>' + esc(campus.id) + ' · ' + esc(campus.name) + '</h1>' +
-      '<p class="hero-sub">' + esc(campus.nameZh) + ' · ' + esc(campus.countryZh) + ' ' + esc(campus.country) + '</p></div>');
+      '<p class="hero-sub">' + esc(campus.nameZh) + ' · ' + esc(campus.countryZh) + ' ' + esc(campus.country) + '</p>' +
+      '<button class="btn sm" data-action="add-project" data-campus="' + esc(campus.id) + '">+ 添加项目</button></div>');
     h.push('<div class="kpi-row">' +
       LM.views.overview.kpi(roll.capacityMW.toFixed(1) + ' MW', '在建容量', 'CAPACITY', '') +
       LM.views.overview.kpi(String(roll.ongoing), '在施工项目', 'ON-GOING', '') +
@@ -6249,6 +6251,75 @@ window.LM_SEED = {
     h.querySelector('#ack-reason').focus({ preventScroll: true });
   };
 
+  /* ── new project ─────────────────────────────────────────────────────
+     Creates the minimal skeleton (blank = 未填报, never 0) and drops the
+     user straight into the full editor to fill the rest in. */
+  function slugify(name, projects) {
+    var base = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'project';
+    var id = base, n = 2;
+    while (projects.some(function (p) { return p.id === id; })) id = base + '-' + (n++);
+    return id;
+  }
+
+  V.openNewProject = function (campusId, onDone) {
+    var d = D.current;
+    var h = ensureHost();
+    h.hidden = false;
+    document.body.classList.add('modal-open');
+    h.innerHTML = '<div class="editor narrow" role="dialog" aria-modal="true" aria-label="添加项目">' +
+      '<div class="ed-head"><div class="ed-id"><h2>添加项目</h2><p>先建骨架，保存后直接进入完整编辑器</p></div>' +
+      '<button class="icon-btn" data-close aria-label="关闭">✕</button></div>' +
+      '<div class="ed-pane solo">' +
+      paneHead('基本信息', '只有名称、园区、阶段是必填。其余栏位建好后在编辑器里补，留空 = 未填报。') +
+      '<div class="flds">' +
+      '<label class="fld"><span class="fld-lbl">项目名称 *</span>' +
+      '<input id="np-name" placeholder="例如：KTP-H 或 NTP Warehouse Fit-out"></label>' +
+      '<label class="fld"><span class="fld-lbl">中文名（可选）</span><input id="np-namezh"></label>' +
+      '<label class="fld"><span class="fld-lbl">园区 *</span><select id="np-campus">' +
+      d.campuses.map(function (c) {
+        return '<option value="' + esc(c.id) + '"' + (c.id === campusId ? ' selected' : '') + '>' +
+          esc(c.id) + ' · ' + esc(c.nameZh || c.name) + '</option>';
+      }).join('') + '</select></label>' +
+      '<label class="fld"><span class="fld-lbl">阶段 *</span><select id="np-phase">' +
+      '<option value="ongoing">在施工 On-going</option>' +
+      '<option value="completed">已完成（销项管理）Completed</option>' +
+      '</select></label>' +
+      '<label class="fld"><span class="fld-lbl">Tenant（可选）</span><input id="np-tenant"></label>' +
+      '<label class="fld"><span class="fld-lbl">容量 MW（可选）</span><input id="np-mw" placeholder="基建包留空"></label>' +
+      '</div></div>' +
+      '<div class="ed-foot"><p class="ed-hint" id="np-err"></p>' +
+      '<button class="btn ghost" data-close>取消</button>' +
+      '<button class="btn primary" data-save>创建并编辑</button></div></div>';
+
+    h.querySelector('[data-save]').addEventListener('click', function () {
+      var name = h.querySelector('#np-name').value.trim();
+      if (!name) { h.querySelector('#np-err').textContent = '项目名称不能为空'; return; }
+      var phase = h.querySelector('#np-phase').value;
+      var mw = readNum(h.querySelector('#np-mw').value);
+      var p = {
+        id: slugify(name, d.projects),
+        campus: h.querySelector('#np-campus').value,
+        phase: phase,
+        name: name,
+        nameZh: h.querySelector('#np-namezh').value.trim(),
+        tenant: h.querySelector('#np-tenant').value.trim() || '-',
+        scope: '',
+        capacityMW: typeof mw === 'number' ? mw : null,
+        owners: { lead: '', owner1: '', owner2: '' },
+        status: 'nodata',
+        milestones: []
+      };
+      if (phase === 'ongoing') p.progress = { actual: null, planned: null, spi: null };
+      d.projects.push(p);
+      D.save();
+      V.close();
+      location.hash = '#/project/' + p.id;
+      if (onDone) onDone();
+      V.openProject(p.id, onDone);
+    });
+    h.querySelector('#np-name').focus({ preventScroll: true });
+  };
+
   /* ── report meta ─────────────────────────────────────────────────── */
   V.openMeta = function (onDone) {
     var d = D.current;
@@ -6701,6 +6772,13 @@ window.LM_SEED = {
       window.print();
     });
 
+    document.getElementById('btn-add-project').addEventListener('click', function () {
+      closeMenu();
+      /* prefill the campus when invoked from a campus page */
+      var m = location.hash.match(/^#\/campus\/([^/]+)/);
+      LM.views.editor.openNewProject(m ? decodeURIComponent(m[1]) : null, A.render);
+    });
+
     /* delegated actions inside views */
     main.addEventListener('click', function (e) {
       var b = e.target.closest && e.target.closest('[data-action]');
@@ -6708,6 +6786,7 @@ window.LM_SEED = {
       var act = b.getAttribute('data-action');
       var id = b.getAttribute('data-project');
       if (act === 'edit-project') LM.views.editor.openProject(id, A.render);
+      else if (act === 'add-project') LM.views.editor.openNewProject(b.getAttribute('data-campus'), A.render);
       else if (act === 'edit-analysis') LM.views.editor.openAnalysis(id, A.render);
       else if (act === 'ack-alarm') {
         LM.views.editor.openAck(id, b.getAttribute('data-ackkey'), A.alarms(), A.render);
