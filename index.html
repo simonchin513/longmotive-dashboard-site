@@ -751,6 +751,35 @@ table.ed-tbl tr.ms-rev-row td {
 .ms-rev-now { color: var(--ink); font-variant-numeric: tabular-nums; }
 .icon-btn.xs { width: 16px; height: 16px; font-size: 10px; line-height: 1; }
 
+/* milestone stage tracking — editor chips + project-page pipeline */
+table.ed-tbl tr.ms-stage-row td {
+  padding: 4px 8px 8px; font-size: 12.5px;
+  background: color-mix(in srgb, var(--accent) 3.5%, transparent);
+}
+.stage-item { display: inline-flex; align-items: center; gap: 2px; margin: 2px 8px 2px 0; }
+.stage-chip {
+  font: inherit; font-size: 12.5px; cursor: pointer;
+  padding: 3px 10px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-muted);
+}
+.stage-chip:hover { border-color: var(--accent); color: var(--ink); }
+.stage-chip.done {
+  border-color: color-mix(in srgb, var(--good) 45%, var(--line));
+  background: color-mix(in srgb, var(--good) 10%, var(--surface));
+  color: var(--good); font-weight: 600;
+}
+.stage-add { display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; }
+.stage-add input { width: 110px; font-size: 12px; padding: 3px 7px; }
+
+.stage-pipe { display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; vertical-align: middle; }
+.stage-pipe i {
+  width: 9px; height: 9px; border-radius: 50%; display: inline-block;
+  border: 1.5px solid var(--line); background: transparent;
+}
+.stage-pipe i.done { background: var(--good); border-color: var(--good); }
+.stage-pipe i.cur { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 25%, transparent); }
+.stage-pipe b { font-size: 12px; font-weight: 600; color: var(--ink-muted); margin-left: 2px; white-space: nowrap; }
+
 /* lapsed status override — needs a decision, so it reads as a warning */
 .fld-help.ov-lapsed { color: var(--warn); }
 .fld-help.ov-lapsed .btn { margin-left: 6px; }
@@ -2885,6 +2914,30 @@ window.LM_SEED = {
     };
   }
   M.milestoneView = milestoneView;
+
+  /* ── milestone stage tracking ────────────────────────────────────────
+     A stage chain makes the gap between "not started" and "achieved"
+     visible: each tick stamps the report date it passed. Stages are
+     process visibility ONLY — `actual` remains the single achievement
+     judge everywhere (alarms, gantt, achieved list). Enabled per
+     milestone on demand, template by node type. */
+  M.stageTemplate = function (type) {
+    if (type === 'BOMBA' || type === 'CCC' || type === 'IST' || type === 'IEAT') {
+      /* approval-type node: the short chain */
+      return ['申请 Application', '文件提交 Documents', '检查验收 Inspection', '批文 Approval'];
+    }
+    return ['申请 Application', '文件提交 Documents', '审批 Approval',
+      '安装 Installation', '调试 Commissioning', '客户反馈 Client Feedback'];
+  };
+
+  M.stageSummary = function (ms) {
+    var st = ms.stages || [];
+    if (!st.length) return null;
+    var done = st.filter(function (s) { return s.done; }).length;
+    var cur = st.find(function (s) { return !s.done; });
+    return { done: done, total: st.length, current: cur ? cur.label : null,
+      allDone: done === st.length };
+  };
 
   function groupBy(arr, fn) {
     var map = {}, order = [];
@@ -5396,8 +5449,11 @@ window.LM_SEED = {
       if (!w.milestones.length) { h.push('<div class="la-c empty">—</div>'); return; }
       h.push('<div class="la-c">' + w.milestones.map(function (m) {
         var od = M.parseDate(m.planned) < mv.windowStart;
+        var sum = M.stageSummary(m);
         return '<div class="la-item ms-item ' + (od ? 'overdue' : '') + '">' +
-          '<b>' + esc(m.name) + '</b>' +
+          '<b>' + esc(m.name) +
+          (sum ? ' <span class="tag" title="阶段进度' + (sum.current ? '，当前：' + esc(sum.current) : '') + '">' + sum.done + '/' + sum.total + '</span>' : '') +
+          '</b>' +
           '<span class="la-meta">' + esc(m.p6Id || m.type) + (m.capacityMW ? ' · ' + m.capacityMW + ' MW' : '') + '</span></div>';
       }).join('') + '</div>');
     });
@@ -5550,6 +5606,25 @@ window.LM_SEED = {
       }).join(' → ') + ' →</span>';
   }
 
+  /* Stage pipeline — dots read left to right: green = passed (tooltip has
+     the report date it passed), amber ring = current, hollow = pending.
+     Achievement stays `actual`-only, so a fully ticked chain without an
+     actual date is surfaced as a rule conflict rather than shown done. */
+  function stagePipeHtml(ms) {
+    var sum = M.stageSummary(ms);
+    if (!sum || ms.actual) return '';
+    var dots = ms.stages.map(function (st, i) {
+      var cls = st.done ? 'done' : (ms.stages.findIndex(function (x) { return !x.done; }) === i ? 'cur' : '');
+      return '<i class="' + cls + '" title="' + esc(st.label + (st.done ? ' · ' + M.fmtDate(st.done) + ' 通过' : '')) + '"></i>';
+    }).join('');
+    var body = '<span class="stage-pipe">' + dots + '<b>' + sum.done + '/' + sum.total +
+      (sum.current ? ' · 当前：' + esc(sum.current) : '') + '</b></span>';
+    if (sum.allDone) {
+      return ' ' + M.ent(body, '各阶段已全部通过，但「实际完成日期」未填——节点仍按未完成计，预警照常');
+    }
+    return ' ' + body;
+  }
+
   function milestoneDateCell(ms, reportDate) {
     var chain = revisionChainHtml(ms);
     if (ms.actual) {
@@ -5562,9 +5637,10 @@ window.LM_SEED = {
       var late = t < today;
       return chain + '<span class="' + (late ? 'bad' : '') + '">' + M.fmtDate(ms.planned) + '</span>' +
         (late ? ' <span class="tag tag-red">逾期 ' + M.daysBetween(t, today) + ' 天</span>' : '') +
-        (ms.note ? ' <span class="muted">' + esc(ms.note) + '</span>' : '');
+        (ms.note ? ' <span class="muted">' + esc(ms.note) + '</span>' : '') +
+        stagePipeHtml(ms);
     }
-    return '<span class="muted">' + esc(ms.dateText || '待定') + '</span>';
+    return '<span class="muted">' + esc(ms.dateText || '待定') + '</span>' + stagePipeHtml(ms);
   }
 
   function slipDays(m) {
@@ -5766,6 +5842,58 @@ window.LM_SEED = {
       });
     });
 
+    /* stage tracking: enable with the type template, toggle done (stamps
+       the current report date), add and remove stages */
+    pane.querySelectorAll('[data-stgenable]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        commit(p, pane);
+        var m = (p.milestones || [])[+b.getAttribute('data-stgenable')];
+        if (m) {
+          m.stages = M.stageTemplate(m.type).map(function (lbl) { return { label: lbl, done: null }; });
+          D.save();
+        }
+        V.openProject(id, onDone);
+      });
+    });
+    pane.querySelectorAll('[data-stgtoggle]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        commit(p, pane);
+        var m = (p.milestones || [])[+b.getAttribute('data-stgtoggle')];
+        var st = m && m.stages && m.stages[+b.getAttribute('data-stg')];
+        if (st) {
+          st.done = st.done ? null : D.current.meta.reportDate;
+          D.save();
+        }
+        V.openProject(id, onDone);
+      });
+    });
+    pane.querySelectorAll('[data-stgdel]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        commit(p, pane);
+        var m = (p.milestones || [])[+b.getAttribute('data-stgdel')];
+        if (m && m.stages) {
+          m.stages.splice(+b.getAttribute('data-stg'), 1);
+          if (!m.stages.length) delete m.stages;
+          D.save();
+        }
+        V.openProject(id, onDone);
+      });
+    });
+    pane.querySelectorAll('[data-stgadd]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var inp = pane.querySelector('[data-stgnew="' + b.getAttribute('data-stgadd') + '"]');
+        var lbl = inp ? inp.value.trim() : '';
+        if (!lbl) return;
+        commit(p, pane);
+        var m = (p.milestones || [])[+b.getAttribute('data-stgadd')];
+        if (m) {
+          (m.stages = m.stages || []).push({ label: lbl, done: null });
+          D.save();
+        }
+        V.openProject(id, onDone);
+      });
+    });
+
     /* drop one entry from a milestone's revision chain */
     pane.querySelectorAll('[data-delrev]').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -5951,7 +6079,27 @@ window.LM_SEED = {
         cell('milestones.' + i + '.phaseLabel', m.phaseLabel, 'text', 'w-xs') +
         cell('milestones.' + i + '.capacityMW', m.capacityMW, 'number', 'w-xs') +
         cell('milestones.' + i + '.p6Id', m.p6Id, 'text', 'w-ref') +
-        '<td class="w-act"><button class="icon-btn danger" data-del="milestones" data-index="' + i + '" aria-label="删除">✕</button></td></tr>');
+        '<td class="w-act"><button class="icon-btn danger" data-del="milestones" data-index="' + i + '" aria-label="删除">✕</button>' +
+        ((m.stages || []).length ? '' :
+          '<button class="icon-btn" data-stgenable="' + i + '" title="启用阶段跟踪（按节点类型套用模板）" aria-label="启用阶段">▤</button>') +
+        '</td></tr>');
+      /* stage chain — click a chip to stamp/unstamp the current report
+         date; ✕ removes a stage, the input adds one */
+      if ((m.stages || []).length) {
+        var sum = M.stageSummary(m);
+        h.push('<tr class="ms-stage-row' + (isDone ? ' row-done' : '') + '"><td colspan="9">' +
+          '<span class="ms-rev-lbl">阶段 ' + sum.done + '/' + sum.total + '</span>' +
+          m.stages.map(function (st, si) {
+            return '<span class="stage-item"><button class="stage-chip' + (st.done ? ' done' : '') +
+              '" data-stgtoggle="' + i + '" data-stg="' + si + '" title="' +
+              (st.done ? '已于周报日 ' + esc(st.done) + ' 通过，点击取消' : '点击标记为已通过（盖当期报告日）') + '">' +
+              (st.done ? '✓ ' : '') + esc(st.label) + '</button>' +
+              '<button class="icon-btn danger xs" data-stgdel="' + i + '" data-stg="' + si + '" aria-label="删除此阶段">✕</button></span>';
+          }).join('') +
+          '<span class="stage-add"><input placeholder="新阶段名" data-stgnew="' + i + '">' +
+          '<button class="btn xs" data-stgadd="' + i + '">+ 阶段</button></span>' +
+          '</td></tr>');
+      }
       /* revision chain — read-only history under its row; ✕ removes one
          entry (e.g. a typo correction that isn't a real re-plan) */
       if ((m.revisions || []).length) {
