@@ -1279,9 +1279,25 @@ window.LM_SEED_KTP = [
     { name: 'IST — G2', type: 'IST', group: 'DCMEP', planned: '2026-08-08', actual: '2026-08-08', phaseLabel: 'G2' },
     { name: 'Architectural Completion', type: 'CUSTOM', group: 'MBW + BBMEP', p6Id: 'ML.INTERIM.230', planned: '2026-08-13', actual: null },
     { name: 'Certificate of Completion & Compliance (CCC)', type: 'CCC', group: 'MBW + BBMEP', p6Id: 'ML.CONTRACT.200', planned: '2026-08-13', actual: null, note: '周报载 2026-08-30' },
-    { name: 'RFS Phase 1 — G2 · 32MW', type: 'RFS', group: 'DCMEP', planned: '2026-08-15', actual: null, phaseLabel: 'G2', capacityMW: 32 },
+    { name: 'RFS Phase 1 — G2 · 32MW', type: 'RFS', group: 'DCMEP', planned: '2026-08-15', actual: null, phaseLabel: 'G2', capacityMW: 32,
+      stages: [
+        { label: '申请 Application', done: '2026-08-10' },
+        { label: '文件提交 Documents', done: '2026-08-10' },
+        { label: '审批 Approval', done: '2026-08-10' },
+        { label: '安装 Installation', done: '2026-08-10' },
+        { label: '调试 Commissioning', done: null },
+        { label: '客户反馈 Client Feedback', done: null }
+      ] },
     { name: 'IST — G1', type: 'IST', group: 'DCMEP', planned: '2026-08-31', actual: null, phaseLabel: 'G1' },
-    { name: 'RFS Phase 2 — G1 · 32MW', type: 'RFS', group: 'DCMEP', planned: '2026-09-10', actual: null, phaseLabel: 'G1', capacityMW: 32 },
+    { name: 'RFS Phase 2 — G1 · 32MW', type: 'RFS', group: 'DCMEP', planned: '2026-09-10', actual: null, phaseLabel: 'G1', capacityMW: 32,
+      stages: [
+        { label: '申请 Application', done: '2026-08-10' },
+        { label: '文件提交 Documents', done: '2026-08-10' },
+        { label: '审批 Approval', done: '2026-08-10' },
+        { label: '安装 Installation', done: null },
+        { label: '调试 Commissioning', done: null },
+        { label: '客户反馈 Client Feedback', done: null }
+      ] },
     { name: 'CPC — Ready for Services', type: 'CPC', group: 'MBW + BBMEP', planned: '2026-09-30', actual: null },
     { name: 'CMGD / DLP Ends', type: 'DLP', planned: null, dateText: '24 个月' }
   ],
@@ -1329,7 +1345,8 @@ window.LM_SEED_KTP = [
     { item: 'Smoke pipe', eta: '2026-04-30', requiredOnSite: '2026-04-30', owner: '张强', status: '部分到仓 / 待核实' }
   ],
   siteIssues: { rss: { received: 318, closed: 155 }, ncr: { received: 10, closed: 3 }, pmci: { received: 45, closed: 0 } },
-  dataQuality: ['CCC 日期在 P6 (2026-08-13) 与周报 (2026-08-30) 之间不一致，此处保留 P6 日期并在备注载明周报日期。']
+  dataQuality: ['CCC 日期在 P6 (2026-08-13) 与周报 (2026-08-30) 之间不一致，此处保留 P6 日期并在备注载明周报日期。',
+    'RFS 阶段初值由 Claude 于周 46 按周报进度与现场作业（Cx L2–L4 进行中）推断，请项目组核对后调整。']
 },
 
 {
@@ -1388,7 +1405,15 @@ window.LM_SEED_KTP = [
     { name: 'Bomba (CCIE)', type: 'BOMBA', group: 'DCMEP', planned: '2026-08-05', actual: '2026-08-05' },
     { name: 'CCC', type: 'CCC', group: 'DCMEP', planned: '2026-08-30', actual: null },
     { name: 'IST', type: 'IST', group: 'DCMEP', planned: '2026-09-20', actual: null },
-    { name: 'RFS 1 — F1 · 24MW', type: 'RFS', group: 'DCMEP', planned: '2026-10-30', actual: null, phaseLabel: 'F1', capacityMW: 24 },
+    { name: 'RFS 1 — F1 · 24MW', type: 'RFS', group: 'DCMEP', planned: '2026-10-30', actual: null, phaseLabel: 'F1', capacityMW: 24,
+      stages: [
+        { label: '申请 Application', done: '2026-08-10' },
+        { label: '文件提交 Documents', done: '2026-08-10' },
+        { label: '审批 Approval', done: '2026-08-10' },
+        { label: '安装 Installation', done: null },
+        { label: '调试 Commissioning', done: null },
+        { label: '客户反馈 Client Feedback', done: null }
+      ] },
     { name: 'CPC / Undertaking', type: 'CPC', group: 'DCMEP', planned: '2026-11-30', actual: null },
     { name: 'RFS 2 — F2 · 32MW', type: 'RFS', group: 'DCMEP', planned: '2027-04-15', actual: null, phaseLabel: 'F2', capacityMW: 32 },
     { name: 'CMGD / DLP Ends', type: 'DLP', planned: null, dateText: '24 个月' }
@@ -1420,7 +1445,8 @@ window.LM_SEED_KTP = [
     { action: 'F1 LV F1-A01 F1-D06 CxL2 & CxL3 启动', owner: 'RA Power System Protection' }
   ],
   siteIssues: { rss: { received: 42, closed: 19 }, ncr: { received: 0, closed: 0 }, pmci: { received: 10, closed: 3 } },
-  dataQuality: ['统筹 45 的收款金额 (RM 585,944,545.42) 大于合约金额 (RM 101,816,548.05)，源数据疑有误，此处照录未修改。']
+  dataQuality: ['统筹 45 的收款金额 (RM 585,944,545.42) 大于合约金额 (RM 101,816,548.05)，源数据疑有误，此处照录未修改。',
+    'RFS 阶段初值由 Claude 于周 46 按周报进度与现场作业（F1 LV 送电、CxL2/L3 下周启动）推断，请项目组核对后调整。']
 },
 
 {
@@ -1516,7 +1542,15 @@ window.LM_SEED_KTP = [
   milestones: [
     { name: 'IST', type: 'IST', group: 'DCMEP', planned: '2026-08-10', actual: null, note: 'Genset 需第三方修复，目标 8/10 开始' },
     { name: 'Deep Cleaning', type: 'CUSTOM', group: 'DCMEP', planned: '2026-08-20', actual: null },
-    { name: 'RFS', type: 'RFS', group: 'DCMEP', planned: '2026-08-20', actual: null, capacityMW: 12 },
+    { name: 'RFS', type: 'RFS', group: 'DCMEP', planned: '2026-08-20', actual: null, capacityMW: 12,
+      stages: [
+        { label: '申请 Application', done: '2026-08-10' },
+        { label: '文件提交 Documents', done: '2026-08-10' },
+        { label: '审批 Approval', done: '2026-08-10' },
+        { label: '安装 Installation', done: '2026-08-10' },
+        { label: '调试 Commissioning', done: null },
+        { label: '客户反馈 Client Feedback', done: null }
+      ] },
     { name: 'CPC / Undertaking', type: 'CPC', group: 'DCMEP', planned: '2026-08-30', actual: null },
     { name: 'CMGD / DLP Ends', type: 'DLP', planned: null, dateText: '24 个月' }
   ],
@@ -1537,7 +1571,8 @@ window.LM_SEED_KTP = [
     { area: 'B1、C1、D1', activity: '柴发烧机 Cx4 检查', status: 'Completed 100%', remark: '' }
   ],
   nextWeekFocus: [],
-  dataQuality: ['EHS 工时数据在周报 46 中为空白。']
+  dataQuality: ['EHS 工时数据在周报 46 中为空白。',
+    'RFS 阶段初值由 Claude 于周 46 按周报进度与现场作业（冷站方舱与柴发 Cx4 检查完成）推断，请项目组核对后调整。']
 },
 
 {
@@ -2047,6 +2082,7 @@ window.LM_SEED_NTP = [
   id: 'ntp-k', campus: 'NTP', phase: 'ongoing',
   name: 'NTP-K', nameZh: 'NTP-K 楼', tenant: 'O', scope: 'MBW, BBMEP, DCMEP', capacityMW: 56,
   owners: { lead: '王先贞', owner1: 'Carlos', owner2: '刘继泽' },
+  dataQuality: ['RFS 阶段初值由 Claude 于周 46 按周报进度与现场作业（K2 GA 在 CxL4/L5、K2 GB 在 CxL3/L4）推断，请项目组核对后调整。'],
   status: 'green',
   progress: { actual: 0.9925, planned: 0.9871, spi: 1.0055 },
   lad: 'NIL', eot: 'Under Review 审核中',
@@ -2060,8 +2096,24 @@ window.LM_SEED_NTP = [
     { name: 'CCC Completion', type: 'CCC', group: 'MBW + BBMEP', planned: '2026-06-30', actual: '2026-06-30' },
     { name: 'RFS 1 — K1 DH GB & service rooms', type: 'RFS', group: 'DCMEP', planned: '2026-06-30', actual: '2026-06-30' },
     { name: 'RFS 2 — K1 DH GA', type: 'RFS', group: 'DCMEP', planned: '2026-08-03', actual: '2026-08-03' },
-    { name: 'RFS 3 — K2 DH GA', type: 'RFS', group: 'DCMEP', planned: '2026-08-13', actual: null },
-    { name: 'RFS 4 — K2 DH GB', type: 'RFS', group: 'DCMEP', planned: '2026-08-28', actual: null },
+    { name: 'RFS 3 — K2 DH GA', type: 'RFS', group: 'DCMEP', planned: '2026-08-13', actual: null,
+      stages: [
+        { label: '申请 Application', done: '2026-08-10' },
+        { label: '文件提交 Documents', done: '2026-08-10' },
+        { label: '审批 Approval', done: '2026-08-10' },
+        { label: '安装 Installation', done: '2026-08-10' },
+        { label: '调试 Commissioning', done: null },
+        { label: '客户反馈 Client Feedback', done: null }
+      ] },
+    { name: 'RFS 4 — K2 DH GB', type: 'RFS', group: 'DCMEP', planned: '2026-08-28', actual: null,
+      stages: [
+        { label: '申请 Application', done: '2026-08-10' },
+        { label: '文件提交 Documents', done: '2026-08-10' },
+        { label: '审批 Approval', done: '2026-08-10' },
+        { label: '安装 Installation', done: '2026-08-10' },
+        { label: '调试 Commissioning', done: null },
+        { label: '客户反馈 Client Feedback', done: null }
+      ] },
     { name: 'CPC / Undertaking', type: 'CPC', group: 'MBW + BBMEP', planned: '2026-11-30', actual: null },
     { name: 'CMGD / DLP Ends', type: 'DLP', planned: null, dateText: '24 个月' }
   ],
