@@ -3369,7 +3369,7 @@ window.LM_SEED = {
     var labelW = opts.labelWidth || 168;
     var valueW = 74;
     var w = opts.width || 720;
-    var rowH = opts.rowH || 26, gap = 6;
+    var rowH = opts.rowH || 30, gap = 6;
     var h = rows.length * (rowH + gap) + 8;
     var plotW = w - labelW - valueW - 12;
     var max = opts.max || Math.max.apply(null, rows.map(function (r) { return r.value || 0; })) || 1;
@@ -3398,8 +3398,8 @@ window.LM_SEED = {
   C.actualVsPlanned = function (rows, opts) {
     opts = opts || {};
     if (!rows.length) return '<div class="chart-empty">无数据 No data</div>';
-    var labelW = opts.labelWidth || 186, valueW = 108;
-    var w = opts.width || 760, rowH = 28, gap = 6;
+    var labelW = opts.labelWidth || 186, valueW = 118;
+    var w = opts.width || 760, rowH = opts.rowH || 34, gap = 7;
     var h = rows.length * (rowH + gap) + 26;
     var plotW = w - labelW - valueW - 12;
     var body = '';
@@ -4594,7 +4594,7 @@ window.LM_SEED = {
       h.push('</div>');
       h.push('<div class="table-scroll">' + C.hbar(ranked.slice(0, 10).map(function (r) {
         return { label: r.project.name, value: r.score, display: String(r.score) };
-      }), { width: 760, labelWidth: 200 }) + '</div>');
+      }), { width: 1000, labelWidth: 220 }) + '</div>');
       h.push('<p class="note">长度 = 加权评分，已含严重度权重（紧急 10 · 高 6 · 中 3 · 低 1）加红灯类别 × 4；按此从高到低排序。各项目最高预警的严重度见下方预警清单。</p>');
       h.push('</section>');
     }
@@ -4679,7 +4679,7 @@ window.LM_SEED = {
     h.push('<div class="band">');
     h.push('<div class="band-head"><h2>交付容量</h2><p>2026 年至今累计 ' + roll.ytdDeliveredMw.toFixed(2) + ' MW</p></div>');
     h.push('<section class="panel"><div class="panel-head"><h3>每月 RFS 交付 · MW</h3></div>');
-    h.push('<div class="table-scroll">' + C.columns(months, { width: 760, height: 220 }) + '</div>');
+    h.push('<div class="table-scroll">' + C.columns(months, { width: 1000, height: 260 }) + '</div>');
     h.push('<div class="table-scroll"><table class="tbl compact"><thead><tr><th>月份</th><th>项目 / Phase</th><th>RFS 日期</th><th class="r">容量 MW</th><th class="r">累计</th></tr></thead><tbody>');
     var cum = 0;
     (d.portfolio.rfsDelivery || []).forEach(function (m) {
@@ -4928,7 +4928,7 @@ window.LM_SEED = {
     if (avpRows.length) {
       h.push('<section class="panel"><div class="panel-head"><h3>实际 vs 计划进度</h3>' +
         '<span class="card-sub">竖线 = 计划 · 条形颜色按 ≤5% / &gt;5% 偏差规则</span></div>');
-      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: 820, labelWidth: 210 }) + '</div>');
+      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: 1160, labelWidth: 230 }) + '</div>');
       h.push('</section>');
     }
 
@@ -5140,7 +5140,7 @@ window.LM_SEED = {
         (pr.note ? '<span class="card-sub">' + esc(pr.note) + '</span>' : '') + '</div>');
       h.push('<div class="table-scroll">' + C.actualVsPlanned(p.phases.map(function (ph) {
         return { label: ph.label + (ph.capacityMW ? ' · ' + ph.capacityMW + ' MW' : ''), actual: ph.actual, planned: ph.planned };
-      }), { width: 720, labelWidth: 150 }) + '</div>');
+      }), { width: 1000, labelWidth: 170 }) + '</div>');
       h.push('</section>');
     }
     h.push('</div>');
@@ -6511,7 +6511,7 @@ window.LM_SEED = {
         return { label: trunc(p.name, 30), actual: p.progress.actual, planned: p.progress.planned };
       });
       if (!avp.length) return head + '<p class="note">所选项目没有填报进度数据。</p>';
-      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: 860, labelWidth: 220 }) + '</div>' + note();
+      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: 1160, labelWidth: 230 }) + '</div>' + note();
     }
 
     /* ── aggregate into groups ───────────────────────────────────────── */
@@ -6546,7 +6546,7 @@ window.LM_SEED = {
         display: fmt(b.value),
         color: b.color || (metric.key === 'variance' ? C.status(M.varianceStatus(b.value)) : C.accent())
       };
-    }), { width: 820, labelWidth: 230, max: max }) + '</div>' + note();
+    }), { width: 1160, labelWidth: 230, max: max }) + '</div>' + note();
   }
 
   function statusKeyFromLabel(label) {
