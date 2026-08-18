@@ -3727,16 +3727,25 @@ window.LM_SEED = {
   var FILL_GREEN = 'FF92D050';
   var FILL_YELLOW = 'FFFFFF00';
   var FILL_RED = 'FFFF0000';
-  /* The source workbook fills NOTHING except status. Headers earn their weight
-     from bold + the thin grid, section rows from a medium underline. Keeping it
-     that way means a coloured cell always means one thing. */
+  /* DATA cells are filled with nothing but the three status colours — a
+     coloured data cell always means one thing. The register's chrome, though,
+     carries the source's real band system (measured off 统筹 45's theme fills,
+     Office theme colour × tint): gold header band, blue campus banner, grey
+     completed-section band, and the dark-grey bold header ink. */
+  var FILL_HDR = 'FFFFE699';      /* accent4 60% — header rows + A. band   */
+  var FILL_CAMPUS = 'FFB4C7E7';   /* accent1 60% — campus banner            */
+  var FILL_SECT_B = 'FFC9C9C9';   /* accent3 40% — B. Completed banner      */
+  var FILL_HDR_B = 'FFD0CECE';    /* lt2 −10%   — B-section header rows     */
+  var INK_HDR = 'FF3A3637';       /* the register's bold header ink         */
+  var INK_GRAY = 'FF737373';      /* secondary text (theme lt2 −50%)        */
 
   var FMT_DATE = '[$-14409]yyyy\\-mm\\-dd;@';
   var FMT_MW = '0\\ "MW"';
   var FMT_SPI = '0.000';
   var FMT_PCT = '0%';
   var FMT_PCT2 = '0.00%';
-  var FMT_MONEY = '_-* #,##0.00_-;\\-* #,##0.00_-;_-* "-"??_-;_-@_-';
+  /* the source's dominant accounting format, space-padded variant */
+  var FMT_MONEY = '_ * #,##0.00_ ;_ * \\-#,##0.00_ ;_ * "-"??_ ;_ @_ ';
 
   /* Kept for the analysis / alarm sheets, mapped onto the source palette so
      the whole workbook uses one set of colours. */
@@ -3935,47 +3944,85 @@ window.LM_SEED = {
   };
 
   /* ── 统筹 NN — master register ─────────────────────────────────────────
-     Their structure, not a flat table: a project occupies as many rows as it
-     has contract lines (one per currency), and the identity columns are
-     vertically merged across them. Frozen at D1, zoom 80, gridlines off. */
+     Their structure, not a flat table: column A is a 9-wide empty gutter and
+     data starts at B; a project occupies as many rows as it has contract
+     lines (one per currency), identity columns vertically merged across
+     them. A 30pt 周报 title, blue campus banners, a gold band over each
+     A-section and grey over each B-section. Frozen at D1 (gutter + No. +
+     Project stay put), zoom 80, gridlines ON — all measured off 统筹 45. */
+
+  /* banner/section band: text at column B, fill painted across the table */
+  function regBand(ws, text, fillArgb, span) {
+    var r = ws.addRow(['', text]);
+    r.height = 30;
+    r.getCell(2).font = { name: 'Microsoft YaHei', size: 10, bold: true, color: { argb: INK_HDR } };
+    r.getCell(2).alignment = { vertical: 'middle' };
+    for (var i = 2; i <= span + 1; i++) fill(r.getCell(i), fillArgb);
+    ws.mergeCells(r.number, 2, r.number, span + 1);
+    return r;
+  }
+
+  /* header row: filled band, bold dark-grey ink, 55 high like the source */
+  function regHeader(ws, cells, fillArgb) {
+    var r = ws.addRow([''].concat(cells));
+    r.height = 55;
+    r.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+    for (var i = 2; i <= cells.length + 1; i++) {
+      var c = r.getCell(i);
+      c.font = { name: 'Microsoft YaHei', size: 10, bold: true, color: { argb: INK_HDR } };
+      fill(c, fillArgb);
+      c.border = { top: THIN, left: THIN, right: THIN, bottom: MEDIUM };
+    }
+    return r;
+  }
+
   function sheetRegister(wb, d, ctx) {
     var ws = wb.addWorksheet('统筹 ' + d.meta.week, {
-      views: [{ state: 'frozen', xSplit: 3, ySplit: 0, zoomScale: 80, showGridLines: false }]
+      views: [{ state: 'frozen', xSplit: 3, ySplit: 0, zoomScale: 80 }]
     });
-    widths(ws, [5.7, 40.8, 10.8, 25.8, 15.8, 15.8, 15.8, 10, 8, 15.8, 17.3, 17.3, 17.3, 17.3, 17.3, 17.3, 17.3, 15.8, 10, 18, 18, 10]);
-    titleRow(ws, '海外项目统筹 · 周报 ' + d.meta.week,
-      '报告日期 ' + d.meta.reportDate + ' · 数据截止 ' + d.meta.cutoffDate +
-      ' · 绿=已完成 · 黄=需关注 · 红=逾期或严重滞后', 22);
+    widths(ws, [9, 5.7, 40.8, 10.8, 25.8, 15.8, 15.8, 15.8, 10, 8, 15.8, 17.3, 17.3, 17.3, 17.3, 17.3, 17.3, 17.3, 15.8, 10, 18, 18, 10]);
+    var SPAN = 22;
+
+    /* the source's own masthead: big 周报 title at B1, date beside it */
+    var t = ws.addRow(['', '周报 - ' + d.meta.week]);
+    t.height = 40;
+    t.getCell(2).font = { name: 'Microsoft YaHei', size: 30, bold: false };
+    t.getCell(4).value = d.meta.reportDate;
+    t.getCell(4).font = { name: 'Microsoft YaHei', size: 10, color: { argb: INK_GRAY } };
+    t.getCell(4).alignment = { vertical: 'bottom' };
+    var sub = ws.addRow(['', '报告日期 ' + d.meta.reportDate + ' · 数据截止 ' + d.meta.cutoffDate +
+      ' · 绿=已完成 · 黄=需关注 · 红=逾期或严重滞后']);
+    sub.getCell(2).font = { name: 'Microsoft YaHei', size: 9, color: { argb: INK_GRAY } };
+    ws.addRow([]);
 
     d.campuses.forEach(function (camp) {
       var ongoing = d.projects.filter(function (p) { return p.campus === camp.id && p.phase === 'ongoing'; });
       var completed = d.projects.filter(function (p) { return p.campus === camp.id && p.phase === 'completed'; });
       if (!ongoing.length && !completed.length) return;
 
-      sectionRow(ws, camp.name + ' (' + camp.id + ')', 22);
+      regBand(ws, camp.name + ' (' + camp.id + ')', FILL_CAMPUS, SPAN);
 
       if (ongoing.length) {
-        sectionRow(ws, 'A. On-going Projects 在施工项目', 22);
-        headerRow(ws, ['No.', 'Project / 项目', 'Tenant', 'Scope / 项目范围', '总负责人',
+        regBand(ws, 'A. On-going Projects 在施工项目', FILL_HDR, SPAN);
+        regHeader(ws, ['No.', 'Project / 项目', 'Tenant', 'Scope / 项目范围', '总负责人',
           'Owner 1 / 负责人1', 'Owner 2 / 负责人2', 'Progress / 总进度', 'SPI', 'Project Status / 项目状况',
           'BOMBA', 'IST', 'CCC', 'RFS1', 'RFS2', 'RFS3', 'CPC / Undertaking', 'CMGD / DLP Ends',
-          'Capacity', '币种', '合同金额', 'Collection 已收款']);
-        var gridFrom = ws.rowCount + 1;
+          'Capacity', '币种', '合同金额', 'Collection 已收款'], FILL_HDR);
         ongoing.forEach(function (p, i) { writeRegisterRows(ws, d, p, i + 1, false); });
         var tr = ws.addRow([]);
-        tr.getCell(19).value = ongoing.reduce(function (s2, p) { return s2 + (p.capacityMW || 0); }, 0);
-        tr.getCell(19).numFmt = FMT_MW;
+        tr.getCell(20).value = ongoing.reduce(function (s2, p) { return s2 + (p.capacityMW || 0); }, 0);
+        tr.getCell(20).numFmt = FMT_MW;
         tr.font = FONT_H;
-        tr.getCell(19).border = { top: MEDIUM, bottom: MEDIUM };
+        tr.getCell(20).border = { top: MEDIUM, bottom: MEDIUM };
         ws.addRow([]);
       }
 
       if (completed.length) {
-        sectionRow(ws, 'B. Completed Projects 已完成项目', 22);
-        headerRow(ws, ['No.', 'Project / 项目', 'Tenant', 'Scope / 项目范围', '总负责人',
+        regBand(ws, 'B. Completed Projects 已完成项目', FILL_SECT_B, SPAN);
+        regHeader(ws, ['No.', 'Project / 项目', 'Tenant', 'Scope / 项目范围', '总负责人',
           'Owner 1 / 负责人1', 'Owner 2 / 负责人2', 'Defect / 销项进度', '销项计划', 'Status',
           'As-Built 竣工图', 'Training Manual 培训手册', 'OMM 操作手册', 'NCR 闭合率', 'PMCI / RSS 闭合率',
-          '文档整体 %', 'CPC / Undertaking', 'CMGD / DLP Ends', 'Capacity', '币种', '合同金额', 'Collection 已收款']);
+          '文档整体 %', 'CPC / Undertaking', 'CMGD / DLP Ends', 'Capacity', '币种', '合同金额', 'Collection 已收款'], FILL_HDR_B);
         completed.forEach(function (p, i) { writeRegisterRows(ws, d, p, i + 1, true); });
         ws.addRow([]);
       }
@@ -3986,7 +4033,8 @@ window.LM_SEED = {
   }
 
   /* Emits one row per contract line and vertically merges the identity block,
-     which is how the source register reads a multi-currency project. */
+     which is how the source register reads a multi-currency project. All
+     cell indices are +1 for the gutter column A. */
   function writeRegisterRows(ws, d, p, no, isCompleted) {
     var money = (p.commercial && p.commercial.length) ? p.commercial : [null];
     var first = ws.rowCount + 1;
@@ -3998,64 +4046,64 @@ window.LM_SEED = {
       var r = ws.addRow([]);
       r.alignment = { vertical: 'top', wrapText: true };
       if (idx === 0) {
-        r.getCell(1).value = no;
-        r.getCell(2).value = p.name;
-        r.getCell(3).value = p.tenant || '';
-        r.getCell(4).value = p.scope || '';
-        r.getCell(5).value = o.lead || '';
-        r.getCell(6).value = o.owner1 || '';
-        r.getCell(7).value = o.owner2 || '';
+        r.getCell(2).value = no;
+        r.getCell(3).value = p.name;
+        r.getCell(4).value = p.tenant || '';
+        r.getCell(5).value = p.scope || '';
+        r.getCell(6).value = o.lead || '';
+        r.getCell(7).value = o.owner1 || '';
+        r.getCell(8).value = o.owner2 || '';
 
         if (isCompleted) {
-          if (p.defectProgressLabel) r.getCell(8).value = p.defectProgressLabel;
-          else pctCell(r, 8, p.defectProgress);
-          fill(r.getCell(8), rateFill(p.defectProgress));
-          dateCell(r, 9, p.defectPlan, '待确认');
-          statusCell(r, 10, p);
-          pctCell(r, 11, M.closeoutRate(co.asBuilt)); fill(r.getCell(11), rateFill(M.closeoutRate(co.asBuilt)));
-          pctCell(r, 12, M.closeoutRate(co.trainingManual)); fill(r.getCell(12), rateFill(M.closeoutRate(co.trainingManual)));
-          pctCell(r, 13, M.closeoutRate(co.omm)); fill(r.getCell(13), rateFill(M.closeoutRate(co.omm)));
+          if (p.defectProgressLabel) r.getCell(9).value = p.defectProgressLabel;
+          else pctCell(r, 9, p.defectProgress);
+          fill(r.getCell(9), rateFill(p.defectProgress));
+          dateCell(r, 10, p.defectPlan, '待确认');
+          statusCell(r, 11, p);
+          pctCell(r, 12, M.closeoutRate(co.asBuilt)); fill(r.getCell(12), rateFill(M.closeoutRate(co.asBuilt)));
+          pctCell(r, 13, M.closeoutRate(co.trainingManual)); fill(r.getCell(13), rateFill(M.closeoutRate(co.trainingManual)));
+          pctCell(r, 14, M.closeoutRate(co.omm)); fill(r.getCell(14), rateFill(M.closeoutRate(co.omm)));
           var ncr = si.ncr && si.ncr.received ? si.ncr.closed / si.ncr.received : null;
-          pctCell(r, 14, ncr); fill(r.getCell(14), rateFill(ncr));
+          pctCell(r, 15, ncr); fill(r.getCell(15), rateFill(ncr));
           var second = si.pmci && si.pmci.received ? si.pmci : (si.rss && si.rss.received ? si.rss : null);
           var sr = second ? second.closed / second.received : null;
-          pctCell(r, 15, sr); fill(r.getCell(15), rateFill(sr));
+          pctCell(r, 16, sr); fill(r.getCell(16), rateFill(sr));
           var ov = typeof co.overallPct === 'number' ? co.overallPct : null;
-          pctCell(r, 16, ov); fill(r.getCell(16), rateFill(ov));
+          pctCell(r, 17, ov); fill(r.getCell(17), rateFill(ov));
         } else {
-          pctCell(r, 8, p.progress && p.progress.actual);
-          fill(r.getCell(8), rateFill(p.progress && p.progress.actual));
+          pctCell(r, 9, p.progress && p.progress.actual);
+          fill(r.getCell(9), rateFill(p.progress && p.progress.actual));
           if (p.progress && typeof p.progress.spi === 'number') {
-            r.getCell(9).value = p.progress.spi; r.getCell(9).numFmt = FMT_SPI;
+            r.getCell(10).value = p.progress.spi; r.getCell(10).numFmt = FMT_SPI;
           }
-          statusCell(r, 10, p);
-          milestoneCell(r, 11, milestoneOf(p, 'BOMBA'), d.meta.reportDate);
-          milestoneCell(r, 12, milestoneOf(p, 'IST'), d.meta.reportDate);
-          milestoneCell(r, 13, milestoneOf(p, 'CCC'), d.meta.reportDate);
-          milestoneCell(r, 14, rfs[0], d.meta.reportDate);
-          milestoneCell(r, 15, rfs[1], d.meta.reportDate);
-          milestoneCell(r, 16, rfs[2], d.meta.reportDate);
+          statusCell(r, 11, p);
+          milestoneCell(r, 12, milestoneOf(p, 'BOMBA'), d.meta.reportDate);
+          milestoneCell(r, 13, milestoneOf(p, 'IST'), d.meta.reportDate);
+          milestoneCell(r, 14, milestoneOf(p, 'CCC'), d.meta.reportDate);
+          milestoneCell(r, 15, rfs[0], d.meta.reportDate);
+          milestoneCell(r, 16, rfs[1], d.meta.reportDate);
+          milestoneCell(r, 17, rfs[2], d.meta.reportDate);
         }
-        milestoneCell(r, 17, milestoneOf(p, 'CPC'), d.meta.reportDate);
+        milestoneCell(r, 18, milestoneOf(p, 'CPC'), d.meta.reportDate);
         var dlp = milestoneOf(p, 'DLP');
-        r.getCell(18).value = dlp ? (dlp.dateText || (dlp.planned ? M.fmtDate(dlp.planned) : '')) : '';
+        r.getCell(19).value = dlp ? (dlp.dateText || (dlp.planned ? M.fmtDate(dlp.planned) : '')) : '';
         if (typeof p.capacityMW === 'number') {
-          r.getCell(19).value = p.capacityMW; r.getCell(19).numFmt = FMT_MW;
-        } else { r.getCell(19).value = '-'; }
+          r.getCell(20).value = p.capacityMW; r.getCell(20).numFmt = FMT_MW;
+        } else { r.getCell(20).value = '-'; }
       }
       if (c) {
-        r.getCell(20).value = c.currency || '';
-        if (typeof c.contractValue === 'number') { r.getCell(21).value = c.contractValue; r.getCell(21).numFmt = FMT_MONEY; }
-        if (typeof c.collected === 'number') { r.getCell(22).value = c.collected; r.getCell(22).numFmt = FMT_MONEY; }
+        r.getCell(21).value = c.currency || '';
+        if (typeof c.contractValue === 'number') { r.getCell(22).value = c.contractValue; r.getCell(22).numFmt = FMT_MONEY; }
+        if (typeof c.collected === 'number') { r.getCell(23).value = c.collected; r.getCell(23).numFmt = FMT_MONEY; }
       }
     });
 
     var last = ws.rowCount;
     if (last > first) {
-      for (var col = 1; col <= 19; col++) ws.mergeCells(first, col, last, col);
+      for (var col = 2; col <= 20; col++) ws.mergeCells(first, col, last, col);
     }
     (p.dataQuality || []).forEach(function (q) {
-      ws.getCell(first, 2).note = { texts: [{ text: q }] };
+      ws.getCell(first, 3).note = { texts: [{ text: q }] };
     });
   }
 
