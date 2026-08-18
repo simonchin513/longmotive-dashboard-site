@@ -324,11 +324,12 @@ table.tbl tr.total td { font-weight: 700; }
    rule, the same encoding the campus charts use), the number large, and a
    one-line answer to "where is it" beneath the bar. */
 .progress-board { padding-top: 20px; }
-.pb-cols { columns: 2; column-gap: 48px; }
+.pb-cols { columns: 2; column-gap: 56px; column-rule: 1px solid var(--line); }
 .pb-row {
   display: grid; grid-template-columns: 190px minmax(0, 1fr) 96px;
-  gap: 18px; align-items: center; padding: 12px 0;
+  gap: 18px; align-items: center; padding: 14px 0;
   break-inside: avoid;
+  border-bottom: 1px solid var(--line);
 }
 .pb-name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
 .pb-name a { font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
@@ -6121,7 +6122,7 @@ window.LM_SEED = {
        about what is wrong. ── */
     h.push('<div class="band">');
     h.push('<div class="band-head"><h2>项目进度</h2>' +
-      '<p>' + roll.ongoingCount + ' 个在施工项目 · 条形 = 实际进度 · 竖线 = 计划 · 颜色按 ≤5% / >5% 偏差规则</p></div>');
+      '<p>' + roll.ongoingCount + ' 个在施工项目 · 条形 = 实际进度 · 有计划数时竖线示计划、颜色按 ≤5% / >5% 偏差规则</p></div>');
     h.push(progressBoard(d, roll));
     h.push('</div>');
 
@@ -6417,9 +6418,12 @@ window.LM_SEED = {
     var pr = p.progress || {};
     var a = typeof pr.actual === 'number' ? pr.actual : null;
     var pl = typeof pr.planned === 'number' ? pr.planned : null;
-    var key = (a !== null && pl !== null) ? M.varianceStatus(a - pl) : 'nodata';
+    /* colour carries the variance dimension when a plan exists; without
+       one the bar is plain magnitude and takes the accent hue (chart
+       colour rule 6c), not the dead nodata grey */
+    var col = (a !== null && pl !== null) ? C.status(M.varianceStatus(a - pl)) : C.accent();
     var fill = a !== null
-      ? '<i class="pb-fill" style="width:' + Math.min(100, a * 100) + '%;background:' + C.status(key) + '"></i>'
+      ? '<i class="pb-fill" style="width:' + Math.min(100, a * 100) + '%;background:' + col + '"></i>'
       : '';
     var tick = pl !== null
       ? '<b class="pb-tick" style="left:' + Math.min(100, pl * 100) + '%"></b>'
@@ -6432,7 +6436,8 @@ window.LM_SEED = {
       '<div class="pb-stage' + (stage.cls ? ' ' + stage.cls : '') + '">' + stage.html + '</div></div>' +
       '<div class="pb-pct">' + (a === null
         ? '<b class="muted">—</b><span>未填报</span>'
-        : '<b>' + (a * 100).toFixed(1) + '%</b><span>' + (pl === null ? '计划待补' : '计划 ' + (pl * 100).toFixed(1) + '%') + '</span>') +
+        : '<b>' + (a * 100).toFixed(1) + '%</b>' +
+          (pl === null ? '' : '<span>计划 ' + (pl * 100).toFixed(1) + '%</span>')) +
       '</div></div>';
   }
 
