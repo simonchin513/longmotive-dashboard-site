@@ -307,7 +307,7 @@ table.tbl tr.total td { font-weight: 700; }
 .sevkeys { list-style: none; display: flex; gap: 16px; flex-wrap: wrap; margin: 0; padding: 0; }
 .sevkeys li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-muted); }
 .sevkeys b { font-size: 14px; font-weight: 650; color: var(--ink); font-variant-numeric: tabular-nums; }
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
 
 .alarm-split { display: flex; gap: 26px; }
 .alarm-split div { display: flex; flex-direction: column; gap: 1px; }
@@ -320,46 +320,57 @@ table.tbl tr.total td { font-weight: 700; }
    Fixed layout with a colgroup, so every group shares one set of column
    edges. Auto width made each column start wherever its own longest cell
    happened to end. */
-table.alarm-tbl { table-layout: fixed; width: 100%; min-width: 660px; }
-.alarm-tbl col.c-proj { width: 216px; }
-.alarm-tbl col.c-when { width: 132px; }
-.alarm-tbl col.c-owner { width: 116px; }
+table.alarm-tbl { table-layout: fixed; width: 100%; min-width: 780px; }
+.alarm-tbl col.c-proj { width: 250px; }
+.alarm-tbl col.c-when { width: 156px; }
+.alarm-tbl col.c-owner { width: 150px; }
 /* c-item takes the remainder */
 
 table.alarm-tbl td {
   border-bottom: 1px solid var(--line);
-  padding: 9px 12px 9px 0; vertical-align: top;
-  line-height: 1.45;      /* shared, so the first line of every column aligns */
+  padding: 13px 14px 13px 0; vertical-align: top;
+  line-height: 1.5;       /* shared, so the first line of every column aligns */
 }
 table.alarm-tbl tr:last-child td { border-bottom: 0; }
+tr.al-row:hover td { background: color-mix(in srgb, var(--ink) 2.5%, transparent); }
+/* a quiet severity accent on the row's leading edge */
+tr.al-row td:first-child { padding-left: 12px; }
+tr.al-row.al-sev-critical td:first-child { box-shadow: inset 3px 0 0 var(--bad); }
+tr.al-row.al-sev-high td:first-child,
+tr.al-row.al-sev-medium td:first-child { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--warn) 70%, transparent); }
+tr.al-row.al-sev-low td:first-child { box-shadow: inset 3px 0 0 var(--line); }
 
 /* group heading rides inside the table so it cannot shift the columns */
-.alarm-tbl tr.grp > td { border-bottom: 0; padding: 20px 0 7px; }
-.alarm-tbl tr.grp.first > td { padding-top: 0; }
+.alarm-tbl tr.grp > td { border-bottom: 0; padding: 26px 0 9px; }
+.alarm-tbl tr.grp.first > td { padding-top: 4px; }
 .sev-head {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 12.5px; font-weight: 650; line-height: 1.4;
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 14.5px; font-weight: 700; line-height: 1.4;
+  letter-spacing: .01em;
 }
-.sev-head i { font-style: normal; font-weight: 400; font-size: 11.5px; color: var(--ink-muted); }
+.sev-head i { font-style: normal; font-weight: 500; font-size: 12.5px; color: var(--ink-muted); }
 .sev-head.sev-critical { color: var(--bad); }
 .sev-head.sev-high, .sev-head.sev-medium { color: var(--warn); }
 .sev-head.sev-low { color: var(--ink-muted); }
 
 .al-proj { overflow-wrap: anywhere; }
-.al-proj a { font-size: 13px; font-weight: 600; }
-.al-campus { display: block; font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
-.al-item { font-size: 12.5px; overflow-wrap: anywhere; }
+.al-proj a { font-size: 14.5px; font-weight: 650; }
+.al-campus {
+  display: block; font-size: 11.5px; letter-spacing: .06em;
+  color: var(--ink-muted); margin-top: 3px;
+}
+.al-item { font-size: 13.5px; overflow-wrap: anywhere; }
 .al-when { text-align: right; }
-.al-date { display: block; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-muted); }
-.al-state { display: block; font-size: 12px; font-weight: 600; margin-top: 2px; }
+.al-date { display: block; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.al-state { display: block; font-size: 13px; font-weight: 650; margin-top: 3px; }
 .al-state.red { color: var(--bad); }
 .al-state.amber { color: var(--warn); }
-.al-owner { font-size: 11.5px; color: var(--ink-muted); overflow-wrap: anywhere; }
+.al-owner { font-size: 13px; overflow-wrap: anywhere; }
 .alarm-tbl col.c-act2 { width: 128px; }
 .al-act { white-space: nowrap; }
 .al-act .btn + .btn { margin-left: 4px; }
 .al-act { text-align: right; }
-.al-act .btn { opacity: .55; }
+.al-act .btn { opacity: .7; }
 tr:hover .al-act .btn { opacity: 1; }
 
 /* Acknowledged: still on the page, visibly set aside. Collapsed by default so
@@ -376,7 +387,7 @@ tr:hover .al-act .btn { opacity: 1; }
 .alarm-tbl.is-acked { opacity: .7; }
 .alarm-tbl.is-acked .al-proj a { font-weight: 500; }
 .ack-why {
-  display: block; margin-top: 3px; font-size: 11px; line-height: 1.5;
+  display: block; margin-top: 4px; font-size: 12.5px; line-height: 1.5;
   color: var(--ink-muted);
 }
 .ack-why.stale { color: var(--warn); }
@@ -4979,7 +4990,7 @@ window.LM_SEED = {
         '<span class="dot" style="background:' + C.severity(g.key) + '"></span>' +
         esc(M.SEVERITY_LABEL[g.key]) + '<i>' + g.items.length + ' 条</i></span></td></tr>');
       g.items.forEach(function (a) {
-        h.push('<tr>' +
+        h.push('<tr class="al-row al-sev-' + g.key + '">' +
           '<td class="al-proj"><a href="#/project/' + a.project.id + '">' + esc(a.project.name) + '</a>' +
           '<span class="al-campus">' + esc(a.project.campus) + '</span></td>' +
           '<td class="al-item">' + esc(a.detail) +
