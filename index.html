@@ -968,7 +968,7 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
 <!-- vendored, offline: ExcelJS 4.4.0 (MIT) — see js/vendor/exceljs-LICENSE.txt -->
 <!-- seed dataset: plain scripts, not modules, so the page works from file:// -->
 <script>
-window.LM_STORAGE_KEY = 'longmotive-share-w1';
+window.LM_STORAGE_KEY = 'longmotive-share-wx';
 
 /* ===== js/vendor/exceljs.min.js ===== */
 /*! ExcelJS 19-10-2023 */
@@ -1018,90 +1018,2959 @@ https://github.com/nodeca/pako/blob/main/LICENSE
 //# sourceMappingURL=exceljs.min.js.map
 
 /* ===== data/seed-meta.js ===== */
-/* Longmotive Project Control — BLANK TEMPLATE.
-   All report data was removed on 2026-08-18 at the user's request; the full
-   week-46 dataset is archived at archive/longmotive-week46-full.json and can
-   be restored via the toolbar's 载入 button. Rules and fixed vocabularies
-   below are structure, not data, and stay. */
+/* GENERATED from Summary Projects.xlsx 统筹 45 via import-xlsx.py on 2026-08-18.
+   Regenerate: python import-xlsx.py <xlsx> then re-bake, or edit in the app and 保存. */
 window.LM_META = {
-  week: 1,
-  reportDate: '2026-01-01',
-  cutoffDate: '2026-01-01',
-  previousCutoffDate: null,
-  title: 'Longmotive 海外项目周报',
-  titleEn: 'Overseas Project Control',
-  tagline: 'Poweringup Progress, Building Excellence / 推动进步，打造卓越',
-  sources: [],
-  // Rule printed on every 周报 slide — drives status colour and the variance alarm.
-  statusRule: {
-    green: 'On Track 正常',
-    amber: 'Attention Required 需关注 (偏差 ≤ 5%)',
-    red: 'Critical 严重滞后 (偏差 > 5%)',
-    amberThreshold: 0.05
+  "week": 45,
+  "reportDate": "2026-08-03",
+  "cutoffDate": "2026-08-03",
+  "previousCutoffDate": null,
+  "title": "Longmotive 海外项目周报",
+  "titleEn": "Overseas Project Control",
+  "tagline": "Poweringup Progress, Building Excellence / 推动进步，打造卓越",
+  "sources": [
+    "Summary Projects.xlsx — 统筹 45（import-xlsx.py 导入）"
+  ],
+  "statusRule": {
+    "green": "On Track 正常",
+    "amber": "Attention Required 需关注 (偏差 ≤ 5%)",
+    "red": "Critical 严重滞后 (偏差 > 5%)",
+    "amberThreshold": 0.05
   },
-  alarmWindowDays: 30
+  "alarmWindowDays": 30
 };
 
-window.LM_CAMPUSES = [];
-
-/* 总览 sheet — 老板关注的事项 / 风险事项 / 下周重点作业 */
-window.LM_PORTFOLIO = {
-  bossAttention: [],
-  risks: [],
-  nextWeekPriorities: [],
-  safety: {
-    fatalities: null,
-    afr: null,
-    asr: null,
-    reportableAccidents: null,
-    cumulativeManHoursLabel: ''
+window.LM_CAMPUSES = [
+  {
+    "id": "KTP",
+    "name": "Kempas Teknologi Park",
+    "nameZh": "",
+    "country": "",
+    "countryZh": ""
   },
-  rfsDelivery: [],
-  confirmedDelivery2025Mw: null
-};
-
-/* The 8 fixed rows of 「2. Weekly Executive Summary」 — identical on every project slide. */
-window.LM_EXEC_CATEGORIES = [
-  { key: 'schedule', en: 'Schedule', zh: '计划' },
-  { key: 'manpower', en: 'Manpower', zh: '人员' },
-  { key: 'quality', en: 'Quality', zh: '质量' },
-  { key: 'safety', en: 'Safety', zh: '安全' },
-  { key: 'commissioning', en: 'Testing & Commissioning', zh: '测试' },
-  { key: 'documentation', en: 'Documentation', zh: '文档' },
-  { key: 'opsReadiness', en: 'Operational Readiness', zh: '运营准备' },
-  { key: 'client', en: 'Client / Stakeholder', zh: '客户 / 相关方' }
+  {
+    "id": "NTP",
+    "name": "Nusajaya Teknologi Park",
+    "nameZh": "",
+    "country": "",
+    "countryZh": ""
+  },
+  {
+    "id": "NDP-KITP",
+    "name": "Nongsa Tecknology Park",
+    "nameZh": "",
+    "country": "",
+    "countryZh": ""
+  },
+  {
+    "id": "CTP",
+    "name": "Chonburi Tech Park",
+    "nameZh": "",
+    "country": "",
+    "countryZh": ""
+  },
+  {
+    "id": "BTP",
+    "name": "Banting Technology Park",
+    "nameZh": "",
+    "country": "",
+    "countryZh": ""
+  }
 ];
 
-/* The 9 fixed rows of 「3. EHS」 */
+window.LM_PORTFOLIO = {
+  "bossAttention": [],
+  "risks": [],
+  "nextWeekPriorities": [],
+  "safety": {
+    "fatalities": null,
+    "afr": null,
+    "asr": null,
+    "reportableAccidents": null,
+    "cumulativeManHoursLabel": ""
+  },
+  "rfsDelivery": [],
+  "confirmedDelivery2025Mw": null
+};
+
+window.LM_EXEC_CATEGORIES = [
+  {
+    "key": "schedule",
+    "en": "Schedule",
+    "zh": "计划"
+  },
+  {
+    "key": "manpower",
+    "en": "Manpower",
+    "zh": "人员"
+  },
+  {
+    "key": "quality",
+    "en": "Quality",
+    "zh": "质量"
+  },
+  {
+    "key": "safety",
+    "en": "Safety",
+    "zh": "安全"
+  },
+  {
+    "key": "commissioning",
+    "en": "Testing & Commissioning",
+    "zh": "测试"
+  },
+  {
+    "key": "documentation",
+    "en": "Documentation",
+    "zh": "文档"
+  },
+  {
+    "key": "opsReadiness",
+    "en": "Operational Readiness",
+    "zh": "运营准备"
+  },
+  {
+    "key": "client",
+    "en": "Client / Stakeholder",
+    "zh": "客户 / 相关方"
+  }
+];
+
 window.LM_EHS_FIELDS = [
-  { key: 'weeklyManHours', en: 'Total Man Hours Worked (Weekly)', zh: '本周安全工时' },
-  { key: 'avgManDays', en: 'Accumulative Man-days Worked (Average)', zh: '本周工作人数' },
-  { key: 'accidentFreeHours', en: 'Accumulative Accident-Free Man Hours', zh: '累计安全工时' },
-  { key: 'fatalities', en: 'Fatalities', zh: '死亡案例' },
-  { key: 'afr', en: 'Accident Frequency Rate (AFR)', zh: '一般事故率' },
-  { key: 'asr', en: 'Accident Severity Rate (ASR)', zh: '严重事故率' },
-  { key: 'manDaysLost', en: 'Total Man Days Lost', zh: '损失工时' },
-  { key: 'reportableAccidents', en: 'No. of Reportable Accident / Incident', zh: '事故累计数' },
-  { key: 'nearMiss', en: 'Near Miss', zh: '发生意外未受伤' }
+  {
+    "key": "weeklyManHours",
+    "en": "Total Man Hours Worked (Weekly)",
+    "zh": "本周安全工时"
+  },
+  {
+    "key": "avgManDays",
+    "en": "Accumulative Man-days Worked (Average)",
+    "zh": "本周工作人数"
+  },
+  {
+    "key": "accidentFreeHours",
+    "en": "Accumulative Accident-Free Man Hours",
+    "zh": "累计安全工时"
+  },
+  {
+    "key": "fatalities",
+    "en": "Fatalities",
+    "zh": "死亡案例"
+  },
+  {
+    "key": "afr",
+    "en": "Accident Frequency Rate (AFR)",
+    "zh": "一般事故率"
+  },
+  {
+    "key": "asr",
+    "en": "Accident Severity Rate (ASR)",
+    "zh": "严重事故率"
+  },
+  {
+    "key": "manDaysLost",
+    "en": "Total Man Days Lost",
+    "zh": "损失工时"
+  },
+  {
+    "key": "reportableAccidents",
+    "en": "No. of Reportable Accident / Incident",
+    "zh": "事故累计数"
+  },
+  {
+    "key": "nearMiss",
+    "en": "Near Miss",
+    "zh": "发生意外未受伤"
+  }
 ];
 
 
 /* ===== data/seed-ktp.js ===== */
-/* BLANK TEMPLATE — KTP projects removed 2026-08-18 at the user's request.
-   Full dataset archived at archive/longmotive-week46-full.json (load via 载入). */
-window.LM_SEED_KTP = [];
+/* GENERATED from Summary Projects.xlsx 统筹 45 via import-xlsx.py on 2026-08-18.
+   Regenerate: python import-xlsx.py <xlsx> then re-bake, or edit in the app and 保存. */
+window.LM_SEED_KTP = [
+  {
+    "id": "ktp-j1",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-J1",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "MBW, BBMEP, DCMEP",
+    "capacityMW": 52.0,
+    "owners": {
+      "lead": "叶锦维",
+      "owner1": "叶锦维 /吕慧娴",
+      "owner2": "刘思孝"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "BOMBA",
+        "type": "BOMBA",
+        "group": "",
+        "planned": "2026-05-15",
+        "actual": "2026-05-15"
+      },
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": "2026-05-07",
+        "actual": "2026-05-07"
+      },
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2026-05-30",
+        "actual": null,
+        "note": "EOT ?"
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-05-15",
+        "actual": "2026-05-15",
+        "capacityMW": 24.0,
+        "phaseLabel": "J2"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-08-07",
+        "actual": null,
+        "revisions": [
+          {
+            "planned": "2026-07-30",
+            "at": null
+          },
+          {
+            "planned": "2026-07-15",
+            "at": null
+          }
+        ],
+        "capacityMW": 28.0,
+        "phaseLabel": "J1"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-09-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.998,
+      "planned": null,
+      "spi": 0.998
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 339634959.91999996,
+        "collected": 193053885.1
+      },
+      {
+        "currency": "USD",
+        "contractValue": 34401547.06,
+        "collected": 0.0
+      }
+    ]
+  },
+  {
+    "id": "ktp-plot-2-infrastructure-and-piling-ktp-j-h",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-Plot 2 Infrastructure and Piling (KTP-J & H)",
+    "nameZh": "",
+    "tenant": "-",
+    "scope": "Infrastructure, Piling",
+    "capacityMW": null,
+    "owners": {
+      "lead": "叶锦维",
+      "owner1": "叶锦维",
+      "owner2": "-"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2026-05-30",
+        "actual": "2026-05-30"
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-06-30",
+        "actual": null,
+        "note": "EOT ?"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-08-15",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.9966,
+      "planned": null,
+      "spi": 0.9966
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 126200000.0,
+        "collected": 59782117.28
+      }
+    ]
+  },
+  {
+    "id": "external-piping",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "External Piping",
+    "nameZh": "",
+    "tenant": "-",
+    "scope": "External Piping",
+    "capacityMW": null,
+    "owners": {
+      "lead": "张帆",
+      "owner1": "张帆",
+      "owner2": "薛志宏"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-06-30",
+        "actual": null,
+        "note": "Contract At Large"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "Contract At-Large"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.9,
+      "planned": null,
+      "spi": 0.9
+    }
+  },
+  {
+    "id": "ktp-g",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-G",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "MBW, BBMEP",
+    "capacityMW": 64.0,
+    "owners": {
+      "lead": "吴锋艳",
+      "owner1": "Joey 祖儿",
+      "owner2": "王保凤"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "BOMBA",
+        "type": "BOMBA",
+        "group": "",
+        "planned": "2026-07-30",
+        "actual": null,
+        "revisions": [
+          {
+            "planned": "2026-06-30",
+            "at": null
+          }
+        ]
+      },
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null,
+        "revisions": [
+          {
+            "planned": "2026-07-30",
+            "at": null
+          }
+        ]
+      },
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2026-08-15",
+        "actual": null,
+        "revisions": [
+          {
+            "planned": "2026-07-30",
+            "at": null
+          }
+        ]
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-08-15",
+        "actual": null,
+        "capacityMW": 32.0,
+        "phaseLabel": "G2"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-09-10",
+        "actual": null,
+        "capacityMW": 32.0,
+        "phaseLabel": "G1"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-09-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.9212,
+      "planned": null,
+      "spi": 1.042907
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 364643137.52,
+        "collected": 58407355.33
+      },
+      {
+        "currency": "USD",
+        "contractValue": 36035212.15,
+        "collected": 0.0
+      }
+    ]
+  },
+  {
+    "id": "plot-2-retaining-walls-and-earth-work",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "Plot 2 - Retaining Walls and Earth Work",
+    "nameZh": "",
+    "tenant": "-",
+    "scope": "Civil Works",
+    "capacityMW": null,
+    "owners": {
+      "lead": "胥善林",
+      "owner1": "叶锦维",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-07-30",
+        "actual": "2026-07-30",
+        "note": "Zone 1"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null,
+        "note": "Zone 2"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-10-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.7,
+      "planned": null,
+      "spi": 0.7
+    }
+  },
+  {
+    "id": "ktp-f",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-F",
+    "nameZh": "",
+    "tenant": "MSFT",
+    "scope": "DCMEP",
+    "capacityMW": 56.0,
+    "owners": {
+      "lead": "赵慧光",
+      "owner1": "林俊伟",
+      "owner2": "Izzul / Steven"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "BOMBA",
+        "type": "BOMBA",
+        "group": "",
+        "planned": "2026-08-05",
+        "actual": null
+      },
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": "2026-09-20",
+        "actual": null
+      },
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-10-30",
+        "actual": null,
+        "capacityMW": 24.0,
+        "phaseLabel": "F1"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-04-15",
+        "actual": null,
+        "capacityMW": 32.0,
+        "phaseLabel": "F2"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-11-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "导入器（周 45）：总进度栏无法解析：'F1 70.44%'"
+    ],
+    "progress": {
+      "actual": null,
+      "planned": null,
+      "spi": null
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 101816548.05,
+        "collected": 585944545.42
+      },
+      {
+        "currency": "USD",
+        "contractValue": 62952910.69,
+        "collected": 0.0
+      }
+    ]
+  },
+  {
+    "id": "plot-3-infrastructure",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "Plot 3 Infrastructure",
+    "nameZh": "",
+    "tenant": "-",
+    "scope": "Infrastructure",
+    "capacityMW": null,
+    "owners": {
+      "lead": "胥善林",
+      "owner1": "邱勇翔",
+      "owner2": "Hamierul 哈米路"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2027-03-15",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2027-03-15",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.1606,
+      "planned": null,
+      "spi": 0.26563
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 197971037.5186,
+        "collected": 0.0
+      }
+    ]
+  },
+  {
+    "id": "ktp-n",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-N",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "MBW, BBMEP, DCMEP",
+    "capacityMW": 160.0,
+    "owners": {
+      "lead": "吴锋艳",
+      "owner1": "叶锦维/吴绍仟",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "BOMBA",
+        "type": "BOMBA",
+        "group": "",
+        "planned": "2027-07-05",
+        "actual": null
+      },
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "?"
+      },
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2027-03-30",
+        "actual": null
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2027-04-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2027-05-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.07,
+      "planned": null,
+      "spi": 0.355872
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 1412546004.46,
+        "collected": null
+      }
+    ]
+  },
+  {
+    "id": "ktp-c2-1f-a-b-c-d-e-f",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-C2 1F (A, B, C, D, E, F)",
+    "nameZh": "",
+    "tenant": "T",
+    "scope": "DCMEP",
+    "capacityMW": 12.0,
+    "owners": {
+      "lead": "张帆",
+      "owner1": "王德晔",
+      "owner2": "王联运"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": "2026-08-10",
+        "actual": null,
+        "revisions": [
+          {
+            "planned": "2026-07-21",
+            "at": null
+          }
+        ]
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-08-20",
+        "actual": null,
+        "revisions": [
+          {
+            "planned": "2026-07-30",
+            "at": null
+          }
+        ]
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.9896,
+      "planned": null,
+      "spi": 0.9896
+    }
+  },
+  {
+    "id": "ktp-vc-rocc",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-VC ROCC",
+    "nameZh": "",
+    "tenant": "DayOne",
+    "scope": "Renovation Works",
+    "capacityMW": null,
+    "owners": {
+      "lead": "王先贞",
+      "owner1": "张仕林",
+      "owner2": "王德晔"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-09-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-10-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.0,
+      "planned": null,
+      "spi": 0.0
+    }
+  },
+  {
+    "id": "ktp-l",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-L",
+    "nameZh": "",
+    "tenant": "MSFT",
+    "scope": "BBMEP， DCMEP",
+    "capacityMW": 96.0,
+    "owners": {
+      "lead": "刘宏维",
+      "owner1": "Joey 祖儿",
+      "owner2": "沙菲克"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2027-02-28",
+        "actual": null
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2027-03-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2027-04-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.0,
+      "planned": null,
+      "spi": 0.0
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 533000000.0,
+        "collected": null
+      }
+    ]
+  },
+  {
+    "id": "ktp-m",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-M",
+    "nameZh": "",
+    "tenant": "MSFT",
+    "scope": "BBMEP， DCMEP",
+    "capacityMW": 32.0,
+    "owners": {
+      "lead": "张帆",
+      "owner1": "刘思孝",
+      "owner2": "薛志宏"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2027-03-30",
+        "actual": null
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2027-04-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2027-05-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.0,
+      "planned": null,
+      "spi": 0.0
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 203300000.0,
+        "collected": null
+      }
+    ]
+  },
+  {
+    "id": "ktp-plot3",
+    "campus": "KTP",
+    "phase": "ongoing",
+    "name": "KTP-PLOT3",
+    "nameZh": "",
+    "tenant": "DayOne",
+    "scope": "Earth Work, Retaining， Piling KTP-L, N, CLS",
+    "capacityMW": null,
+    "owners": {
+      "lead": "胥善林",
+      "owner1": "叶锦维",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": null,
+      "planned": null,
+      "spi": null
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 177134036.92000002,
+        "collected": 59394498.03
+      }
+    ]
+  },
+  {
+    "id": "ktp-e",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-E",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 49.8,
+    "owners": {
+      "lead": "张帆",
+      "owner1": "张容源  YY",
+      "owner2": "James 郑登全"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-04-04",
+        "actual": null
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-04-19",
+        "actual": null
+      },
+      {
+        "name": "RFS 3",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-04-28",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2025-10-31",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": "2026-10-31",
+        "actual": null
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.9797,
+    "defectPlan": "2026-10-31",
+    "closeout": {
+      "asBuilt": {
+        "pct": 1.0
+      },
+      "trainingManual": {
+        "pct": 0.85
+      },
+      "omm": {
+        "pct": 0.26
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 114008825.29,
+        "collected": 101664371.65
+      }
+    ]
+  },
+  {
+    "id": "ktp-a-vc",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-A+VC",
+    "nameZh": "",
+    "tenant": "MSFT",
+    "scope": "DCMEP",
+    "capacityMW": 24.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Hennry 张文豪",
+      "owner2": "Azizi"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-05-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2025-12-01",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": "2026-12-01",
+        "actual": null
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.9747,
+    "defectPlan": "2026-10-31",
+    "closeout": {
+      "omm": {
+        "pct": 0.13
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 225203755.82999998,
+        "collected": 199409971.96
+      },
+      {
+        "currency": "USD",
+        "contractValue": 8886281.55,
+        "collected": 8886281.55
+      },
+      {
+        "currency": "RM",
+        "contractValue": 46920000.0,
+        "collected": 39521043.39
+      }
+    ]
+  },
+  {
+    "id": "ktp-d-d2-d1-gf-bd-d1-1f-a-sc-ks-d1-1f-d-e-f-t",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-D (D2+D1 GF) - BD + D1 1F (A, SC) - KS & + D1 1F (D, E, F) - T",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 38.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Azizi",
+      "owner2": "Hennry 张文豪"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-06-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2025-10-31",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": "2026-10-31",
+        "actual": null
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.985,
+    "defectPlan": "2026-10-31",
+    "closeout": {
+      "asBuilt": {
+        "pct": 1.0
+      },
+      "trainingManual": {
+        "pct": 1.0
+      },
+      "omm": {
+        "pct": 0.65
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 181244128.7,
+        "collected": 160019772.05
+      }
+    ]
+  },
+  {
+    "id": "ktp-c2-gf",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-C2 GF",
+    "nameZh": "",
+    "tenant": "A",
+    "scope": "MBW, BBMEP, DCMEP",
+    "capacityMW": 21.6,
+    "owners": {
+      "lead": "",
+      "owner1": "James 郑登全",
+      "owner2": "Yuki"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-10-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2025-12-20",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "Applying CPC"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.6,
+    "defectPlan": "2026-08-30",
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.36
+      },
+      "trainingManual": {
+        "pct": 0.77
+      },
+      "omm": {
+        "pct": 0.05
+      }
+    }
+  },
+  {
+    "id": "ktp-d-d1-1f-zone-a-sc-snaglist",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-D (D1-1F) - Zone A, SC （Snaglist)",
+    "nameZh": "",
+    "tenant": "KS",
+    "scope": "DCMEP",
+    "capacityMW": 3.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Azizi",
+      "owner2": "Hennry 张文豪"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-11-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-01-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "N/A"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.9818,
+    "defectPlan": "2026-08-30",
+    "closeout": {}
+  },
+  {
+    "id": "ktp-d-e-pop",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-D/E POP",
+    "nameZh": "",
+    "tenant": "BD / BP",
+    "scope": "DCMEP",
+    "capacityMW": 0.12,
+    "owners": {
+      "lead": "",
+      "owner1": "郭德顺",
+      "owner2": "张容源  YY"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-12-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2025-12-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "N/A"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.0,
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.41
+      }
+    }
+  },
+  {
+    "id": "ktp-c1-gf-1f",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-C1 (GF, 1F)",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "DCMEP",
+    "capacityMW": 21.6,
+    "owners": {
+      "lead": "",
+      "owner1": "James 郑登全",
+      "owner2": "Umar"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-03-30",
+        "actual": null
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-04-15",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-05-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "Need to apply CPC"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.5217,
+    "defectPlan": "2026-07-15",
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.44
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 106799736.4,
+        "collected": 89429665.96000001
+      },
+      {
+        "currency": "USD",
+        "contractValue": 35564330.25,
+        "collected": 0.0
+      }
+    ]
+  },
+  {
+    "id": "ktp-b-b3",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-B + B3",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "MBW, BBMEP, DCMEP",
+    "capacityMW": 64.8,
+    "owners": {
+      "lead": "",
+      "owner1": "张容源  YY",
+      "owner2": "James 郑登全"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-03-30",
+        "actual": null
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-04-25",
+        "actual": null
+      },
+      {
+        "name": "RFS 3",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-04-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-04-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "Defect Stage"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectPlan": "2026-07-30",
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.0383
+      },
+      "trainingManual": {
+        "pct": 0.34
+      },
+      "omm": {
+        "pct": 0.0
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 707176423.97,
+        "collected": 554996222.84
+      },
+      {
+        "currency": "USD",
+        "contractValue": 69220424.04,
+        "collected": 57582080.408
+      }
+    ]
+  },
+  {
+    "id": "ktp-d-d1-1f-zone-d-e-f",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-D (D1-1F) - Zone D, E, F",
+    "nameZh": "",
+    "tenant": "T",
+    "scope": "DCMEP",
+    "capacityMW": 5.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Azizi",
+      "owner2": "Hennry 张文豪"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-03-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "N/A"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {}
+  },
+  {
+    "id": "ktp-d-d1-1f-zone-b-c-kiv",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-D (D1-1F) - Zone B, C KIV",
+    "nameZh": "",
+    "tenant": "KS",
+    "scope": "DCMEP",
+    "capacityMW": 3.0,
+    "owners": {
+      "lead": "",
+      "owner1": "",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "N/A"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {}
+  },
+  {
+    "id": "plot-3-ktp-cls",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "Plot 3 - KTP CLS",
+    "nameZh": "",
+    "tenant": "-",
+    "scope": "Piling",
+    "capacityMW": null,
+    "owners": {
+      "lead": "",
+      "owner1": "",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-12-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "N/A"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {}
+  },
+  {
+    "id": "ktp-j2",
+    "campus": "KTP",
+    "phase": "completed",
+    "name": "KTP-J2",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "MBW, BBMEP, DCMEP",
+    "capacityMW": 52.0,
+    "owners": {
+      "lead": "",
+      "owner1": "叶锦维",
+      "owner2": "吕慧娴"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-05-15",
+        "actual": null,
+        "capacityMW": 29.6,
+        "phaseLabel": "J2"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "To J1 Completion"
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "Pending J1 completion"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectPlan": "2026-08-15",
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.0
+      },
+      "trainingManual": {
+        "pct": 0.19
+      },
+      "omm": {
+        "pct": 0.07
+      }
+    }
+  }
+];
 
 
 /* ===== data/seed-ntp.js ===== */
-/* BLANK TEMPLATE — NTP projects removed 2026-08-18 at the user's request.
-   Full dataset archived at archive/longmotive-week46-full.json (load via 载入). */
-window.LM_SEED_NTP = [];
+/* GENERATED from Summary Projects.xlsx 统筹 45 via import-xlsx.py on 2026-08-18.
+   Regenerate: python import-xlsx.py <xlsx> then re-bake, or edit in the app and 保存. */
+window.LM_SEED_NTP = [
+  {
+    "id": "ntp-j1",
+    "campus": "NTP",
+    "phase": "ongoing",
+    "name": "NTP-J1",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "DCMEP",
+    "capacityMW": 21.6,
+    "owners": {
+      "lead": "汪斌",
+      "owner1": "翟风起",
+      "owner2": "常文明"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": "2026-05-15",
+        "actual": "2026-05-25",
+        "revisions": [
+          {
+            "planned": "2026-05-02",
+            "at": null
+          }
+        ]
+      },
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2026-01-30",
+        "actual": "2026-01-30"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "12 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.9735,
+      "planned": null,
+      "spi": 0.9735
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 128161272.28999999,
+        "collected": 88149200.47
+      }
+    ]
+  },
+  {
+    "id": "ntp-j2",
+    "campus": "NTP",
+    "phase": "ongoing",
+    "name": "NTP-J2",
+    "nameZh": "",
+    "tenant": "A\nT",
+    "scope": "DCMEP",
+    "capacityMW": 24.0,
+    "owners": {
+      "lead": "",
+      "owner1": "翟风起",
+      "owner2": "常文明"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": "2026-07-30",
+        "actual": "2026-07-30"
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-01-30",
+        "actual": "2026-01-30",
+        "note": "GC,GD,GE,GF"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-03-30",
+        "actual": "2026-03-30",
+        "note": "GA,GB, 1A1"
+      },
+      {
+        "name": "RFS 3",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-04-30",
+        "actual": "2026-04-30",
+        "note": "1A2, 1A3"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.9943,
+      "planned": null,
+      "spi": 0.9943
+    },
+    "commercial": [
+      {
+        "currency": "USD",
+        "contractValue": 37732269.57,
+        "collected": 14432593.42
+      }
+    ]
+  },
+  {
+    "id": "external-fiber-optic",
+    "campus": "NTP",
+    "phase": "ongoing",
+    "name": "External Fiber Optic",
+    "nameZh": "",
+    "tenant": "DayOne",
+    "scope": "Fiber Cabling Works",
+    "capacityMW": null,
+    "owners": {
+      "lead": "",
+      "owner1": "刘继泽",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-06-30",
+        "actual": "2026-06-30"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-06-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "EOT 2026-06-30"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 1.0,
+      "planned": null,
+      "spi": 1.0
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 14450000.0,
+        "collected": 14449999.997
+      }
+    ]
+  },
+  {
+    "id": "ntp-k",
+    "campus": "NTP",
+    "phase": "ongoing",
+    "name": "NTP-K",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "MBW, BBMEP, DCMEP",
+    "capacityMW": 56.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Carlos",
+      "owner2": "刘继泽"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "BOMBA",
+        "type": "BOMBA",
+        "group": "",
+        "planned": "2026-05-26",
+        "actual": "2026-05-26"
+      },
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": "2026-06-28",
+        "actual": "2026-06-28"
+      },
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2026-06-30",
+        "actual": "2026-06-30"
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-06-30",
+        "actual": "2026-06-30"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null
+      },
+      {
+        "name": "RFS 3",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-09-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-11-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.9771,
+      "planned": null,
+      "spi": 1.003389
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 422702024.77,
+        "collected": 198360010.41
+      }
+    ]
+  },
+  {
+    "id": "ntp-vc-plot-4",
+    "campus": "NTP",
+    "phase": "ongoing",
+    "name": "NTP-VC （Plot 4）",
+    "nameZh": "",
+    "tenant": "DayOne",
+    "scope": "ID Works, BBMEP",
+    "capacityMW": null,
+    "owners": {
+      "lead": "",
+      "owner1": "周蒙岑 / Nelson",
+      "owner2": "刘继泽"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "BOMBA",
+        "type": "BOMBA",
+        "group": "",
+        "planned": "2026-05-26",
+        "actual": "2026-05-26"
+      },
+      {
+        "name": "CCC",
+        "type": "CCC",
+        "group": "",
+        "planned": "2026-06-19",
+        "actual": "2026-06-19"
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-07-30",
+        "actual": null,
+        "note": "(暂定）"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-07-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.98,
+      "planned": null,
+      "spi": 0.983936
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 18000000.0,
+        "collected": 8068065.52
+      }
+    ]
+  },
+  {
+    "id": "ntp-p",
+    "campus": "NTP",
+    "phase": "ongoing",
+    "name": "NTP-P",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "DCMEP",
+    "capacityMW": 160.0,
+    "owners": {
+      "lead": "",
+      "owner1": "刘继泽",
+      "owner2": "Francis Lee"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "？"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "？"
+      },
+      {
+        "name": "RFS 3",
+        "type": "RFS",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "？"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.0,
+      "planned": null,
+      "spi": null
+    }
+  },
+  {
+    "id": "ntp-g-gf-phase-3",
+    "campus": "NTP",
+    "phase": "ongoing",
+    "name": "NTP-G (GF Phase 3）",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 28.0,
+    "owners": {
+      "lead": "",
+      "owner1": "张凤斌",
+      "owner2": "陈丽雯"
+    },
+    "status": "nodata",
+    "milestones": [],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "导入器（周 45）：总进度栏无法解析：'未开始'"
+    ],
+    "progress": {
+      "actual": null,
+      "planned": null,
+      "spi": null
+    }
+  },
+  {
+    "id": "plot-1-ntp-a-b-c-d-e",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "Plot 1-NTP-A, B, C, D, E",
+    "nameZh": "",
+    "tenant": "BD\nA / BIGO",
+    "scope": "DCMEP",
+    "capacityMW": 119.0,
+    "owners": {
+      "lead": "巫有展",
+      "owner1": "巫有展",
+      "owner2": "Edi"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "Varies"
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "Applying to 30.3.2026"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {
+      "asBuilt": {
+        "pct": 1.0
+      },
+      "omm": {
+        "pct": 1.0
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 855972392.79,
+        "collected": 814572482.4315
+      },
+      {
+        "currency": "USD",
+        "contractValue": 1084260.0,
+        "collected": 1029498.0
+      }
+    ]
+  },
+  {
+    "id": "plot3-4",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "PLOT3-4 室外给水管道、园林绿化工程",
+    "nameZh": "",
+    "tenant": "D1",
+    "scope": "",
+    "capacityMW": null,
+    "owners": {
+      "lead": "",
+      "owner1": "",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {},
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 21674617.5,
+        "collected": 19532622.07
+      }
+    ]
+  },
+  {
+    "id": "ntp-ofi-2-interlot",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "NTP-OFI 2 Interlot",
+    "nameZh": "",
+    "tenant": "-",
+    "scope": "",
+    "capacityMW": null,
+    "owners": {
+      "lead": "",
+      "owner1": "",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {}
+  },
+  {
+    "id": "ntp-m",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "NTP-M",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 48.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Syahdan",
+      "owner2": "Nor Fahan"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-06-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "CCYR to apply"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectPlan": "2026-08-30",
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.0
+      },
+      "trainingManual": {
+        "pct": 0.5
+      },
+      "omm": {
+        "pct": 0.0
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 81600000.0,
+        "collected": 67200000.0
+      }
+    ]
+  },
+  {
+    "id": "ntp-g-phase-1",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "NTP-G (Phase 1)",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 16.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Rizal",
+      "owner2": "萧凯伦"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-07-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "CCYR to apply"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.0
+      },
+      "trainingManual": {
+        "pct": 0.63
+      },
+      "omm": {
+        "pct": 0.0
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 179137746.43,
+        "collected": 150274874.12
+      }
+    ]
+  },
+  {
+    "id": "ntp-g-phase-1b",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "NTP-G (Phase 1B)",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 9.6,
+    "owners": {
+      "lead": "",
+      "owner1": "",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-10-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "CCYR to apply"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {}
+  },
+  {
+    "id": "ntp-g-phase-2",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "NTP-G (Phase 2)",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 28.0,
+    "owners": {
+      "lead": "",
+      "owner1": "",
+      "owner2": ""
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "等待第三期施工"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "CCYR to apply"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {},
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 99200000.0,
+        "collected": 94240000.0
+      }
+    ]
+  },
+  {
+    "id": "ntp-j2-2",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "NTP-J2",
+    "nameZh": "",
+    "tenant": "A\nT",
+    "scope": "DCMEP",
+    "capacityMW": null,
+    "owners": {
+      "lead": "",
+      "owner1": "Rasydan/Aswad",
+      "owner2": "Edi / Mat"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-01-30",
+        "actual": null,
+        "note": "GC,GD,GE,GF"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-03-30",
+        "actual": null,
+        "note": "GA,GB, 1A1"
+      },
+      {
+        "name": "RFS 3",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-04-30",
+        "actual": null,
+        "note": "1A2, 1A3"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "CCYR to apply"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.0
+      },
+      "trainingManual": {
+        "pct": 0.79
+      },
+      "omm": {
+        "pct": 0.0
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 128161272.28999999,
+        "collected": 88149200.47
+      },
+      {
+        "currency": "USD",
+        "contractValue": 37732269.57,
+        "collected": 14432593.42
+      }
+    ]
+  },
+  {
+    "id": "ntp-k-2",
+    "campus": "NTP",
+    "phase": "completed",
+    "name": "NTP-K",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "MBW, BBMEP, DCMEP",
+    "capacityMW": null,
+    "owners": {
+      "lead": "",
+      "owner1": "Carlos",
+      "owner2": "刘继泽"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-06-30",
+        "actual": null
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-08-30",
+        "actual": null
+      },
+      {
+        "name": "RFS 3",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-09-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-11-30",
+        "actual": null
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.0
+      },
+      "trainingManual": {
+        "pct": 0.0
+      },
+      "omm": {
+        "pct": 0.0
+      }
+    },
+    "commercial": [
+      {
+        "currency": "RM",
+        "contractValue": 422702024.77,
+        "collected": 198360010.41
+      }
+    ]
+  }
+];
 
 
 /* ===== data/seed-other.js ===== */
-/* BLANK TEMPLATE — NDP-KITP / CTP projects removed 2026-08-18 at the user's
-   request. Full dataset archived at archive/longmotive-week46-full.json. */
-window.LM_SEED_OTHER = [];
+/* GENERATED from Summary Projects.xlsx 统筹 45 via import-xlsx.py on 2026-08-18.
+   Regenerate: python import-xlsx.py <xlsx> then re-bake, or edit in the app and 保存. */
+window.LM_SEED_OTHER = [
+  {
+    "id": "kitp-a",
+    "campus": "NDP-KITP",
+    "phase": "ongoing",
+    "name": "KITP-A",
+    "nameZh": "",
+    "tenant": "Firmus",
+    "scope": "DCMEP",
+    "capacityMW": 120.0,
+    "owners": {
+      "lead": "王先贞",
+      "owner1": "李洋",
+      "owner2": "翟风起"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "未确认"
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-12-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2027-02-28",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.0,
+      "planned": null,
+      "spi": 0.0
+    }
+  },
+  {
+    "id": "ndp-c1",
+    "campus": "NDP-KITP",
+    "phase": "completed",
+    "name": "NDP-C1",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "DCMEP",
+    "capacityMW": 2.0,
+    "owners": {
+      "lead": "Terry / 王东亚",
+      "owner1": "Fikri",
+      "owner2": "Faris"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2025-09-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2025-09-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.94,
+    "defectPlan": "2026-07-15",
+    "closeout": {
+      "asBuilt": {
+        "pct": 1.0
+      },
+      "trainingManual": {
+        "pct": 0.95
+      },
+      "omm": {
+        "pct": 1.0
+      }
+    },
+    "commercial": [
+      {
+        "currency": "USD",
+        "contractValue": 7141580.76,
+        "collected": 571326.4608
+      }
+    ]
+  },
+  {
+    "id": "ndp-c2",
+    "campus": "NDP-KITP",
+    "phase": "completed",
+    "name": "NDP-C2",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "DCMEP",
+    "capacityMW": 38.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Fikri",
+      "owner2": "Faris"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-03-30",
+        "actual": null
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2026-03-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "defectProgress": 0.992,
+    "defectPlan": "2026-07-15",
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.99
+      },
+      "omm": {
+        "pct": 0.74
+      }
+    }
+  },
+  {
+    "id": "ctp-a",
+    "campus": "CTP",
+    "phase": "ongoing",
+    "name": "CTP-A",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 10.0,
+    "owners": {
+      "lead": "",
+      "owner1": "Alex 张永雄",
+      "owner2": "郭鹏"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "IST",
+        "type": "IST",
+        "group": "",
+        "planned": "2026-12-28",
+        "actual": null
+      },
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2027-02-01",
+        "actual": null,
+        "capacityMW": 24.0,
+        "phaseLabel": "A1"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2028-02-01",
+        "actual": null,
+        "capacityMW": 24.0,
+        "phaseLabel": "A2"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2028-03-01",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "progress": {
+      "actual": 0.28,
+      "planned": null,
+      "spi": 0.933333
+    }
+  },
+  {
+    "id": "ctp-d",
+    "campus": "CTP",
+    "phase": "ongoing",
+    "name": "CTP-D",
+    "nameZh": "",
+    "tenant": "O",
+    "scope": "Infrastructure Works",
+    "capacityMW": null,
+    "owners": {
+      "lead": "",
+      "owner1": "Alex 张永雄",
+      "owner2": "郭鹏"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "？"
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补",
+      "导入器（周 45）：总进度栏无法解析：'未开始'"
+    ],
+    "progress": {
+      "actual": null,
+      "planned": null,
+      "spi": 0.0
+    }
+  },
+  {
+    "id": "ctp-b",
+    "campus": "CTP",
+    "phase": "completed",
+    "name": "CTP-B",
+    "nameZh": "",
+    "tenant": "BD",
+    "scope": "DCMEP",
+    "capacityMW": 72.8,
+    "owners": {
+      "lead": "郭鹏",
+      "owner1": "郭鹏",
+      "owner2": "Alex 张永雄"
+    },
+    "status": "nodata",
+    "milestones": [
+      {
+        "name": "RFS 1",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-05-30",
+        "actual": "2026-05-30",
+        "phaseLabel": "B1"
+      },
+      {
+        "name": "RFS 2",
+        "type": "RFS",
+        "group": "",
+        "planned": "2026-06-30",
+        "actual": "2026-06-30",
+        "phaseLabel": "B2"
+      },
+      {
+        "name": "CPC",
+        "type": "CPC",
+        "group": "",
+        "planned": "2027-07-30",
+        "actual": null
+      },
+      {
+        "name": "DLP",
+        "type": "DLP",
+        "group": "",
+        "planned": null,
+        "actual": null,
+        "dateText": "24 个月"
+      }
+    ],
+    "dataQuality": [
+      "本项目由导入器于周 45 新建，基础数据待补"
+    ],
+    "closeout": {
+      "asBuilt": {
+        "pct": 0.16
+      },
+      "trainingManual": {
+        "pct": 0.79
+      },
+      "omm": {
+        "pct": 0.08
+      }
+    }
+  }
+];
 
 
 /* ===== data/project-data.js ===== */
