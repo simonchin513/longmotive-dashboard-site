@@ -18,6 +18,7 @@
   --grid: #e7e5e4;
   --accent: #0891b2;
   --good: #15803d;
+  --fill-good: #16a34a;   /* fill-grade 正常 green — data marks, not text */
   --warn: #b45309;
   --bad: #b91c1c;
   --shadow: 0 1px 2px rgba(28,25,23,.06), 0 8px 24px rgba(28,25,23,.05);
@@ -38,6 +39,7 @@
     --grid: #33312e;
     --accent: #0ea5b7;
     --good: #4ade80;
+    --fill-good: #4ade80;
     --warn: #fbbf24;
     --bad: #f87171;
     --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
@@ -54,6 +56,7 @@
   --grid: #33312e;
   --accent: #0ea5b7;
   --good: #4ade80;
+  --fill-good: #4ade80;
   --warn: #fbbf24;
   --bad: #f87171;
   --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
@@ -238,12 +241,28 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 .kpi-en { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-muted); }
 .kpi-sub { font-size: 12.5px; line-height: 1.5; color: var(--ink-muted); margin-top: 6px; }
 
-/* The legend panel — colour and marker semantics, always on the page but
-   given room: grouped columns, one meaning per line, never a cramped run. */
+/* The legend panel — colour and marker semantics. Collapsible <details>:
+   the one-line summary always sits under the KPIs, the grouped columns
+   unfold only for whoever wants the read. */
 .legend-panel {
-  margin-top: 20px; padding: 18px 24px 16px;
+  margin-top: 20px; padding: 0;
   border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
 }
+.legend-panel summary {
+  cursor: pointer; list-style: none; user-select: none;
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 24px; font-size: 13.5px; font-weight: 650;
+}
+.legend-panel summary::-webkit-details-marker { display: none; }
+.legend-panel summary::before {
+  content: ''; flex: none; width: 8px; height: 8px;
+  border-right: 2px solid var(--ink-muted); border-bottom: 2px solid var(--ink-muted);
+  transform: rotate(-45deg); transition: transform .18s ease; margin-top: -2px;
+}
+.legend-panel[open] summary::before { transform: rotate(45deg); margin-top: -4px; }
+.legend-panel summary:hover { color: var(--accent); }
+.ck-hint { font-weight: 400; font-size: 12.5px; color: var(--ink-muted); }
+.legend-panel .ck-body { padding: 4px 24px 16px; }
 .ck-cols {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 6px 48px;
@@ -270,11 +289,11 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 .kpi-seg i { display: block; }
 .kpi-cols { display: flex; align-items: flex-end; gap: 3px; height: 30px; }
 .kpi-cols i {
-  flex: 1; display: block; background: var(--accent);
+  flex: 1; display: block; background: var(--fill-good);
   border-radius: 2px 2px 0 0; min-width: 4px;
 }
 .kpi-track { height: 9px; border-radius: 5px; background: var(--line); overflow: hidden; }
-.kpi-fill { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
+.kpi-fill { display: block; height: 100%; background: var(--fill-good); border-radius: 5px; }
 .kpi-red { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
 .kpi-red .kpi-value { color: var(--bad); }
 .kpi-amber { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
@@ -597,7 +616,7 @@ h3.sub .count { font-weight: 400; color: var(--ink-muted); margin-left: 8px; }
 }
 .la-bar {
   grid-row: 1; align-self: center; height: 9px; border-radius: 5px;
-  margin: 0 3px; background: var(--accent);
+  margin: 0 3px; background: var(--fill-good);
 }
 .la-bar-ms { background: var(--warn); }
 /* Milestones vs activities separate by fill and border, not by a coloured rail. */
@@ -5033,9 +5052,10 @@ window.LM_SEED = {
     return ramp[i % ramp.length];
   };
 
-  /* The accent — the single hue a one-series magnitude chart wears. Length
-     carries the ranking; the fill is not a second, competing encoding. */
-  C.accent = function () { return isDark() ? CATEGORICAL_DARK[0] : CATEGORICAL_LIGHT[0]; };
+  /* The hue a one-series magnitude chart wears. User rule: anything that is
+     not an alarm reads as 正常 — plain quantities wear the status green, not a
+     separate "quantity" hue. Blue stays reserved for the campus ramp + UI. */
+  C.accent = function () { return C.status('green'); };
 
   /* Status colours are reserved and never reused as "series N". Every status
      mark ships with its label text — see STATUS_LABEL in model.js.
@@ -5382,7 +5402,7 @@ window.LM_SEED = {
       }
       if (bh > 0) {
         body += '<rect x="' + x + '" y="' + topY + '" width="' + bw + '" height="' + bh + '" rx="4" ' +
-          'fill="' + (r.color || C.categorical(0)) + '" data-tip="' + esc(r.label + ' · ' + tipTail) + '">' +
+          'fill="' + (r.color || C.accent()) + '" data-tip="' + esc(r.label + ' · ' + tipTail) + '">' +
           '<title>' + esc(r.label + ': ' + tipTail) + '</title></rect>';
         /* the number clears BOTH the bar top and the plan tick */
         var clearY = tickY === null ? topY : Math.min(topY, tickY);
@@ -6478,13 +6498,25 @@ window.LM_SEED = {
     h.push('</div>');   /* /attn-cols */
 
     if (ranked.length) {
+      /* Bars wear each project's worst OPEN alarm severity — same colours the
+         severity legend already explains; an alarm chart never wears 正常. */
+      var sevRank = { critical: 0, high: 1, medium: 2, low: 3 };
+      var worstSevOf = function (pid) {
+        var w = null;
+        alarms.forEach(function (a) {
+          if (a.project.id !== pid || !M.isOpen(a)) return;
+          if (w === null || sevRank[a.severity] < sevRank[w]) w = a.severity;
+        });
+        return w || 'low';
+      };
       var rankedRows = ranked.slice(0, 10).map(function (r) {
-        return { label: r.project.name, value: r.score, display: String(r.score) };
+        return { label: r.project.name, value: r.score, display: String(r.score),
+          color: C.severity(worstSevOf(r.project.id)) };
       });
       var rankedLabelW = C.labelWidthFor(rankedRows.map(function (r) { return r.label; }));
       h.push('<section class="card">');
       h.push('<div class="card-head"><h2>预警加权评分排名 · 前 10</h2>' +
-        '<span class="card-sub">长度 = 加权评分，从高到低 · 全名直读</span></div>');
+        '<span class="card-sub">长度 = 加权评分，从高到低 · 颜色 = 该项目最高预警严重度</span></div>');
       h.push('<div class="table-scroll">' + C.hbar(rankedRows, {
         width: rankedLabelW + 760, labelWidth: rankedLabelW, rowH: 38,
         ariaLabel: '预警加权评分排名条形图，前 10 名'
@@ -6628,11 +6660,14 @@ window.LM_SEED = {
     var s = d.portfolio.safety || {};
     h.push('<section class="panel"><div class="panel-head"><h3>安全绩效（所有园区）</h3>' +
       '<span class="card-sub">累计 ' + esc(s.cumulativeManHoursLabel || '') + '</span></div>');
+    var safeCount = function (v) {
+      return v === null || v === undefined ? '待补' : String(v);
+    };
     h.push('<div class="kpi-row small">' +
-      kpi(String(s.fatalities), '死亡事故', 'FATALITIES', '') +
+      kpi(safeCount(s.fatalities), '死亡事故', 'FATALITIES', '') +
       kpi(M.pct(s.afr, 0), '一般事故率', 'AFR', '') +
       kpi(M.pct(s.asr, 0), '严重事故率', 'ASR', '') +
-      kpi(String(s.reportableAccidents), '事故累计数', 'REPORTABLE', '') +
+      kpi(safeCount(s.reportableAccidents), '事故累计数', 'REPORTABLE', '') +
       '</div></section>');
     h.push('</div>');
 
@@ -6655,17 +6690,21 @@ window.LM_SEED = {
   }
   V.kpi = kpi;
 
-  /* The colour key — always on the page, built from the real palette
-     functions so it can never drift from what the charts actually paint.
-     Colour is never asked to explain itself. */
+  /* The colour key — built from the real palette functions so it can never
+     drift from what the charts actually paint. Collapsible: the summary line
+     stays on the page, the body unfolds on demand (state kept in app.js). */
   function colorLegendHtml() {
     var item = function (color, label) {
       return '<span class="ck-item"><i class="ck-sw" style="background:' + color + '"></i>' +
         label + '</span>';
     };
-    return '<div class="legend-panel"><div class="ck-cols">' +
+    var open = false;
+    try { open = localStorage.getItem('lm-legend-open') === '1'; } catch (e) { /* ignore */ }
+    return '<details class="legend-panel" id="color-legend"' + (open ? ' open' : '') + '>' +
+      '<summary>颜色与标记含义<span class="ck-hint">图表配色的读法 · 点击展开 / 收起</span></summary>' +
+      '<div class="ck-body"><div class="ck-cols">' +
       '<div class="ck-col"><b>状态 / 进度色</b>' +
-      item(C.status('green'), '正常') +
+      item(C.status('green'), '正常 · 纯数量/进度也用此色') +
       item(C.status('amber'), '需关注 · 落后 ≤5%') +
       item(C.status('red'), '严重滞后 >5% · 逾期') +
       item(C.status('nodata'), '未开始 / 待补') +
@@ -6676,15 +6715,14 @@ window.LM_SEED = {
       item(C.severity('medium'), '中') +
       item(C.severity('low'), '低') +
       '</div>' +
-      '<div class="ck-col"><b>其他颜色</b>' +
-      item(C.accent(), '数量 / 进度本身，不含好坏') +
+      '<div class="ck-col"><b>园区颜色</b>' +
       '<span class="ck-item"><i class="ck-sw" style="background:conic-gradient(' +
       C.categorical(0) + ' 0 25%,' + C.categorical(1) + ' 0 50%,' +
       C.categorical(2) + ' 0 75%,' + C.categorical(3) + ' 0 100%)"></i>' +
       '园区区分色，对应环图图例</span>' +
       '</div></div>' +
       M.legendHtml() +
-      '</div>';
+      '</div></details>';
   }
 
   /* KPI micro-visuals — data marks, not decoration: segments only where a
@@ -8838,6 +8876,35 @@ window.LM_SEED = {
 
   A.alarms = function () { return ctxCache ? ctxCache.alarms : M.buildAlarms(D.current); };
 
+  /* Headline numbers count up from 0 on every render. Only the first numeric
+     text node inside each value element is touched, so units, drv tooltips
+     and surrounding markup survive; a re-render disconnects the old nodes
+     and the stale animation loops stop themselves. */
+  function animateCounts(root) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var els = root.querySelectorAll('.kpi-value, .donut-value, .worst-score');
+    Array.prototype.forEach.call(els, function (el) {
+      var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      var node = null, n;
+      while ((n = walker.nextNode())) { if (/\d/.test(n.nodeValue)) { node = n; break; } }
+      if (!node) return;
+      var m = node.nodeValue.match(/^([^0-9]*?)(-?\d+(?:\.\d+)?)([\s\S]*)$/);
+      if (!m) return;
+      var target = parseFloat(m[2]);
+      if (!isFinite(target) || target === 0) return;
+      var dec = (m[2].split('.')[1] || '').length;
+      var t0 = performance.now(), dur = 850;
+      node.nodeValue = m[1] + (0).toFixed(dec) + m[3];
+      requestAnimationFrame(function tick(now) {
+        if (!node.isConnected) return;
+        var t = Math.min(1, (now - t0) / dur);
+        var eased = 1 - Math.pow(1 - t, 3);   /* ease-out cubic */
+        node.nodeValue = m[1] + (target * eased).toFixed(dec) + m[3];
+        if (t < 1) requestAnimationFrame(tick);
+      });
+    });
+  }
+
   function route() {
     var h = location.hash.replace(/^#\/?/, '');
     if (!h) return { view: 'overview' };
@@ -8885,6 +8952,7 @@ window.LM_SEED = {
     main.innerHTML = html;
     main.scrollTop = 0;
     window.scrollTo(0, 0);
+    animateCounts(main);
 
     if (r.view === 'builder') LM.views.builder.bind(main, A.render);
 
@@ -8997,6 +9065,14 @@ window.LM_SEED = {
       var m = location.hash.match(/^#\/campus\/([^/]+)/);
       LM.views.editor.openNewProject(m ? decodeURIComponent(m[1]) : null, A.render);
     });
+
+    /* the colour legend remembers whether the user left it open —
+       'toggle' does not bubble, so listen in the capture phase */
+    main.addEventListener('toggle', function (e) {
+      if (e.target && e.target.id === 'color-legend') {
+        try { localStorage.setItem('lm-legend-open', e.target.open ? '1' : '0'); } catch (err) { /* ignore */ }
+      }
+    }, true);
 
     /* delegated actions inside views */
     main.addEventListener('click', function (e) {
