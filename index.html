@@ -333,6 +333,15 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 }
 .kpi-track { height: 9px; border-radius: 5px; background: var(--line); overflow: hidden; }
 .kpi-fill { display: block; height: 100%; background: var(--fill-good); border-radius: 5px; }
+/* a KPI tile that navigates (预警总数 → alarm card) */
+.kpi[data-action] { cursor: pointer; }
+.kpi[data-action]:hover { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent); }
+.alarm-card.flash { animation: lm-card-flash 1.4s ease-out; }
+@keyframes lm-card-flash {
+  0% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--warn) 55%, transparent); }
+  100% { box-shadow: var(--shadow); }
+}
+
 .kpi-red { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
 .kpi-red .kpi-value { color: var(--bad); }
 .kpi-amber { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
@@ -6492,13 +6501,15 @@ window.LM_SEED = {
     h.push(kpi(roll.avgProgress === null ? '待补' : (roll.avgProgress * 100).toFixed(1) + '%',
       '平均进度', 'AVG PROGRESS', '仅计已填报项目', null, '在施工项目实际进度的算术平均', null,
       roll.avgProgress === null ? '' : miniBar(roll.avgProgress)));
+    /* this tile IS the alarm card's headcount — clicking it jumps there */
     h.push(kpi(String(roll.alarmTotal), '预警总数', 'ACTIVE ALARMS',
       roll.alarmOverdue + ' 逾期 · ' + roll.alarmIncoming + ' 即将到期' +
       (roll.alarmAcked ? ' · 另 ' + roll.alarmAcked + ' 条已确认' : ''),
       roll.alarmCritical ? 'red' : 'amber',
       '预警引擎：未完成里程碑的到期/逾期 + 进度偏差；已确认的不计入',
       '逾期与即将到期各自计数',
-      miniSeg(sevSegs)));
+      miniSeg(sevSegs),
+      'data-action="goto-alarms" role="link" tabindex="0" title="点击跳到下方预警清单"'));
     h.push('</div>');
     h.push(colorLegendHtml());
     h.push('</section>');
@@ -6727,9 +6738,9 @@ window.LM_SEED = {
   /* The value and the sub-line are separate facts: a tile can hold an entered
      number over a derived caption (planned progress with 偏差 beneath it), so
      each takes its own marker. */
-  function kpi(value, zh, en, sub, tone, derivedFrom, subDerivedFrom, viz) {
+  function kpi(value, zh, en, sub, tone, derivedFrom, subDerivedFrom, viz, attrs) {
     var val = derivedFrom ? M.drv(esc(value), derivedFrom) : esc(value);
-    return '<div class="kpi' + (tone ? ' kpi-' + tone : '') + '">' +
+    return '<div class="kpi' + (tone ? ' kpi-' + tone : '') + '"' + (attrs ? ' ' + attrs : '') + '>' +
       '<div class="kpi-value">' + val + '</div>' +
       '<div class="kpi-zh">' + esc(zh) + '</div>' +
       '<div class="kpi-en">' + esc(en) + '</div>' +
@@ -9153,6 +9164,13 @@ window.LM_SEED = {
       LM.views.editor.openNewProject(m ? decodeURIComponent(m[1]) : null, A.render);
     });
 
+    /* keyboard: Enter activates focusable data-action elements (KPI tiles) */
+    main.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var b = e.target.closest && e.target.closest('[data-action][tabindex]');
+      if (b) b.click();
+    });
+
     /* the colour legend remembers whether the user left it open —
        'toggle' does not bubble, so listen in the capture phase */
     main.addEventListener('toggle', function (e) {
@@ -9175,7 +9193,16 @@ window.LM_SEED = {
       }
       var act = b.getAttribute('data-action');
       var id = b.getAttribute('data-project');
-      if (act === 'pb-sort') {
+      if (act === 'goto-alarms') {
+        var alarmCard = document.getElementById('alarms');
+        if (alarmCard) {
+          alarmCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          alarmCard.classList.remove('flash');
+          void alarmCard.offsetWidth;   /* restart the highlight animation */
+          alarmCard.classList.add('flash');
+        }
+      }
+      else if (act === 'pb-sort') {
         try { localStorage.setItem('lm-pb-sort', b.getAttribute('data-sort')); } catch (err) { /* ignore */ }
         A.render();
       }
