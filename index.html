@@ -237,6 +237,55 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 .kpi-delta.bad { color: var(--bad); }
 .kpi-delta.flat { color: var(--ink-muted); font-weight: 400; }
 
+/* ── project lifecycle: Application → … → 客户移交 ─────────────────────
+   pill = compact where-is-it marker; pipe = the full seven-step read.
+   Colour states, not stage identity: done green, current accent, ahead
+   muted — stage identity is carried by icon + text, never colour alone. */
+.lc-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11.5px; font-weight: 500; white-space: nowrap;
+  padding: 2px 9px 2px 7px; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line));
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+.lc-pill i { font-style: normal; }
+.lc-pill.lc-handover {
+  border-color: color-mix(in srgb, var(--good) 40%, var(--line));
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 8%, var(--surface));
+}
+.lc-ic { flex: none; display: inline-block; vertical-align: -2px; }
+
+.lc-pipe {
+  display: flex; align-items: flex-start; gap: 0;
+  margin: 14px 0 4px; overflow-x: auto; padding-bottom: 2px;
+}
+.lc-step {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  min-width: 86px; text-align: center; flex: none;
+}
+.lc-step b {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid var(--line); color: var(--ink-muted); background: var(--surface);
+}
+.lc-step i { font-style: normal; font-size: 12px; font-weight: 600; color: var(--ink-muted); }
+.lc-step em { font-style: normal; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-muted); }
+.lc-step.done b { border-color: var(--fill-good); color: var(--fill-good); background: color-mix(in srgb, var(--fill-good) 9%, var(--surface)); }
+.lc-step.done i { color: var(--good); font-weight: 500; }
+.lc-step.now b {
+  border-color: var(--accent); color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.lc-step.now i { color: var(--accent); font-size: 13px; }
+.lc-link {
+  flex: 1 1 24px; height: 2px; min-width: 14px; margin-top: 16px;
+  background: var(--line);
+}
+.lc-link.done { background: var(--fill-good); }
+
 /* inline bar labels: name rides inside (or just past) the bar; the surface
    halo keeps it readable on any fill without per-colour contrast math */
 .bar-label-in {
@@ -5080,6 +5129,112 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
   }
   M.statusChipHtml = statusChipHtml;
 
+  /* ── project lifecycle stage ─────────────────────────────────────────
+     One fixed chain per project: Application → Approval → Installation →
+     Commissioning → RFS 1 → RFS 2 → 客户移交. Derived from evidence in
+     this order, never guessed:
+       completed phase        → 客户移交
+       all RFS achieved       → 客户移交（销项/移交中）
+       IST or any RFS done    → next undelivered RFS (RFS 1 / RFS 2 / …)
+       earliest pending = IST → Commissioning
+       actual progress > 0    → Installation
+       any milestone achieved → Approval
+       otherwise              → Application                              */
+  M.LIFECYCLE = [
+    { key: 'application', zh: '申请', en: 'Application' },
+    { key: 'approval', zh: '审批', en: 'Approval' },
+    { key: 'installation', zh: '安装施工', en: 'Installation' },
+    { key: 'commissioning', zh: '调试测试', en: 'Commissioning' },
+    { key: 'rfs1', zh: 'RFS 1 交付', en: 'RFS 1' },
+    { key: 'rfs2', zh: 'RFS 2 交付', en: 'RFS 2' },
+    { key: 'handover', zh: '客户移交', en: 'Handover' }
+  ];
+
+  M.lifecycleStage = function (p) {
+    var mk = function (idx, label, note) {
+      return { idx: idx, key: M.LIFECYCLE[idx].key,
+        label: label || M.LIFECYCLE[idx].zh, note: note };
+    };
+    if (p.phase === 'completed') {
+      return mk(6, '客户移交', 'phase = completed：项目已在销项/移交管理');
+    }
+    var ms = p.milestones || [];
+    var rfs = ms.filter(function (m) { return m.type === 'RFS'; })
+      .sort(function (a, b) {
+        return (+(String(a.name).match(/\d+/) || [99])[0]) -
+               (+(String(b.name).match(/\d+/) || [99])[0]);
+      });
+    var rfsDone = rfs.filter(function (m) { return m.actual; }).length;
+    var ist = ms.filter(function (m) { return m.type === 'IST'; });
+    var istDone = ist.length && ist.every(function (m) { return m.actual; });
+    if (rfsDone > 0 || istDone) {
+      if (rfs.length && rfsDone >= rfs.length) {
+        return mk(6, '客户移交', '全部 RFS 节点已交付，进入移交');
+      }
+      var next = rfs[rfsDone];
+      var n = next ? +((String(next.name).match(/\d+/) || [rfsDone + 1])[0]) : rfsDone + 1;
+      return mk(n <= 1 ? 4 : 5, 'RFS ' + n + ' 交付',
+        (rfsDone ? 'RFS ' + rfsDone + ' 已交付，' : 'IST 已完成，') + '正在交付 RFS ' + n);
+    }
+    var pending = ms.filter(function (m) { return !m.actual && parseDate(m.planned) !== null; })
+      .sort(function (a, b) { return parseDate(a.planned) - parseDate(b.planned); });
+    if (pending[0] && pending[0].type === 'IST') {
+      return mk(3, null, '最早未完成节点是 IST（系统联调测试）');
+    }
+    var pr = p.progress || {};
+    if (typeof pr.actual === 'number' && pr.actual > 0) {
+      return mk(2, null, '施工进度 ' + (pr.actual * 100).toFixed(1) + '%，IST 之前的阶段');
+    }
+    if (ms.some(function (m) { return m.actual; })) {
+      return mk(1, null, '已有节点完成但施工未起量');
+    }
+    return mk(0, null, '尚无完成节点，进度未填报或为 0');
+  };
+
+  /* Hand-drawn 16px stroke icons — one per lifecycle stage, currentColor. */
+  var LC_ICON = {
+    application: '<rect x="3.5" y="2" width="9" height="12" rx="1.2"/>' +
+      '<path d="M6 5.5h4M6 8h4M6 10.5h2.5"/>',
+    approval: '<circle cx="8" cy="8" r="5.8"/><path d="M5.4 8.2l1.8 1.8 3.4-3.8"/>',
+    installation: '<circle cx="8" cy="8" r="2.4"/>' +
+      '<path d="M8 2.2v2.2M8 11.6v2.2M2.2 8h2.2M11.6 8h2.2M3.9 3.9l1.6 1.6M10.5 10.5l1.6 1.6M12.1 3.9l-1.6 1.6M5.5 10.5l-1.6 1.6"/>',
+    commissioning: '<path d="M2.8 11.4a5.4 5.4 0 0 1 10.4 0"/>' +
+      '<path d="M8 11.4L11 7.6"/><circle cx="8" cy="11.4" r="1.1"/>',
+    rfs1: '<path d="M8.8 1.8L3.8 8.8h3l-1 5.4 5.4-7.4h-3z" fill="currentColor" stroke="none"/>',
+    rfs2: '<path d="M8.8 1.8L3.8 8.8h3l-1 5.4 5.4-7.4h-3z" fill="currentColor" stroke="none"/>',
+    handover: '<circle cx="5" cy="8" r="2.6"/>' +
+      '<path d="M7.6 8h6M11.2 8v2.6M13.6 8v1.8"/>'
+  };
+  M.stageIconSvg = function (key, size) {
+    return '<svg class="lc-ic" viewBox="0 0 16 16" width="' + (size || 15) + '" height="' + (size || 15) +
+      '" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" ' +
+      'stroke-linejoin="round" aria-hidden="true">' + (LC_ICON[key] || '') + '</svg>';
+  };
+
+  /* Compact pill: icon + label, dotted like every derived value. */
+  M.lifecyclePillHtml = function (p) {
+    var s = M.lifecycleStage(p);
+    return '<span class="lc-pill lc-' + s.key + '" data-tip="' +
+      esc('阶段推导：' + s.note) + '">' + M.stageIconSvg(s.key) +
+      '<i>' + esc(s.label) + '</i></span>';
+  };
+
+  /* Full pipeline for the project page: seven icons, done → current → ahead. */
+  M.lifecyclePipeHtml = function (p) {
+    var s = M.lifecycleStage(p);
+    var h = ['<div class="lc-pipe" role="img" aria-label="项目阶段：当前处于' + esc(s.label) + '">'];
+    M.LIFECYCLE.forEach(function (st, i) {
+      var cls = i < s.idx ? 'done' : i === s.idx ? 'now' : 'ahead';
+      var label = i === s.idx ? s.label : st.zh;
+      h.push('<span class="lc-step ' + cls + '">' +
+        '<b>' + M.stageIconSvg(st.key, 17) + '</b>' +
+        '<i>' + esc(label) + '</i><em>' + esc(st.en) + '</em></span>');
+      if (i < M.LIFECYCLE.length - 1) h.push('<span class="lc-link' + (i < s.idx ? ' done' : '') + '"></span>');
+    });
+    h.push('</div>');
+    return h.join('') + '<p class="note">' + M.drv('阶段为推导值', s.note) + '</p>';
+  };
+
   /* ── portfolio roll-ups ──────────────────────────────────────────────── */
 
   function rollup(data, alarms) {
@@ -6815,7 +6970,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       h.push('<div class="card-head"><h2>预警最高项目</h2><span class="card-sub">加权评分 = 严重度权重 + 红灯类别 × 4</span></div>');
       h.push('<div class="worst-body">');
       h.push('<div class="worst-name"><a href="#/project/' + top.project.id + '">' + esc(top.project.name) + '</a>' +
-        M.statusChipHtml(top.project) + '</div>');
+        M.statusChipHtml(top.project) + ' ' + M.lifecyclePillHtml(top.project) + '</div>');
       h.push('<div class="worst-score">' +
         M.drv(String(top.score), 'Σ(严重度权重 紧急10/高6/中3/低1) + 红灯类别数 × 4') + '</div>');
       h.push('<ul class="worst-facts">' +
@@ -7255,7 +7410,8 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       h.push('<ul class="stuck-list">');
       stuck.slice(0, 8).forEach(function (x) {
         h.push('<li><a href="#/project/' + x.p.id + '">' + esc(x.p.name) + '</a>' +
-          '<span class="stuck-what">' + esc(x.s.nodeName) + ' · 原计划 ' + esc(x.s.nodeDate) + '</span>' +
+          '<span class="stuck-what">' + esc(x.s.nodeName) + ' · 原计划 ' + esc(x.s.nodeDate) + ' · ' +
+          M.lifecyclePillHtml(x.p) + '</span>' +
           '<span class="al-pill red">逾期 ' + x.s.overdueDays + ' 天</span></li>');
       });
       h.push('</ul>');
@@ -7433,7 +7589,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       '<span class="card-sub">点项目名或行尾 → 进入详情</span></div>');
     h.push('<div class="table-scroll"><table class="tbl"><thead><tr>' +
       '<th>项目 Project</th><th>租户 / 范围</th><th>负责人</th><th class="r">容量</th>' +
-      '<th class="r">进度</th><th class="r">计划</th><th class="r">SPI</th><th>状态</th><th>下一节点</th><th class="r">预警</th><th></th>' +
+      '<th class="r">进度</th><th class="r">计划</th><th class="r">SPI</th><th>状态</th><th>阶段 Stage</th><th>下一节点</th><th class="r">预警</th><th></th>' +
       '</tr></thead><tbody>');
     ongoing.forEach(function (p) {
       var next = nextMilestone(p, d.meta.reportDate);
@@ -7449,6 +7605,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         '<td class="r muted">' + M.pct(pr.planned, 1) + '</td>' +
         '<td class="r">' + (typeof pr.spi === 'number' ? pr.spi.toFixed(2) : '—') + '</td>' +
         '<td>' + statusChip(p) + '</td>' +
+        '<td>' + M.lifecyclePillHtml(p) + '</td>' +
         '<td class="sm">' + (next
           ? M.drv(esc(next.name) + '<div class="muted">' + M.fmtDate(next.planned) + '</div>',
                   '里程碑中第一个未标记实际日期、且计划日期不早于周报日的节点')
@@ -7571,6 +7728,9 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       ' ' + M.statusChipHtml(p) + '</h1>' +
       '<p class="hero-sub">' + esc(p.nameZh || '') + ' · ' + esc(p.tenant || '—') + ' · ' + esc(p.scope || '') +
       (p.capacityMW ? ' · ' + p.capacityMW + ' MW' : '') + '</p></div>');
+
+    /* where the project stands in its life: Application → … → 客户移交 */
+    h.push(M.lifecyclePipeHtml(p));
 
     var pr = p.progress || {};
     var variance = (typeof pr.actual === 'number' && typeof pr.planned === 'number') ? pr.actual - pr.planned : null;
