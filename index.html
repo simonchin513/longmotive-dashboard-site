@@ -190,7 +190,7 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 .band-head h2 { font-size: 19px; font-weight: 700; letter-spacing: -.022em; }
 /* Sits on the page ground, which is darker than a card — muted alone lands at
    4.48:1 there, so pull it toward the ink. */
-.band-head p { margin: 0; font-size: 12px; color: color-mix(in srgb, var(--ink-muted) 76%, var(--ink)); }
+.band-head p { margin: 0; font-size: 13px; line-height: 1.5; color: color-mix(in srgb, var(--ink-muted) 76%, var(--ink)); }
 
 .card, .panel { padding: 20px 24px; margin-bottom: 18px; border-radius: var(--radius); }
 .card {
@@ -235,19 +235,34 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 }
 .kpi-value { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.12; }
 .kpi-zh { font-size: 13px; font-weight: 600; margin-top: 4px; }
-.kpi-en { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-muted); }
-.kpi-sub { font-size: 12px; color: var(--ink-muted); margin-top: 5px; }
+.kpi-en { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-muted); }
+.kpi-sub { font-size: 12.5px; line-height: 1.5; color: var(--ink-muted); margin-top: 6px; }
 
-/* The colour key — quiet but always present, so colour never goes unexplained */
-.color-key {
-  display: flex; flex-wrap: wrap; gap: 6px 26px;
-  margin: 14px 0 0; font-size: 12.5px; color: var(--ink-muted);
+/* The legend panel — colour and marker semantics, always on the page but
+   given room: grouped columns, one meaning per line, never a cramped run. */
+.legend-panel {
+  margin-top: 20px; padding: 18px 24px 16px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
 }
-.ck-group { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-.ck-group b { font-weight: 650; color: var(--ink); margin-right: 2px; }
+.ck-cols {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 6px 48px;
+}
+.ck-col b {
+  display: block; font-size: 11.5px; font-weight: 650; letter-spacing: .05em;
+  color: var(--ink-muted); margin-bottom: 8px;
+}
+.ck-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13.5px; line-height: 1.6; padding: 3px 0;
+}
 .ck-sw {
-  width: 12px; height: 12px; border-radius: 3px; display: inline-block;
-  flex: none; margin-left: 6px;
+  width: 13px; height: 13px; border-radius: 4px; display: inline-block;
+  flex: none;
+}
+.legend-panel .drv-legend {
+  margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--line);
+  font-size: 13px; gap: 22px;
 }
 /* KPI micro-visuals: a data mark per tile so the shape reads before the text */
 .kpi-viz { margin-top: 10px; }
@@ -6346,7 +6361,6 @@ window.LM_SEED = {
       miniSeg(sevSegs)));
     h.push('</div>');
     h.push(colorLegendHtml());
-    h.push(M.legendHtml());
     h.push('</section>');
 
     /* ── band: 项目进度 — what this dashboard exists for. Leadership reads
@@ -6561,29 +6575,32 @@ window.LM_SEED = {
      functions so it can never drift from what the charts actually paint.
      Colour is never asked to explain itself. */
   function colorLegendHtml() {
-    var sw = function (color) {
-      return '<i class="ck-sw" style="background:' + color + '"></i>';
+    var item = function (color, label) {
+      return '<span class="ck-item"><i class="ck-sw" style="background:' + color + '"></i>' +
+        label + '</span>';
     };
-    return '<p class="color-key">' +
-      '<span class="ck-group"><b>状态 / 进度色</b>' +
-      sw(C.status('green')) + '正常' +
-      sw(C.status('amber')) + '需关注（落后≤5%）' +
-      sw(C.status('red')) + '严重滞后（>5%）· 逾期' +
-      sw(C.status('nodata')) + '未开始 / 待补' +
-      '</span>' +
-      '<span class="ck-group"><b>预警严重度</b>' +
-      sw(C.severity('critical')) + '紧急' +
-      sw(C.severity('high')) + '高' +
-      sw(C.severity('medium')) + '中' +
-      sw(C.severity('low')) + '低' +
-      '</span>' +
-      '<span class="ck-group"><b>其他</b>' +
-      sw(C.accent()) + '数量 / 进度本身，不含好坏' +
-      '<i class="ck-sw" style="background:conic-gradient(' +
+    return '<div class="legend-panel"><div class="ck-cols">' +
+      '<div class="ck-col"><b>状态 / 进度色</b>' +
+      item(C.status('green'), '正常') +
+      item(C.status('amber'), '需关注 · 落后 ≤5%') +
+      item(C.status('red'), '严重滞后 >5% · 逾期') +
+      item(C.status('nodata'), '未开始 / 待补') +
+      '</div>' +
+      '<div class="ck-col"><b>预警严重度</b>' +
+      item(C.severity('critical'), '紧急') +
+      item(C.severity('high'), '高') +
+      item(C.severity('medium'), '中') +
+      item(C.severity('low'), '低') +
+      '</div>' +
+      '<div class="ck-col"><b>其他颜色</b>' +
+      item(C.accent(), '数量 / 进度本身，不含好坏') +
+      '<span class="ck-item"><i class="ck-sw" style="background:conic-gradient(' +
       C.categorical(0) + ' 0 25%,' + C.categorical(1) + ' 0 50%,' +
       C.categorical(2) + ' 0 75%,' + C.categorical(3) + ' 0 100%)"></i>' +
-      '园区区分色（见下方环图图例）' +
-      '</span></p>';
+      '园区区分色，对应环图图例</span>' +
+      '</div></div>' +
+      M.legendHtml() +
+      '</div>';
   }
 
   /* KPI micro-visuals — data marks, not decoration: segments only where a
