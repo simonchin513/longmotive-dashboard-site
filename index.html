@@ -4469,6 +4469,12 @@ window.LM_SEED = {
     var out = [];
 
     data.projects.forEach(function (p) {
+      /* Alarms watch CONSTRUCTION deadlines. A completed (销项) project's
+         un-greened register cells are close-out bookkeeping, not late
+         buildings — they flooded the critical band until excluded
+         (user decision 2026-08-19). Close-out health lives in the
+         defect/documentation metrics instead. */
+      if (p.phase !== 'ongoing') return;
       (p.milestones || []).forEach(function (ms) {
         if (ms.type === 'DLP') return;
         if (ms.actual) return;                 // achieved
@@ -5232,8 +5238,10 @@ window.LM_SEED = {
     opts = opts || {};
     if (!rows.length) return '<div class="chart-empty">无节点数据 No milestone data</div>';
     var labelW = opts.labelWidth || 200;
-    var w = opts.width || 980, rowH = opts.rowH || 28, gap = 4;
-    var headH = 40;
+    var w = opts.width || 980, rowH = opts.rowH || 38, gap = 6;
+    /* two-line head: 周报日 on its own line above the month labels, so the
+       red marker text never collides with a month tick */
+    var headH = 58;
     var h = rows.length * (rowH + gap) + headH + 12;
     var plotW = w - labelW - 16;
     var t0 = opts.start, t1 = opts.end;
@@ -5257,7 +5265,7 @@ window.LM_SEED = {
         body += '<line x1="' + x(cur) + '" y1="' + (headH - 12) + '" x2="' + x(cur) + '" y2="' + (h - 8) + '" stroke="' + grid() + '" stroke-width="1"/>';
         /* a label that would run past the right edge is dropped, not clipped */
         if (x(cur) + 52 <= w) {
-          body += '<text x="' + (x(cur) + 4) + '" y="' + (headH - 16) + '" class="axis-label" fill="' + inkMuted() + '">' +
+          body += '<text x="' + (x(cur) + 4) + '" y="' + (headH - 18) + '" class="axis-label" fill="' + inkMuted() + '">' +
             (cd.getUTCFullYear() + '-' + String(cd.getUTCMonth() + 1).padStart(2, '0')) + '</text>';
         }
       }
@@ -5265,8 +5273,8 @@ window.LM_SEED = {
     }
 
     if (opts.today) {
-      body += '<line x1="' + x(opts.today) + '" y1="' + (headH - 22) + '" x2="' + x(opts.today) + '" y2="' + (h - 8) + '" stroke="' + C.status('red') + '" stroke-width="2"/>' +
-        '<text x="' + (x(opts.today) + 5) + '" y="' + (headH - 26) + '" class="axis-label strong" fill="' + C.status('red') + '">周报日 ' + LM.model.fmtDate(opts.todayIso) + '</text>';
+      body += '<line x1="' + x(opts.today) + '" y1="' + (headH - 36) + '" x2="' + x(opts.today) + '" y2="' + (h - 8) + '" stroke="' + C.status('red') + '" stroke-width="2"/>' +
+        '<text x="' + (x(opts.today) + 5) + '" y="18" class="axis-label strong" fill="' + C.status('red') + '">周报日 ' + LM.model.fmtDate(opts.todayIso) + '</text>';
     }
 
     rows.forEach(function (r, i) {
@@ -5282,7 +5290,7 @@ window.LM_SEED = {
             '<title>' + esc(it.title) + '</title></rect>';
         } else {
           /* milestone diamond — legible marker with a 2px surface ring */
-          var s = 9;
+          var s = 10;
           body += '<path d="M ' + cx + ' ' + (y + rowH / 2 - s) + ' L ' + (cx + s) + ' ' + (y + rowH / 2) +
             ' L ' + cx + ' ' + (y + rowH / 2 + s) + ' L ' + (cx - s) + ' ' + (y + rowH / 2) + ' Z" ' +
             'fill="' + it.color + '" stroke="' + surface() + '" stroke-width="2" data-tip="' + esc(it.title) + '">' +
@@ -6208,6 +6216,7 @@ window.LM_SEED = {
       'DELAY 逾期：里程碑未标记实际完成日，且计划日期早于报告日。',
       'VARIANCE 进度偏差：在施工项目的实际进度低于计划进度。',
       'DLP（缺陷责任期结束）不参与预警——那是合约时钟，不是可延误的交付物。',
+      '预警仅针对在施工项目；已完成（销项）项目的节点不参与预警，其健康看销项与文档指标。',
       '所有判定以周报的报告日为基准，不使用电脑当前日期。',
       '已确认：经人工接受的预警，保留在清单中但本期不计入预警数与加权评分。',
       '确认仅在授予它的那一期有效；进入下一期后自动失效，预警重新计入，需重新确认。',
@@ -6500,7 +6509,7 @@ window.LM_SEED = {
       '<span class="card-sub">◆ 绿 = 已完成 · 琥珀 = 计划中 · 红 = 逾期 · 阴影带 = ' + (d.meta.alarmWindowDays || 30) + ' 天预警窗</span></div>');
     h.push('<div class="table-scroll">' + C.gantt(ganttRows, {
       start: tl.start, end: tl.end, today: tl.today, todayIso: d.meta.reportDate,
-      alarmDays: d.meta.alarmWindowDays || 30, width: 1100, labelWidth: 210
+      alarmDays: d.meta.alarmWindowDays || 30, width: 1400, labelWidth: 220
     }) + '</div></section>');
     h.push('</div>');
 
