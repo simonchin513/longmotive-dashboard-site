@@ -638,9 +638,9 @@ h3.sub .count { font-weight: 400; color: var(--ink-muted); margin-left: 8px; }
 .chart text { font-family: var(--sans); }
 /* Chart type floors: charts render at design size (no viewBox stretching),
    so these ARE the on-screen sizes — keep every one ≥11.5px legible. */
-.bar-label { font-size: 13px; }
-.bar-value { font-size: 13px; font-variant-numeric: tabular-nums; }
-.axis-label { font-size: 11.5px; }
+.bar-label { font-size: 14px; }
+.bar-value { font-size: 14px; font-variant-numeric: tabular-nums; }
+.axis-label { font-size: 12.5px; }
 .axis-label.strong { font-weight: 650; }
 .donut-value { font-size: 24px; font-weight: 680; }
 .donut-label { font-size: 11.5px; }
@@ -5038,16 +5038,22 @@ window.LM_SEED = {
   C.accent = function () { return isDark() ? CATEGORICAL_DARK[0] : CATEGORICAL_LIGHT[0]; };
 
   /* Status colours are reserved and never reused as "series N". Every status
-     mark ships with its label text — see STATUS_LABEL in model.js. */
+     mark ships with its label text — see STATUS_LABEL in model.js.
+     These are FILL-grade hues: saturated enough to read as signals at a
+     glance (the old text-grade deeps looked brown/muddy as bars). Text keeps
+     the darker --good/--warn/--bad tokens for contrast. */
   C.status = function (key) {
-    var light = { green: '#15803D', amber: '#B45309', red: '#B91C1C', notstarted: '#57534E', nodata: '#78716C', nil: '#78716C' };
-    var dark = { green: '#4ADE80', amber: '#FBBF24', red: '#F87171', notstarted: '#A8A29E', nodata: '#A8A29E', nil: '#A8A29E' };
+    var light = { green: '#16A34A', amber: '#F59E0B', red: '#DC2626', notstarted: '#94A3B8', nodata: '#A8A29E', nil: '#A8A29E' };
+    var dark = { green: '#4ADE80', amber: '#FBBF24', red: '#F87171', notstarted: '#94A3B8', nodata: '#A8A29E', nil: '#A8A29E' };
     return (isDark() ? dark : light)[key] || (isDark() ? '#A8A29E' : '#78716C');
   };
 
+  /* Four DISTINCT severity steps — high and medium used to share one amber,
+     which made the legend a lie and the bands indistinguishable. */
   C.severity = function (key) {
-    var map = { critical: 'red', high: 'amber', medium: 'amber', low: 'notstarted' };
-    return C.status(map[key] || 'nodata');
+    var light = { critical: '#DC2626', high: '#EA580C', medium: '#EAB308', low: '#64748B' };
+    var dark = { critical: '#F87171', high: '#FB923C', medium: '#FACC15', low: '#94A3B8' };
+    return (isDark() ? dark : light)[key] || C.status('nodata');
   };
 
   function css(name, fallback) {
@@ -5074,12 +5080,26 @@ window.LM_SEED = {
       'preserveAspectRatio="xMinYMin meet" role="img" width="' + w + '">' + body + '</svg>';
   }
 
+  /* Label column sized to the LONGEST real name — the user's rule: project
+     names in charts are the point and are never truncated. */
+  C.labelWidthFor = function (names, fs, minW, maxW) {
+    fs = fs || 14;
+    var m = 0;
+    (names || []).forEach(function (n) {
+      n = String(n || '');
+      var w = 0;
+      for (var i = 0; i < n.length; i++) w += n.charCodeAt(i) > 0xFF ? fs : fs * 0.65;
+      if (w > m) m = w;
+    });
+    return Math.min(maxW || 640, Math.max(minW || 240, Math.ceil(m) + 26));
+  };
+
   /* Fit a row label into its column: estimate rendered width (CJK ≈ 1em,
      others ≈ 0.65em — deliberately generous) and ellipsize what exceeds
      the budget. Full text always survives in the row's data-tip/<title>. */
   function fitLabel(s, maxW, fs) {
     s = String(s === null || s === undefined ? '' : s);
-    fs = fs || 13;   /* keep in sync with .bar-label in app.css */
+    fs = fs || 14;   /* keep in sync with .bar-label in app.css */
     var cw = function (ch) { return ch.charCodeAt(0) > 0xFF ? fs : fs * 0.65; };
     var wsum = 0, i;
     for (i = 0; i < s.length; i++) wsum += cw(s[i]);
@@ -5199,7 +5219,9 @@ window.LM_SEED = {
       var hasA = typeof r.actual === 'number';
       var hasP = typeof r.planned === 'number';
       var variance = hasA && hasP ? r.actual - r.planned : null;
-      var col = variance === null ? C.status('nodata') : C.status(LM.model.varianceStatus(variance));
+      /* actual without a plan is plain magnitude → accent, not dead grey */
+      var col = variance !== null ? C.status(LM.model.varianceStatus(variance))
+        : hasA ? C.accent() : C.status('nodata');
       body += '<g class="bar-row" data-tip="' + esc(r.label + ' · 实际 ' + (hasA ? (r.actual * 100).toFixed(2) + '%' : '待补') + ' · 计划 ' + (hasP ? (r.planned * 100).toFixed(2) + '%' : '待补')) + '">';
       body += '<rect x="' + labelW + '" y="' + (y + 6) + '" width="' + plotW + '" height="' + (rowH - 12) + '" rx="4" fill="' + grid() + '" opacity="0.45"/>';
       if (hasA) {
@@ -5327,7 +5349,9 @@ window.LM_SEED = {
     /* labelRotate: slanted category labels for many/long names — they get
        a deep bottom band and never collide or truncate to stumps */
     var rot = !!opts.labelRotate;
-    var padL = rot ? 66 : 46, padB = rot ? 96 : 34, padT = 16;
+    /* padT leaves headroom so a 100%-tall bar's number never lands on the
+       top gridline or a plan tick */
+    var padL = rot ? 66 : 46, padB = rot ? 96 : 34, padT = 30;
     var plotW = w - padL - 16, plotH = h - padB - padT;
     var max = opts.max || Math.max.apply(null, rows.map(function (r) { return r.value || 0; })) || 1;
     var unit = opts.unit === undefined ? ' MW' : opts.unit;
@@ -5343,18 +5367,22 @@ window.LM_SEED = {
       var x = padL + i * step + (step - bw) / 2;
       var bh = ((r.value || 0) / max) * plotH;
       var tipTail = r.tip !== undefined ? r.tip : (r.value + unit);
+      var topY = padT + plotH - bh;
+      /* planned tick — a short ink dash across the bar's slot at plan height */
+      var tickY = null;
+      if (typeof r.planned === 'number') {
+        tickY = padT + plotH - Math.min(1, r.planned / max) * plotH;
+        body += '<line x1="' + (x - 3) + '" y1="' + tickY + '" x2="' + (x + bw + 3) + '" y2="' + tickY +
+          '" stroke="' + ink() + '" stroke-width="2"/>';
+      }
       if (bh > 0) {
-        body += '<rect x="' + x + '" y="' + (padT + plotH - bh) + '" width="' + bw + '" height="' + bh + '" rx="4" ' +
+        body += '<rect x="' + x + '" y="' + topY + '" width="' + bw + '" height="' + bh + '" rx="4" ' +
           'fill="' + (r.color || C.categorical(0)) + '" data-tip="' + esc(r.label + ' · ' + tipTail) + '">' +
           '<title>' + esc(r.label + ': ' + tipTail) + '</title></rect>';
-        body += '<text x="' + (x + bw / 2) + '" y="' + Math.max(14, padT + plotH - bh - 5) + '" text-anchor="middle" class="bar-value" fill="' + ink() + '">' +
+        /* the number clears BOTH the bar top and the plan tick */
+        var clearY = tickY === null ? topY : Math.min(topY, tickY);
+        body += '<text x="' + (x + bw / 2) + '" y="' + Math.max(14, clearY - 7) + '" text-anchor="middle" class="bar-value" fill="' + ink() + '">' +
           (r.display !== undefined ? r.display : r.value) + '</text>';
-      }
-      /* planned tick — a short ink dash across the bar's slot at plan height */
-      if (typeof r.planned === 'number') {
-        var py = padT + plotH - Math.min(1, r.planned / max) * plotH;
-        body += '<line x1="' + (x - 3) + '" y1="' + py + '" x2="' + (x + bw + 3) + '" y2="' + py +
-          '" stroke="' + ink() + '" stroke-width="2"/>';
       }
       if (rot) {
         var lx = x + bw / 2, ly = padT + plotH + 14;
@@ -6439,13 +6467,24 @@ window.LM_SEED = {
         '<li><b>' + top.redCategories + '</b> 红灯类别</li>' +
         '</ul>');
       h.push('</div>');
-      h.push('<div class="table-scroll">' + C.hbar(ranked.slice(0, 10).map(function (r) {
-        return { label: r.project.name, value: r.score, display: String(r.score) };
-      }), { width: 380, labelWidth: 170 }) + '</div>');
-      h.push('<p class="note">长度 = 加权评分，已含严重度权重（紧急 10 · 高 6 · 中 3 · 低 1）加红灯类别 × 4；按此从高到低排序。各项目最高预警的严重度见左侧预警清单。</p>');
+      h.push('<p class="note">加权评分 = 严重度权重（紧急 10 · 高 6 · 中 3 · 低 1）+ 红灯类别 × 4。完整排名见下方图表。</p>');
       h.push('</section>');
     }
-    h.push('</div>');
+    h.push('</div>');   /* /attn-cols */
+
+    if (ranked.length) {
+      var rankedRows = ranked.slice(0, 10).map(function (r) {
+        return { label: r.project.name, value: r.score, display: String(r.score) };
+      });
+      var rankedLabelW = C.labelWidthFor(rankedRows.map(function (r) { return r.label; }));
+      h.push('<section class="card">');
+      h.push('<div class="card-head"><h2>预警加权评分排名 · 前 10</h2>' +
+        '<span class="card-sub">长度 = 加权评分，从高到低 · 全名直读</span></div>');
+      h.push('<div class="table-scroll">' + C.hbar(rankedRows, {
+        width: rankedLabelW + 760, labelWidth: rankedLabelW, rowH: 38
+      }) + '</div>');
+      h.push('</section>');
+    }
     h.push('</div>');
 
     /* ── band: 组合分布 ──────────────────────────────────────────────── */
@@ -6501,7 +6540,7 @@ window.LM_SEED = {
     var ganttRows = Object.keys(byProject).map(function (k) {
       var g = byProject[k];
       return {
-        label: g.project.name.length > 30 ? g.project.name.slice(0, 29) + '…' : g.project.name,
+        label: g.project.name,
         items: g.items.map(function (r) {
           return {
             start: r.date, end: null,
@@ -6514,9 +6553,10 @@ window.LM_SEED = {
     });
     h.push('<section class="panel"><div class="panel-head"><h3>组合甘特图 · 前后 120 天关键节点</h3>' +
       '<span class="card-sub">◆ 绿 = 已完成 · 琥珀 = 计划中 · 红 = 逾期 · 阴影带 = ' + (d.meta.alarmWindowDays || 30) + ' 天预警窗</span></div>');
+    var ganttLabelW = C.labelWidthFor(ganttRows.map(function (r) { return r.label; }));
     h.push('<div class="table-scroll">' + C.gantt(ganttRows, {
       start: tl.start, end: tl.end, today: tl.today, todayIso: d.meta.reportDate,
-      alarmDays: d.meta.alarmWindowDays || 30, width: 1400, labelWidth: 220
+      alarmDays: d.meta.alarmWindowDays || 30, width: ganttLabelW + 1240, labelWidth: ganttLabelW
     }) + '</div></section>');
     h.push('</div>');
 
@@ -6764,21 +6804,11 @@ window.LM_SEED = {
     var noNum = ongoing.length - withNum.length;
     var completed = d.projects.length - ongoing.length;
 
-    var cols = withNum.map(function (p) {
-      var a = p.progress.actual;
-      var pl = typeof p.progress.planned === 'number' ? p.progress.planned : null;
-      var stage = pbStage(p, today);
-      return {
-        label: p.name,
-        value: +(a * 100).toFixed(1),
-        display: Math.round(a * 100),
-        planned: pl === null ? undefined : +(pl * 100).toFixed(1),
-        color: pl !== null ? C.status(M.varianceStatus(a - pl)) : C.accent(),
-        tip: '实际 ' + (a * 100).toFixed(1) + '%' +
-          (pl !== null ? ' / 计划 ' + (pl * 100).toFixed(1) + '%' : '') +
-          ' · ' + stage.text
-      };
+    var rows = withNum.map(function (p) {
+      return { label: p.name, actual: p.progress.actual,
+        planned: typeof p.progress.planned === 'number' ? p.progress.planned : undefined };
     });
+    var labelW = C.labelWidthFor(rows.map(function (r) { return r.label; }));
 
     /* stuck rail: projects blocked on an already-past node, worst first */
     var stuck = ongoing.map(function (p) { return { p: p, s: pbStage(p, today) }; })
@@ -6787,11 +6817,10 @@ window.LM_SEED = {
 
     var h = ['<div class="pg-cols">'];
     h.push('<section class="card progress-board">');
-    h.push('<div class="card-head"><h2>各项目实际进度 %</h2>' +
-      '<span class="card-sub">进度低者在前，未开始靠右 · 柱上横线 = 计划位置 · 悬停看数字与所处阶段 · 图可横向滚动</span></div>');
-    h.push('<div class="table-scroll">' + C.columns(cols, {
-      width: Math.max(760, 88 * cols.length + 70), height: 480, max: 100, unit: '%',
-      labelRotate: true, barMax: 48
+    h.push('<div class="card-head"><h2>各项目实际进度</h2>' +
+      '<span class="card-sub">进度低者在前，未开始（0%）在底部 · 黑色竖线 = 计划位置 · 全名直读，无需悬停</span></div>');
+    h.push('<div class="table-scroll">' + C.actualVsPlanned(rows, {
+      width: labelW + 860, labelWidth: labelW, rowH: 42
     }) + '</div>');
     var tail = [];
     if (noNum) tail.push('另有 ' + noNum + ' 个在施工项目未填报进度');
@@ -6966,15 +6995,16 @@ window.LM_SEED = {
     var avpRows = ongoing.filter(function (p) {
       return p.progress && (typeof p.progress.actual === 'number' || typeof p.progress.planned === 'number');
     }).map(function (p) {
-      return { label: shortName(p.name), actual: p.progress.actual, planned: p.progress.planned };
+      return { label: p.name, actual: p.progress.actual, planned: p.progress.planned };
     });
+    var avpLabelW = C.labelWidthFor(avpRows.map(function (r) { return r.label; }));
     h.push('<div class="band">');
     h.push('<div class="band-head"><h2>在施工项目</h2><p>' + ongoing.length + ' 个 · 统筹 ' + d.meta.week + '</p></div>');
 
     if (avpRows.length) {
       h.push('<section class="panel"><div class="panel-head"><h3>实际 vs 计划进度</h3>' +
         '<span class="card-sub">竖线 = 计划 · 条形颜色按 ≤5% / &gt;5% 偏差规则</span></div>');
-      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: 1160, labelWidth: 230 }) + '</div>');
+      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: avpLabelW + 860, labelWidth: avpLabelW, rowH: 40 }) + '</div>');
       h.push('</section>');
     }
 
