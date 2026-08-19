@@ -217,6 +217,10 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 .kpi-delta.bad { color: var(--bad); }
 .kpi-delta.flat { color: var(--ink-muted); font-weight: 400; }
 
+/* tile-scale sparkline — appears once ≥2 weekly snapshots exist */
+.kpi-spark { display: block; width: 100%; height: 30px; }
+.kpi-spark polyline { stroke: var(--fill-good); }
+
 /* tile-scale bullet: plan tick over the fill */
 .kpi-bullet { position: relative; overflow: visible; }
 .kpi-tick {
@@ -6614,12 +6618,29 @@ window.LM_HISTORY = [{"week":45,"reportDate":"2026-08-03","savedAt":"2026-08-19"
     var fmtPp = function (v) { return (v * 100).toFixed(1) + 'pp'; };
     var tgt = ctx.data.portfolio.targets && ctx.data.portfolio.targets.activeMw;
 
+    /* trend series from the weekly snapshots; the live value stands in for
+       this week's stored point. Returns null until 2 real weeks exist. */
+    var sparkFor = function (key, cur) {
+      if (cf) return null;
+      var pts = hist.map(function (e) { return e[key]; })
+        .filter(function (v) { return typeof v === 'number'; });
+      if (hist.length && String(hist[hist.length - 1].week) === String(d.meta.week)) {
+        pts[pts.length - 1] = cur;
+      } else {
+        pts.push(cur);
+      }
+      if (pts.length < 2) return null;
+      return miniSpark(pts.slice(-8));
+    };
+
     h.push('<div class="kpi-row">');
+    /* the capacity tile trades its campus split for the trend line once
+       history exists — the split lives on in the 园区容量分布 donut */
     h.push(kpi(roll.activeMw.toFixed(1) + ' MW', '在建总容量', 'ACTIVE CAPACITY',
       roll.ongoingCount + ' 个在施工项目' +
       (!cf && tgt ? ' · 目标 ' + tgt + ' MW（' + Math.round(roll.activeMw / tgt * 100) + '%）' : ''),
       null, '在施工项目的容量 MW 求和', null,
-      miniSeg(campusSegs), null,
+      sparkFor('activeMw', roll.activeMw) || miniSeg(campusSegs), null,
       delta(roll.activeMw, prev && prev.activeMw, fmtMw)));
     h.push(kpi(String(roll.ongoingCount), '在施工项目', 'ACTIVE PROJECTS',
       (cf ? '园区 ' + cf : d.campuses.length + ' 个园区'), null, 'phase = ongoing 的项目计数', null,
@@ -6651,7 +6672,7 @@ window.LM_HISTORY = [{"week":45,"reportDate":"2026-08-03","savedAt":"2026-08-19"
     /* this tile IS the alarm card's headcount — clicking it jumps there */
     h.push(kpi(String(roll.alarmTotal), '预警总数', 'ACTIVE ALARMS',
       roll.alarmOverdue + ' 逾期 · ' + roll.alarmIncoming + ' 即将到期' +
-      (roll.alarmAcked ? ' · 另 ' + roll.alarmAcked + ' 条已确认' : ''),
+      (roll.alarmAcked ? ' · 另 ' + roll.alarmAcked + ' 条已确认' : '') + ' · 查看清单 →',
       roll.alarmCritical ? 'red' : 'amber',
       '预警引擎：未完成里程碑的到期/逾期 + 进度偏差；已确认的不计入',
       '逾期与即将到期各自计数',
@@ -6659,6 +6680,11 @@ window.LM_HISTORY = [{"week":45,"reportDate":"2026-08-03","savedAt":"2026-08-19"
       'data-action="goto-alarms" role="link" tabindex="0" title="点击跳到预警清单"',
       delta(roll.alarmTotal, prev && prev.alarmTotal, fmtN, true)));
     h.push('</div>');
+    /* the page states its own data horizon — no silent absence, no fake trend */
+    if (!cf && hist.length < 2) {
+      h.push('<p class="note">周环比 ▲▼ 与趋势线由每周快照驱动：本周（周报 ' + esc(String(d.meta.week)) +
+        '）已存入第 ' + hist.length + ' 条历史，下次周更后自动亮起。</p>');
+    }
     h.push(colorLegendHtml());
     h.push('</section>');
 
@@ -6960,6 +6986,22 @@ window.LM_HISTORY = [{"week":45,"reportDate":"2026-08-03","savedAt":"2026-08-19"
         return '<i style="flex:' + x.v + ';background:' + x.color + '" title="' +
           esc(x.tip + ' · ' + x.v) + '"></i>';
       }).join('') + '</div>';
+  }
+
+  /* sparkline: the weekly snapshot series at tile scale. Wears 正常 green —
+     the trend is a quantity, not a judgement. */
+  function miniSpark(vals) {
+    var w = 150, hgt = 30, pad = 3;
+    var min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+    var span = (max - min) || 1;
+    var pts = vals.map(function (v, i) {
+      var x = pad + (i / (vals.length - 1)) * (w - pad * 2);
+      var y = hgt - pad - ((v - min) / span) * (hgt - pad * 2);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+    return '<svg class="kpi-spark" viewBox="0 0 ' + w + ' ' + hgt + '" ' +
+      'preserveAspectRatio="none" role="img" aria-label="近 ' + vals.length + ' 周趋势折线">' +
+      '<polyline points="' + pts + '" fill="none" stroke-width="2"/></svg>';
   }
 
   /* bullet: actual bar coloured by the variance rule, plan as an ink tick —
