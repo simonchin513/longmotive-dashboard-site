@@ -413,7 +413,16 @@ table.tbl tr.total td { font-weight: 700; }
    band's single colour statement; rows inside stay ink and hairline, and
    urgency reads from the countdown pill. */
 .al-groups { display: grid; gap: 14px; min-width: 760px; }
-.al-group { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+/* The open list scrolls INSIDE its card: readers scroll here, everyone
+   else scrolls the page straight past. Group heads stick while scrolling. */
+.al-scroll {
+  max-height: min(620px, 66vh); overflow-y: auto;
+  padding-right: 6px; overscroll-behavior: contain;
+}
+.al-scroll .al-group-head { position: sticky; top: 0; z-index: 2; }
+/* overflow:clip (not hidden) keeps the radius clipping without creating a
+   scroll container, so the sticky group heads can track .al-scroll */
+.al-group { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: clip; }
 .al-group-head {
   display: flex; align-items: center; gap: 9px;
   padding: 11px 18px; font-size: 13.5px; font-weight: 700; letter-spacing: .01em;
@@ -6379,10 +6388,10 @@ window.LM_SEED = {
 
     h.push('<div class="attn-cols">');
     h.push('<section class="card alarm-card" id="alarms">');
-    h.push('<div class="card-head"><h2>预警 · 未来 ' + (d.meta.alarmWindowDays || 30) + ' 天到期与已逾期</h2></div>');
+    h.push('<div class="card-head"><h2>预警 · 未来 ' + (d.meta.alarmWindowDays || 30) + ' 天到期与已逾期</h2>' +
+      '<span class="card-sub">共 ' + alarms.length + ' 条 · 清单在区内滚动，页面可直接滑过</span></div>');
     h.push(alarmSummary(roll, alarms));
-    h.push(alarmTable(alarms.slice(0, 40)));
-    if (alarms.length > 40) h.push('<p class="note">另有 ' + (alarms.length - 40) + ' 条较低等级预警，完整清单见 Excel 导出的 Alarms 工作表。</p>');
+    h.push(alarmTable(alarms));
     h.push('</section>');
 
     /* ── highest-alarm project — requirement 7 mirrored on screen ─────── */
@@ -6800,7 +6809,8 @@ window.LM_SEED = {
       return { key: k, items: list.filter(function (a) { return a.severity === k; }) };
     }).filter(function (g) { return g.items.length; });
 
-    var h = ['<div class="table-scroll"><div class="al-groups' + (isAcked ? ' is-acked' : '') + '">'];
+    var h = ['<div class="table-scroll' + (isAcked ? '' : ' al-scroll') + '">' +
+      '<div class="al-groups' + (isAcked ? ' is-acked' : '') + '">'];
     groups.forEach(function (g) {
       h.push('<section class="al-group al-g-' + g.key + '">');
       h.push('<header class="al-group-head">' +
