@@ -485,6 +485,11 @@ table.tbl tr.total td { font-weight: 700; }
 }
 .al-list .al-li:first-child { border-top: 0; }
 .al-li:hover { background: color-mix(in srgb, var(--ink) 2.5%, transparent); }
+/* chart rows that navigate: the whole bar row is the click target */
+.chart g[data-goto] { cursor: pointer; }
+.chart g[data-goto]:hover .bar-label { fill: var(--accent); text-decoration: underline; }
+.chart g[data-goto]:hover rect.mark-x { filter: brightness(1.08); }
+
 /* whole row navigates to the project — not just the name link */
 .al-li[data-goto] { cursor: pointer; }
 .al-li[data-goto]:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
@@ -5237,7 +5242,8 @@ window.LM_SEED = {
       var bar = bw > 0
         ? '<rect class="mark-x" x="' + labelW + '" y="' + (y + 5) + '" width="' + bw + '" height="' + (rowH - 10) + '" rx="4" fill="' + col + '"/>'
         : '';
-      return '<g class="bar-row" data-tip="' + esc(r.label + ' · ' + (r.display !== undefined ? r.display : r.value)) + '">' +
+      return '<g class="bar-row"' + (r.goto ? ' data-goto="' + esc(r.goto) + '"' : '') +
+        ' data-tip="' + esc(r.label + ' · ' + (r.display !== undefined ? r.display : r.value)) + '">' +
         '<rect x="' + labelW + '" y="' + (y + 5) + '" width="' + plotW + '" height="' + (rowH - 10) + '" rx="4" fill="' + grid() + '" opacity="0.45"/>' +
         bar +
         '<text x="' + (labelW - 8) + '" y="' + (y + rowH / 2 + 5) + '" text-anchor="end" class="bar-label" fill="' + ink() + '">' + esc(fitLabel(r.label, labelW - 10)) + '</text>' +
@@ -5276,7 +5282,8 @@ window.LM_SEED = {
       /* actual without a plan is plain magnitude → accent, not dead grey */
       var col = variance !== null ? C.status(LM.model.varianceStatus(variance))
         : hasA ? C.accent() : C.status('nodata');
-      body += '<g class="bar-row" data-tip="' + esc(r.label + ' · 实际 ' + (hasA ? (r.actual * 100).toFixed(2) + '%' : '待补') + ' · 计划 ' + (hasP ? (r.planned * 100).toFixed(2) + '%' : '待补')) + '">';
+      body += '<g class="bar-row"' + (r.goto ? ' data-goto="' + esc(r.goto) + '"' : '') +
+        ' data-tip="' + esc(r.label + ' · 实际 ' + (hasA ? (r.actual * 100).toFixed(2) + '%' : '待补') + ' · 计划 ' + (hasP ? (r.planned * 100).toFixed(2) + '%' : '待补')) + '">';
       body += '<rect x="' + labelW + '" y="' + (y + 6) + '" width="' + plotW + '" height="' + (rowH - 12) + '" rx="4" fill="' + grid() + '" opacity="0.45"/>';
       if (hasA) {
         body += '<rect class="mark-x" x="' + labelW + '" y="' + (y + 6) + '" width="' + Math.max(0, r.actual * plotW) + '" height="' + (rowH - 12) + '" rx="4" fill="' + col + '"/>';
@@ -6540,7 +6547,7 @@ window.LM_SEED = {
       };
       var rankedRows = ranked.slice(0, 10).map(function (r) {
         return { label: r.project.name, value: r.score, display: String(r.score),
-          color: C.severity(worstSevOf(r.project.id)) };
+          color: C.severity(worstSevOf(r.project.id)), goto: '#/project/' + r.project.id };
       });
       var rankedLabelW = C.labelWidthFor(rankedRows.map(function (r) { return r.label; }));
       h.push('<section class="card">');
@@ -6865,14 +6872,21 @@ window.LM_SEED = {
     }
     var today = M.parseDate(d.meta.reportDate);
     var ongoing = d.projects.filter(function (p) { return p.phase === 'ongoing'; });
-    /* laggards first — they are what leadership needs in the first
-       viewport; not-started (0%) sit at the far right, healthy tails can
-       scroll */
+    /* urgency first — the variance colour IS the sort key: 严重滞后 (red),
+       then 需关注 (amber), 正常 (green) sinks below them, not-started (0%)
+       at the very bottom; within a band, lowest progress first */
+    var pbRank = function (p) {
+      var pr = p.progress;
+      if (pr.actual === 0) return 3;
+      if (typeof pr.planned !== 'number') return 2;   /* no plan → reads 正常 */
+      var st = M.varianceStatus(pr.actual - pr.planned);
+      return st === 'red' ? 0 : st === 'amber' ? 1 : 2;
+    };
     var withNum = ongoing.filter(function (p) {
       return typeof (p.progress || {}).actual === 'number';
     }).sort(function (a, b) {
-      var az = a.progress.actual === 0, bz = b.progress.actual === 0;
-      if (az !== bz) return az ? 1 : -1;
+      var ra = pbRank(a), rb = pbRank(b);
+      if (ra !== rb) return ra - rb;
       return a.progress.actual - b.progress.actual;
     });
     var noNum = ongoing.length - withNum.length;
@@ -6880,7 +6894,8 @@ window.LM_SEED = {
 
     var rows = withNum.map(function (p) {
       return { label: p.name, actual: p.progress.actual,
-        planned: typeof p.progress.planned === 'number' ? p.progress.planned : undefined };
+        planned: typeof p.progress.planned === 'number' ? p.progress.planned : undefined,
+        goto: '#/project/' + p.id };
     });
     var labelW = C.labelWidthFor(rows.map(function (r) { return r.label; }));
 
@@ -6892,10 +6907,10 @@ window.LM_SEED = {
     var h = ['<div class="pg-cols">'];
     h.push('<section class="card progress-board">');
     h.push('<div class="card-head"><h2>各项目实际进度</h2>' +
-      '<span class="card-sub">进度低者在前，未开始（0%）在底部 · 黑色竖线 = 计划位置 · 全名直读，无需悬停</span></div>');
+      '<span class="card-sub">按紧急度排列：严重滞后 → 需关注 → 正常，未开始（0%）沉底 · 黑色竖线 = 计划位置 · 点击条形进入项目页</span></div>');
     h.push('<div class="table-scroll">' + C.actualVsPlanned(rows, {
       width: labelW + 860, labelWidth: labelW, rowH: 42,
-      ariaLabel: '各项目实际进度与计划对比条形图，进度低者在前'
+      ariaLabel: '各项目实际进度与计划对比条形图，按紧急度排列，严重滞后在前'
     }) + '</div>');
     var tail = [];
     if (noNum) tail.push('另有 ' + noNum + ' 个在施工项目未填报进度');
@@ -7072,7 +7087,8 @@ window.LM_SEED = {
     var avpRows = ongoing.filter(function (p) {
       return p.progress && (typeof p.progress.actual === 'number' || typeof p.progress.planned === 'number');
     }).map(function (p) {
-      return { label: p.name, actual: p.progress.actual, planned: p.progress.planned };
+      return { label: p.name, actual: p.progress.actual, planned: p.progress.planned,
+        goto: '#/project/' + p.id };
     });
     var avpLabelW = C.labelWidthFor(avpRows.map(function (r) { return r.label; }));
     h.push('<div class="band">');
