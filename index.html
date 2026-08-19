@@ -216,10 +216,22 @@ main { padding: 20px 22px 80px; max-width: 1560px; margin: 0 auto; }
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 12px 14px; box-shadow: var(--shadow);
 }
-.kpi-value { font-size: 24px; font-weight: 680; letter-spacing: -.02em; line-height: 1.15; }
-.kpi-zh { font-size: 12px; margin-top: 3px; }
-.kpi-en { font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-muted); }
-.kpi-sub { font-size: 11px; color: var(--ink-muted); margin-top: 5px; }
+.kpi-value { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.12; }
+.kpi-zh { font-size: 13px; font-weight: 600; margin-top: 4px; }
+.kpi-en { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-muted); }
+.kpi-sub { font-size: 12px; color: var(--ink-muted); margin-top: 5px; }
+
+/* KPI micro-visuals: a data mark per tile so the shape reads before the text */
+.kpi-viz { margin-top: 10px; }
+.kpi-seg { display: flex; height: 9px; border-radius: 5px; overflow: hidden; background: var(--line); }
+.kpi-seg i { display: block; }
+.kpi-cols { display: flex; align-items: flex-end; gap: 3px; height: 30px; }
+.kpi-cols i {
+  flex: 1; display: block; background: var(--accent);
+  border-radius: 2px 2px 0 0; min-width: 4px;
+}
+.kpi-track { height: 9px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.kpi-fill { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
 .kpi-red { border-color: color-mix(in srgb, var(--bad) 45%, var(--line)); }
 .kpi-red .kpi-value { color: var(--bad); }
 .kpi-amber { border-color: color-mix(in srgb, var(--warn) 45%, var(--line)); }
@@ -6258,23 +6270,52 @@ window.LM_SEED = {
     h.push('<div class="hero-head"><h1>EXECUTIVE DASHBOARD · 周报 ' + d.meta.week + '</h1>' +
       '<p class="hero-sub">报告日期 ' + M.fmtDate(d.meta.reportDate) + ' · 数据截止 ' + M.fmtDate(d.meta.cutoffDate) + '</p></div>');
 
+    var campusSegs = roll.byCampus.filter(function (c) { return c.capacityMW > 0; })
+      .map(function (c, i) {
+        return { v: +c.capacityMW.toFixed(1), color: C.categorical(i), tip: c.campus.id + ' MW' };
+      });
+    var stSegs = ['green', 'amber', 'red', 'notstarted', 'nodata'].map(function (k) {
+      return { v: roll.statusCounts[k] || 0, color: C.status(k), tip: M.STATUS_LABEL[k] || k };
+    });
+    var doneCounts = {};
+    d.projects.forEach(function (p) {
+      if (p.phase === 'completed') doneCounts[p.status] = (doneCounts[p.status] || 0) + 1;
+    });
+    var doneSegs = ['green', 'amber', 'red', 'nodata'].map(function (k) {
+      return { v: doneCounts[k] || 0, color: C.status(k), tip: (M.STATUS_LABEL[k] || k) + '（销项）' };
+    });
+    var monthCols = (d.portfolio.rfsDelivery || []).map(function (m) {
+      var mw = m.items.reduce(function (s, it) { return s + (it.mw || 0); }, 0);
+      return { v: mw, tip: m.month + ' · ' + mw.toFixed(1) + ' MW' };
+    });
+    var sevSegs = ['critical', 'high', 'medium', 'low'].map(function (k) {
+      return { v: alarms.filter(function (a) { return M.isOpen(a) && a.severity === k; }).length,
+        color: C.severity(k), tip: M.SEVERITY_LABEL[k] || k };
+    });
+
     h.push('<div class="kpi-row">');
     h.push(kpi(roll.activeMw.toFixed(1) + ' MW', '在建总容量', 'ACTIVE CAPACITY',
-      roll.ongoingCount + ' 个在施工项目', null, '在施工项目的容量 MW 求和', null));
+      roll.ongoingCount + ' 个在施工项目', null, '在施工项目的容量 MW 求和', null,
+      miniSeg(campusSegs)));
     h.push(kpi(String(roll.ongoingCount), '在施工项目', 'ACTIVE PROJECTS',
-      d.campuses.length + ' 个园区', null, 'phase = ongoing 的项目计数', null));
+      d.campuses.length + ' 个园区', null, 'phase = ongoing 的项目计数', null,
+      miniSeg(stSegs)));
     h.push(kpi(String(roll.completedCount), '已完成项目', 'COMPLETED PROJECTS',
-      '销项管理中', null, 'phase = completed 的项目计数', null));
+      '销项管理中', null, 'phase = completed 的项目计数', null,
+      miniSeg(doneSegs)));
     h.push(kpi(roll.ytdDeliveredMw.toFixed(2) + ' MW', '2026 已交付容量', 'RFS CAPACITY YTD',
-      '截至 ' + M.fmtDate(d.meta.reportDate), null, '每月 RFS 交付表的单项容量累加', null));
+      '截至 ' + M.fmtDate(d.meta.reportDate), null, '每月 RFS 交付表的单项容量累加', null,
+      monthCols.length ? miniCols(monthCols) : ''));
     h.push(kpi(roll.avgProgress === null ? '待补' : (roll.avgProgress * 100).toFixed(1) + '%',
-      '平均进度', 'AVG PROGRESS', '仅计已填报项目', null, '在施工项目实际进度的算术平均', null));
+      '平均进度', 'AVG PROGRESS', '仅计已填报项目', null, '在施工项目实际进度的算术平均', null,
+      roll.avgProgress === null ? '' : miniBar(roll.avgProgress)));
     h.push(kpi(String(roll.alarmTotal), '预警总数', 'ACTIVE ALARMS',
       roll.alarmOverdue + ' 逾期 · ' + roll.alarmIncoming + ' 即将到期' +
       (roll.alarmAcked ? ' · 另 ' + roll.alarmAcked + ' 条已确认' : ''),
       roll.alarmCritical ? 'red' : 'amber',
       '预警引擎：未完成里程碑的到期/逾期 + 进度偏差；已确认的不计入',
-      '逾期与即将到期各自计数'));
+      '逾期与即将到期各自计数',
+      miniSeg(sevSegs)));
     h.push('</div>');
     h.push(M.legendHtml());
     h.push('</section>');
@@ -6468,16 +6509,45 @@ window.LM_SEED = {
   /* The value and the sub-line are separate facts: a tile can hold an entered
      number over a derived caption (planned progress with 偏差 beneath it), so
      each takes its own marker. */
-  function kpi(value, zh, en, sub, tone, derivedFrom, subDerivedFrom) {
+  function kpi(value, zh, en, sub, tone, derivedFrom, subDerivedFrom, viz) {
     var val = derivedFrom ? M.drv(esc(value), derivedFrom) : esc(value);
     return '<div class="kpi' + (tone ? ' kpi-' + tone : '') + '">' +
       '<div class="kpi-value">' + val + '</div>' +
       '<div class="kpi-zh">' + esc(zh) + '</div>' +
       '<div class="kpi-en">' + esc(en) + '</div>' +
       (sub ? '<div class="kpi-sub">' +
-        (subDerivedFrom ? M.drv(esc(sub), subDerivedFrom) : esc(sub)) + '</div>' : '') + '</div>';
+        (subDerivedFrom ? M.drv(esc(sub), subDerivedFrom) : esc(sub)) + '</div>' : '') +
+      (viz ? '<div class="kpi-viz">' + viz + '</div>' : '') +
+      '</div>';
   }
   V.kpi = kpi;
+
+  /* KPI micro-visuals — data marks, not decoration: segments only where a
+     dimension exists (campus, status, severity), single-hue columns/bars for
+     plain magnitude. Identity rides in the title tooltips; the full donuts
+     and tables below remain the labelled read. */
+  function miniSeg(segs) {
+    var total = segs.reduce(function (s, x) { return s + x.v; }, 0);
+    if (!total) return '';
+    return '<div class="kpi-seg">' + segs.filter(function (x) { return x.v > 0; })
+      .map(function (x) {
+        return '<i style="flex:' + x.v + ';background:' + x.color + '" title="' +
+          esc(x.tip + ' · ' + x.v) + '"></i>';
+      }).join('') + '</div>';
+  }
+
+  function miniCols(vals) {
+    var max = Math.max.apply(null, vals.map(function (v) { return v.v; })) || 1;
+    return '<div class="kpi-cols">' + vals.map(function (v) {
+      return '<i style="height:' + Math.max(6, v.v / max * 100) + '%" title="' +
+        esc(v.tip) + '"></i>';
+    }).join('') + '</div>';
+  }
+
+  function miniBar(frac) {
+    return '<div class="kpi-track"><i class="kpi-fill" style="width:' +
+      Math.min(100, frac * 100) + '%"></i></div>';
+  }
 
   function statusBar(counts) {
     var total = Object.keys(counts).reduce(function (s, k) { return s + counts[k]; }, 0);
