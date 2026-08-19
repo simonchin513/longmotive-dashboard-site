@@ -8,58 +8,65 @@
 /* Longmotive Project Control — light-first tokens, dark redefined in both the
    media query and the [data-theme] selector so the toggle wins either way. */
 
+/* Chrome palette follows the Longmotive site (longmotive-web-demo-site.pages.dev):
+   brand blue #0F52A0, sky cyan #00B0F0/#33C0F3, slate ink #33465A, navy #0D1B2A,
+   pale blue surfaces #D6E4F5. DATA colours (status green/amber/red, severity
+   steps, campus ramp) are semantic + CVD-validated and deliberately unchanged. */
 :root {
-  --bg: #f7f7f6;
+  --bg: #f4f7fb;
   --surface: #ffffff;
-  --surface-2: #fafaf9;
-  --ink: #1c1917;
-  --ink-muted: #78716c;
-  --line: #e7e5e4;
-  --grid: #e7e5e4;
-  --accent: #0891b2;
+  --surface-2: #f7fafd;
+  --ink: #1d3048;
+  --ink-muted: #5d6f86;   /* site's #6F7F94 darkened a step: 11px labels need ≥4.5:1 */
+  --line: #dfe7f1;
+  --grid: #e3eaf4;
+  --accent: #0f52a0;
+  --on-accent: #ffffff;
   --good: #15803d;
   --fill-good: #16a34a;   /* fill-grade 正常 green — data marks, not text */
   --warn: #b45309;
   --bad: #b91c1c;
-  --shadow: 0 1px 2px rgba(28,25,23,.06), 0 8px 24px rgba(28,25,23,.05);
+  --shadow: 0 1px 2px rgba(13,27,42,.07), 0 8px 24px rgba(13,27,42,.06);
   --radius: 10px;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC",
+  --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC",
           "Hiragino Sans GB", "Noto Sans SC", Roboto, Helvetica, Arial, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #121211;
-    --surface: #1a1a19;
-    --surface-2: #201f1e;
-    --ink: #f5f5f4;
-    --ink-muted: #a8a29e;
-    --line: #33312e;
-    --grid: #33312e;
-    --accent: #0ea5b7;
+    --bg: #0d1b2a;
+    --surface: #13253a;
+    --surface-2: #182c44;
+    --ink: #e8f0f8;
+    --ink-muted: #9fb3c8;
+    --line: #24405c;
+    --grid: #24405c;
+    --accent: #33c0f3;
+    --on-accent: #06203b;
     --good: #4ade80;
     --fill-good: #4ade80;
     --warn: #fbbf24;
     --bad: #f87171;
-    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+    --shadow: 0 1px 2px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.4);
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #121211;
-  --surface: #1a1a19;
-  --surface-2: #201f1e;
-  --ink: #f5f5f4;
-  --ink-muted: #a8a29e;
-  --line: #33312e;
-  --grid: #33312e;
-  --accent: #0ea5b7;
+  --bg: #0d1b2a;
+  --surface: #13253a;
+  --surface-2: #182c44;
+  --ink: #e8f0f8;
+  --ink-muted: #9fb3c8;
+  --line: #24405c;
+  --grid: #24405c;
+  --accent: #33c0f3;
+  --on-accent: #06203b;
   --good: #4ade80;
   --fill-good: #4ade80;
   --warn: #fbbf24;
   --bad: #f87171;
-  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+  --shadow: 0 1px 2px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.4);
 }
 
 * { box-sizing: border-box; }
@@ -123,7 +130,7 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 }
 .btn:hover { background: var(--surface-2); }
 .btn:disabled { opacity: .55; cursor: default; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 .btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, #000); }
 .btn.ghost { background: transparent; }
 .btn.sm { font-size: 12px; padding: 4px 10px; }
@@ -1092,8 +1099,9 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
   transition: opacity .18s, transform .18s;
 }
 .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
-.toast.ok { background: var(--good); color: #fff; }
-.toast.bad { background: var(--bad); color: #fff; }
+/* fixed deep fills: the dark theme's light --good/--bad can't carry white text */
+.toast.ok { background: #15803d; color: #fff; }
+.toast.bad { background: #b91c1c; color: #fff; }
 
 #dirty { font-size: 11px; color: var(--warn); }
 
@@ -5217,9 +5225,9 @@ window.LM_HISTORY = [{"week":45,"reportDate":"2026-08-03","savedAt":"2026-08-19"
     var v = getComputedStyle(document.documentElement).getPropertyValue(name);
     return (v && v.trim()) || fallback;
   }
-  var ink = function () { return css('--ink', '#1c1917'); };
-  var inkMuted = function () { return css('--ink-muted', '#78716C'); };
-  var grid = function () { return css('--grid', '#e7e5e4'); };
+  var ink = function () { return css('--ink', '#1d3048'); };
+  var inkMuted = function () { return css('--ink-muted', '#6f7f94'); };
+  var grid = function () { return css('--grid', '#e3eaf4'); };
   var surface = function () { return css('--surface', '#ffffff'); };
 
   function esc(s) {
