@@ -416,10 +416,22 @@ table.tbl tr.total td { font-weight: 700; }
 /* The open list scrolls INSIDE its card: readers scroll here, everyone
    else scrolls the page straight past. Group heads stick while scrolling. */
 .al-scroll {
-  max-height: min(620px, 66vh); overflow-y: auto;
+  max-height: min(500px, 60vh); overflow-y: auto;
   padding-right: 6px; overscroll-behavior: contain;
 }
 .al-scroll .al-group-head { position: sticky; top: 0; z-index: 2; }
+/* make the scroll affordance unmistakable: a fade at the clipped edge and
+   an explicit hint line under the card */
+.al-clip { position: relative; }
+.al-fade {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 44px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface));
+}
+.al-more {
+  margin: 10px 2px 0; font-size: 12.5px; font-weight: 600;
+  color: var(--ink-muted); letter-spacing: .01em;
+}
 /* overflow:clip (not hidden) keeps the radius clipping without creating a
    scroll container, so the sticky group heads can track .al-scroll */
 .al-group { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: clip; }
@@ -6689,7 +6701,10 @@ window.LM_SEED = {
     if (!open.length) {
       h.push('<p class="note">未来 30 天内没有未确认的到期或逾期节点。</p>');
     } else {
-      h.push(alarmRows(open, false));
+      h.push('<div class="al-clip">' + alarmRows(open, false) +
+        '<div class="al-fade" aria-hidden="true"></div></div>');
+      h.push('<p class="al-more">▼ 在清单内滚动查看全部 ' + open.length +
+        ' 条未确认预警 · 页面可直接滑过本卡</p>');
     }
 
     /* Acknowledged items stay on the page — accepted, not deleted — so a
