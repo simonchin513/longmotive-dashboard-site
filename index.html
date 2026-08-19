@@ -224,6 +224,14 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 .kpi-delta.bad { color: var(--bad); }
 .kpi-delta.flat { color: var(--ink-muted); font-weight: 400; }
 
+/* inline bar labels: name rides inside (or just past) the bar; the surface
+   halo keeps it readable on any fill without per-colour contrast math */
+.bar-label-in {
+  font-weight: 650;
+  paint-order: stroke; stroke: var(--surface); stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+
 /* tile-scale sparkline — appears once ≥2 weekly snapshots exist */
 .kpi-spark { display: block; width: 100%; height: 30px; }
 .kpi-spark polyline { stroke: var(--fill-good); }
@@ -5264,6 +5272,27 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     return Math.min(maxW || 640, Math.max(minW || 240, Math.ceil(m) + 26));
   };
 
+  /* Estimated rendered width of a string (CJK ≈ 1em, others ≈ 0.65em). */
+  function textW(s, fs) {
+    fs = fs || 14;
+    var w = 0;
+    s = String(s === null || s === undefined ? '' : s);
+    for (var i = 0; i < s.length; i++) w += s.charCodeAt(i) > 0xFF ? fs : fs * 0.65;
+    return w;
+  }
+
+  /* Inline row label — INSIDE the bar when it fits, just past the bar's end
+     otherwise. The surface-coloured halo (paint-order stroke, see
+     .bar-label-in) keeps it readable on any fill, so the name is never
+     truncated and the chart spends no width on a label column. */
+  function inlineLabel(label, barW, plotW, x0, y) {
+    var lw = textW(label, 14);
+    var x = barW >= lw + 24 ? x0 + 10
+      : (barW + 8 + lw <= plotW - 4 ? x0 + barW + 8 : x0 + 10);
+    return '<text x="' + x + '" y="' + y + '" class="bar-label bar-label-in" fill="' +
+      ink() + '">' + esc(label) + '</text>';
+  }
+
   /* Fit a row label into its column: estimate rendered width (CJK ≈ 1em,
      others ≈ 0.65em — deliberately generous) and ellipsize what exceeds
      the budget. Full text always survives in the row's data-tip/<title>. */
@@ -5339,7 +5368,8 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
   C.hbar = function (rows, opts) {
     opts = opts || {};
     if (!rows.length) return '<div class="chart-empty">无数据 No data</div>';
-    var labelW = opts.labelWidth || 168;
+    var inside = !!opts.labelInside;
+    var labelW = inside ? 0 : (opts.labelWidth || 168);
     var valueW = 74;
     var w = opts.width || 720;
     var rowH = opts.rowH || 30, gap = 6;
@@ -5357,7 +5387,9 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         ' data-tip="' + esc(r.label + ' · ' + (r.display !== undefined ? r.display : r.value)) + '">' +
         '<rect x="' + labelW + '" y="' + (y + 5) + '" width="' + plotW + '" height="' + (rowH - 10) + '" rx="4" fill="' + grid() + '" opacity="0.45"/>' +
         bar +
-        '<text x="' + (labelW - 8) + '" y="' + (y + rowH / 2 + 5) + '" text-anchor="end" class="bar-label" fill="' + ink() + '">' + esc(fitLabel(r.label, labelW - 10)) + '</text>' +
+        (inside
+          ? inlineLabel(r.label, bw, plotW, labelW, y + rowH / 2 + 5)
+          : '<text x="' + (labelW - 8) + '" y="' + (y + rowH / 2 + 5) + '" text-anchor="end" class="bar-label" fill="' + ink() + '">' + esc(fitLabel(r.label, labelW - 10)) + '</text>') +
         '<text x="' + (labelW + plotW + 8) + '" y="' + (y + rowH / 2 + 5) + '" class="bar-value mark-fade" fill="' + inkMuted() + '">' +
         esc(r.display !== undefined ? r.display : r.value) + '</text>' +
         '<title>' + esc(r.label + ': ' + (r.display !== undefined ? r.display : r.value)) + '</title>' +
@@ -5372,7 +5404,8 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
   C.actualVsPlanned = function (rows, opts) {
     opts = opts || {};
     if (!rows.length) return '<div class="chart-empty">无数据 No data</div>';
-    var labelW = opts.labelWidth || 186, valueW = 118;
+    var inside = !!opts.labelInside;
+    var labelW = inside ? 0 : (opts.labelWidth || 186), valueW = 118;
     var w = opts.width || 760, rowH = opts.rowH || 34, gap = 7;
     var h = rows.length * (rowH + gap) + 26;
     var plotW = w - labelW - valueW - 12;
@@ -5403,7 +5436,9 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         var px = labelW + r.planned * plotW;
         body += '<line class="mark-fade" x1="' + px + '" y1="' + (y + 2) + '" x2="' + px + '" y2="' + (y + rowH - 2) + '" stroke="' + ink() + '" stroke-width="2"/>';
       }
-      body += '<text x="' + (labelW - 8) + '" y="' + (y + rowH / 2 + 5) + '" text-anchor="end" class="bar-label" fill="' + ink() + '">' + esc(fitLabel(r.label, labelW - 10)) + '</text>';
+      body += inside
+        ? inlineLabel(r.label, hasA ? Math.max(0, r.actual * plotW) : 0, plotW, labelW, y + rowH / 2 + 5)
+        : '<text x="' + (labelW - 8) + '" y="' + (y + rowH / 2 + 5) + '" text-anchor="end" class="bar-label" fill="' + ink() + '">' + esc(fitLabel(r.label, labelW - 10)) + '</text>';
       var vtxt = hasA ? (r.actual * 100).toFixed(1) + '%' : '待补';
       if (variance !== null) vtxt += '  (' + (variance >= 0 ? '+' : '') + (variance * 100).toFixed(1) + ')';
       body += '<text x="' + (labelW + plotW + 8) + '" y="' + (y + rowH / 2 + 5) + '" class="bar-value mark-fade" fill="' + inkMuted() + '">' + esc(vtxt) + '</text>';
@@ -6748,7 +6783,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       h.push('<div class="card-head"><h2>预警加权评分排名 · 前 10</h2>' +
         '<span class="card-sub">长度 = 加权评分，从高到低 · 颜色 = 该项目最高预警严重度 · 点击条形进入项目页</span></div>');
       h.push('<div class="table-scroll">' + C.hbar(rankedRows, {
-        width: rankedLabelW + 620, labelWidth: rankedLabelW, rowH: 38,
+        width: 860, labelInside: true, rowH: 38,
         ariaLabel: '预警加权评分排名条形图，前 10 名'
       }) + '</div>');
       h.push('</section>');
@@ -7156,7 +7191,6 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         planned: typeof p.progress.planned === 'number' ? p.progress.planned : undefined,
         goto: '#/project/' + p.id };
     });
-    var labelW = C.labelWidthFor(rows.map(function (r) { return r.label; }));
 
     /* stuck rail: projects blocked on an already-past node, worst first */
     var stuck = ongoing.map(function (p) { return { p: p, s: pbStage(p, today) }; })
@@ -7182,7 +7216,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       sortBtn('name', '依名称') +
       '</div></div>');
     h.push('<div class="table-scroll">' + C.actualVsPlanned(rows, {
-      width: labelW + 860, labelWidth: labelW, rowH: 42,
+      width: 1020, labelInside: true, rowH: 42,
       ariaLabel: '各项目实际进度与计划对比条形图，' + SORT_SUB[mode]
     }) + '</div>');
     var tail = [];
@@ -7363,14 +7397,13 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       return { label: p.name, actual: p.progress.actual, planned: p.progress.planned,
         goto: '#/project/' + p.id };
     });
-    var avpLabelW = C.labelWidthFor(avpRows.map(function (r) { return r.label; }));
     h.push('<div class="band">');
     h.push('<div class="band-head"><h2>在施工项目</h2><p>' + ongoing.length + ' 个 · 统筹 ' + d.meta.week + '</p></div>');
 
     if (avpRows.length) {
       h.push('<section class="panel"><div class="panel-head"><h3>实际 vs 计划进度</h3>' +
         '<span class="card-sub">竖线 = 计划 · 条形颜色按 ≤5% / &gt;5% 偏差规则</span></div>');
-      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: avpLabelW + 860, labelWidth: avpLabelW, rowH: 40, ariaLabel: campus.id + ' 园区各项目实际与计划进度对比图' }) + '</div>');
+      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: 1020, labelInside: true, rowH: 40, ariaLabel: campus.id + ' 园区各项目实际与计划进度对比图' }) + '</div>');
       h.push('</section>');
     }
 
@@ -9076,8 +9109,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         return { label: p.name, actual: p.progress.actual, planned: p.progress.planned };
       });
       if (!avp.length) return head + '<p class="note">所选项目没有填报进度数据。</p>';
-      var avpW = C.labelWidthFor(avp.map(function (r) { return r.label; }));
-      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: avpW + 860, labelWidth: avpW }) + '</div>' + note();
+      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: 1020, labelInside: true }) + '</div>' + note();
     }
 
     /* ── aggregate into groups ───────────────────────────────────────── */
@@ -9113,9 +9145,8 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         color: b.color || (metric.key === 'variance' ? C.status(M.varianceStatus(b.value)) : C.accent())
       };
     });
-    var barW = C.labelWidthFor(barRows.map(function (r) { return r.label; }));
     return head + '<div class="table-scroll">' + C.hbar(barRows, {
-      width: barW + 760, labelWidth: barW, max: max
+      width: 900, labelInside: true, max: max
     }) + '</div>' + note();
   }
 
