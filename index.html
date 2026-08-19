@@ -5072,12 +5072,17 @@ window.LM_SEED = {
   }
   C.esc = esc;
 
-  function svg(w, h, body, cls) {
+  var CHART_LABEL = { donut: '环形图', hbar: '条形图', avp: '实际与计划对比图',
+    gantt: '甘特图', stacked: '堆叠条形图', columns: '柱状图' };
+
+  function svg(w, h, body, cls, label) {
     /* width = the design width, not 100%: the chart never scales past its
        viewBox (marks/text stay at intended size on wide cards); CSS
-       max-width:100% still shrinks it proportionally on narrow ones. */
+       max-width:100% still shrinks it proportionally on narrow ones.
+       Every chart carries an accessible name. */
     return '<svg class="chart ' + (cls || '') + '" viewBox="0 0 ' + w + ' ' + h + '" ' +
-      'preserveAspectRatio="xMinYMin meet" role="img" width="' + w + '">' + body + '</svg>';
+      'preserveAspectRatio="xMinYMin meet" role="img" aria-label="' +
+      esc(label || CHART_LABEL[cls] || '图表') + '" width="' + w + '">' + body + '</svg>';
   }
 
   /* Label column sized to the LONGEST real name — the user's rule: project
@@ -5149,7 +5154,7 @@ window.LM_SEED = {
         '<text x="' + r + '" y="' + (r - 2) + '" text-anchor="middle" class="donut-value" fill="' + ink() + '">' + esc(opts.centreValue) + '</text>' +
         '<text x="' + r + '" y="' + (r + 16) + '" text-anchor="middle" class="donut-label" fill="' + inkMuted() + '">' + esc(opts.centreLabel || '') + '</text>';
     }
-    return svg(size, size, parts.join('') + centre, 'donut');
+    return svg(size, size, parts.join('') + centre, 'donut', opts.ariaLabel);
   };
 
   /* Legend — identity is never colour-alone, so this is always rendered
@@ -5192,7 +5197,7 @@ window.LM_SEED = {
         '<title>' + esc(r.label + ': ' + (r.display !== undefined ? r.display : r.value)) + '</title>' +
         '</g>';
     }).join('');
-    return svg(w, h, body, 'hbar');
+    return svg(w, h, body, 'hbar', opts.ariaLabel);
   };
 
   /* ── actual vs planned ───────────────────────────────────────────────
@@ -5237,7 +5242,7 @@ window.LM_SEED = {
       body += '<text x="' + (labelW + plotW + 8) + '" y="' + (y + rowH / 2 + 5) + '" class="bar-value" fill="' + inkMuted() + '">' + esc(vtxt) + '</text>';
       body += '<title>' + esc(r.label + ' 实际 ' + vtxt) + '</title></g>';
     });
-    return svg(w, h, body, 'avp');
+    return svg(w, h, body, 'avp', opts.ariaLabel);
   };
 
   /* ── gantt ───────────────────────────────────────────────────────────
@@ -5307,7 +5312,7 @@ window.LM_SEED = {
         }
       });
     });
-    return svg(w, h, body, 'gantt');
+    return svg(w, h, body, 'gantt', opts.ariaLabel);
   };
 
   /* ── stacked bar (document close-out mix etc.) ───────────────────────── */
@@ -5338,7 +5343,7 @@ window.LM_SEED = {
         segs +
         '<text x="' + (labelW + plotW + 8) + '" y="' + (y + rowH / 2 + 5) + '" class="bar-value" fill="' + inkMuted() + '">' + total + '</text>';
     }).join('');
-    return svg(w, h, body, 'stacked');
+    return svg(w, h, body, 'stacked', opts.ariaLabel);
   };
 
   /* ── column chart (monthly RFS MW) ───────────────────────────────────── */
@@ -5394,7 +5399,7 @@ window.LM_SEED = {
           esc(fitLabel(r.label, step - 6, 11.5)) + '</text>';
       }
     });
-    return svg(w, h, body, 'columns');
+    return svg(w, h, body, 'columns', opts.ariaLabel);
   };
 
   /* ── shared hover tooltip ────────────────────────────────────────────── */
@@ -6481,7 +6486,8 @@ window.LM_SEED = {
       h.push('<div class="card-head"><h2>预警加权评分排名 · 前 10</h2>' +
         '<span class="card-sub">长度 = 加权评分，从高到低 · 全名直读</span></div>');
       h.push('<div class="table-scroll">' + C.hbar(rankedRows, {
-        width: rankedLabelW + 760, labelWidth: rankedLabelW, rowH: 38
+        width: rankedLabelW + 760, labelWidth: rankedLabelW, rowH: 38,
+        ariaLabel: '预警加权评分排名条形图，前 10 名'
       }) + '</div>');
       h.push('</section>');
     }
@@ -6498,7 +6504,7 @@ window.LM_SEED = {
       return { label: c.campus.id, value: c.capacityMW, color: C.categorical(i) };
     });
     h.push('<div class="donut-wrap">' + C.donut(capSlices, {
-      size: 260, centreValue: roll.activeMw.toFixed(0), centreLabel: 'MW 在建', fmt: function (v) { return v.toFixed(1) + ' MW'; }
+      size: 260, ariaLabel: '园区容量分布环形图', centreValue: roll.activeMw.toFixed(0), centreLabel: 'MW 在建', fmt: function (v) { return v.toFixed(1) + ' MW'; }
     }) +
       C.legend(roll.byCampus.map(function (c, i) {
         return { label: c.campus.id + ' · ' + c.campus.country, value: c.capacityMW.toFixed(1) + ' MW · ' + c.ongoing + ' 项', color: C.categorical(i) };
@@ -6510,7 +6516,7 @@ window.LM_SEED = {
       .filter(function (k) { return roll.statusCounts[k]; })
       .map(function (k) { return { label: M.STATUS_LABEL[k], value: roll.statusCounts[k], color: C.status(k) }; });
     h.push('<div class="donut-wrap">' + C.donut(statusSlices, {
-      size: 260, centreValue: String(roll.ongoingCount), centreLabel: '在施工项目'
+      size: 260, ariaLabel: '项目状态分布环形图', centreValue: String(roll.ongoingCount), centreLabel: '在施工项目'
     }) + C.legend(statusSlices.map(function (s) { return { label: s.label, value: s.value, color: s.color }; })) + '</div>');
     h.push('</div></section>');
 
@@ -6556,7 +6562,8 @@ window.LM_SEED = {
     var ganttLabelW = C.labelWidthFor(ganttRows.map(function (r) { return r.label; }));
     h.push('<div class="table-scroll">' + C.gantt(ganttRows, {
       start: tl.start, end: tl.end, today: tl.today, todayIso: d.meta.reportDate,
-      alarmDays: d.meta.alarmWindowDays || 30, width: ganttLabelW + 1240, labelWidth: ganttLabelW
+      alarmDays: d.meta.alarmWindowDays || 30, width: ganttLabelW + 1240, labelWidth: ganttLabelW,
+      ariaLabel: '组合甘特图：全部项目前后 120 天关键节点'
     }) + '</div></section>');
     h.push('</div>');
 
@@ -6568,7 +6575,7 @@ window.LM_SEED = {
     h.push('<div class="band-head"><h2>交付容量</h2><p>2026 年至今累计 ' + roll.ytdDeliveredMw.toFixed(2) + ' MW</p></div>');
     h.push('<div class="deliv-cols">');
     h.push('<section class="panel"><div class="panel-head"><h3>每月 RFS 交付 · MW</h3></div>');
-    h.push('<div class="table-scroll">' + C.columns(months, { width: 940, height: 300 }) + '</div>');
+    h.push('<div class="table-scroll">' + C.columns(months, { width: 940, height: 300, ariaLabel: '每月 RFS 交付容量柱状图' }) + '</div>');
     h.push('<p class="note">统计规则：读取统筹 Completed Projects 的 RFS1–RFS-N；有明确分期 MW 时按分期计入，否则归入最后一个已完成 RFS 并标记「待核对」。</p>');
     h.push('</section>');
     h.push('<section class="panel"><div class="panel-head"><h3>交付台账</h3></div>');
@@ -6820,7 +6827,8 @@ window.LM_SEED = {
     h.push('<div class="card-head"><h2>各项目实际进度</h2>' +
       '<span class="card-sub">进度低者在前，未开始（0%）在底部 · 黑色竖线 = 计划位置 · 全名直读，无需悬停</span></div>');
     h.push('<div class="table-scroll">' + C.actualVsPlanned(rows, {
-      width: labelW + 860, labelWidth: labelW, rowH: 42
+      width: labelW + 860, labelWidth: labelW, rowH: 42,
+      ariaLabel: '各项目实际进度与计划对比条形图，进度低者在前'
     }) + '</div>');
     var tail = [];
     if (noNum) tail.push('另有 ' + noNum + ' 个在施工项目未填报进度');
@@ -7004,7 +7012,7 @@ window.LM_SEED = {
     if (avpRows.length) {
       h.push('<section class="panel"><div class="panel-head"><h3>实际 vs 计划进度</h3>' +
         '<span class="card-sub">竖线 = 计划 · 条形颜色按 ≤5% / &gt;5% 偏差规则</span></div>');
-      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: avpLabelW + 860, labelWidth: avpLabelW, rowH: 40 }) + '</div>');
+      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: avpLabelW + 860, labelWidth: avpLabelW, rowH: 40, ariaLabel: campus.id + ' 园区各项目实际与计划进度对比图' }) + '</div>');
       h.push('</section>');
     }
 
@@ -7216,7 +7224,7 @@ window.LM_SEED = {
         (pr.note ? '<span class="card-sub">' + esc(pr.note) + '</span>' : '') + '</div>');
       h.push('<div class="table-scroll">' + C.actualVsPlanned(p.phases.map(function (ph) {
         return { label: ph.label + (ph.capacityMW ? ' · ' + ph.capacityMW + ' MW' : ''), actual: ph.actual, planned: ph.planned };
-      }), { width: 1000, labelWidth: 170 }) + '</div>');
+      }), { width: 1000, labelWidth: 170, ariaLabel: '分期进度对比图' }) + '</div>');
       h.push('</section>');
     }
     h.push('</div>');
@@ -8706,10 +8714,11 @@ window.LM_SEED = {
       var avp = pool.filter(function (p) {
         return p.progress && (typeof p.progress.actual === 'number' || typeof p.progress.planned === 'number');
       }).slice(0, state.top).map(function (p) {
-        return { label: trunc(p.name, 30), actual: p.progress.actual, planned: p.progress.planned };
+        return { label: p.name, actual: p.progress.actual, planned: p.progress.planned };
       });
       if (!avp.length) return head + '<p class="note">所选项目没有填报进度数据。</p>';
-      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: 1160, labelWidth: 230 }) + '</div>' + note();
+      var avpW = C.labelWidthFor(avp.map(function (r) { return r.label; }));
+      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: avpW + 860, labelWidth: avpW }) + '</div>' + note();
     }
 
     /* ── aggregate into groups ───────────────────────────────────────── */
@@ -8731,20 +8740,24 @@ window.LM_SEED = {
 
     if (state.type === 'columns') {
       return head + '<div class="table-scroll">' + C.columns(shown.map(function (b, i) {
-        return { label: trunc(b.label, 12), value: +(metric.kind === 'pct' ? b.value * 100 : b.value).toFixed(2), color: b.color || C.categorical(i) };
-      }), { width: 860, height: 260 }) + '</div>' + note();
+        return { label: b.label, value: +(metric.kind === 'pct' ? b.value * 100 : b.value).toFixed(2), color: b.color || C.categorical(i) };
+      }), { width: Math.max(860, 88 * shown.length + 140), height: 420, labelRotate: true, barMax: 48 }) + '</div>' + note();
     }
 
     /* bar */
     var max = Math.max.apply(null, shown.map(function (b) { return Math.abs(b.value); })) || 1;
-    return head + '<div class="table-scroll">' + C.hbar(shown.map(function (b, i) {
+    var barRows = shown.map(function (b, i) {
       return {
-        label: trunc(b.label, 30),
+        label: b.label,
         value: Math.abs(b.value),
         display: fmt(b.value),
         color: b.color || (metric.key === 'variance' ? C.status(M.varianceStatus(b.value)) : C.accent())
       };
-    }), { width: 1160, labelWidth: 230, max: max }) + '</div>' + note();
+    });
+    var barW = C.labelWidthFor(barRows.map(function (r) { return r.label; }));
+    return head + '<div class="table-scroll">' + C.hbar(barRows, {
+      width: barW + 760, labelWidth: barW, max: max
+    }) + '</div>' + note();
   }
 
   function statusKeyFromLabel(label) {
