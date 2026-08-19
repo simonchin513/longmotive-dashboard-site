@@ -5324,12 +5324,15 @@ window.LM_SEED = {
     opts = opts || {};
     if (!rows.length) return '<div class="chart-empty">无数据 No data</div>';
     var w = opts.width || 760, h = opts.height || 220;
-    var padL = 46, padB = 34, padT = 16;
+    /* labelRotate: slanted category labels for many/long names — they get
+       a deep bottom band and never collide or truncate to stumps */
+    var rot = !!opts.labelRotate;
+    var padL = rot ? 66 : 46, padB = rot ? 96 : 34, padT = 16;
     var plotW = w - padL - 16, plotH = h - padB - padT;
     var max = opts.max || Math.max.apply(null, rows.map(function (r) { return r.value || 0; })) || 1;
     var unit = opts.unit === undefined ? ' MW' : opts.unit;
     var step = plotW / rows.length;
-    var bw = Math.min(38, step * 0.62);
+    var bw = Math.min(opts.barMax || 38, step * 0.62);
     var body = '';
     [0, 0.5, 1].forEach(function (t) {
       var y = padT + plotH - t * plotH;
@@ -5353,8 +5356,15 @@ window.LM_SEED = {
         body += '<line x1="' + (x - 3) + '" y1="' + py + '" x2="' + (x + bw + 3) + '" y2="' + py +
           '" stroke="' + ink() + '" stroke-width="2"/>';
       }
-      body += '<text x="' + (x + bw / 2) + '" y="' + (h - 12) + '" text-anchor="middle" class="axis-label" fill="' + inkMuted() + '">' +
-        esc(fitLabel(r.label, step - 6, 11.5)) + '</text>';
+      if (rot) {
+        var lx = x + bw / 2, ly = padT + plotH + 14;
+        body += '<text x="' + lx + '" y="' + ly + '" text-anchor="end" class="axis-label" ' +
+          'transform="rotate(-38 ' + lx + ' ' + ly + ')" fill="' + inkMuted() + '">' +
+          esc(fitLabel(r.label, 130, 11.5)) + '</text>';
+      } else {
+        body += '<text x="' + (x + bw / 2) + '" y="' + (h - 12) + '" text-anchor="middle" class="axis-label" fill="' + inkMuted() + '">' +
+          esc(fitLabel(r.label, step - 6, 11.5)) + '</text>';
+      }
     });
     return svg(w, h, body, 'columns');
   };
@@ -6741,9 +6751,16 @@ window.LM_SEED = {
     }
     var today = M.parseDate(d.meta.reportDate);
     var ongoing = d.projects.filter(function (p) { return p.phase === 'ongoing'; });
+    /* laggards first — they are what leadership needs in the first
+       viewport; not-started (0%) sit at the far right, healthy tails can
+       scroll */
     var withNum = ongoing.filter(function (p) {
       return typeof (p.progress || {}).actual === 'number';
-    }).sort(function (a, b) { return b.progress.actual - a.progress.actual; });
+    }).sort(function (a, b) {
+      var az = a.progress.actual === 0, bz = b.progress.actual === 0;
+      if (az !== bz) return az ? 1 : -1;
+      return a.progress.actual - b.progress.actual;
+    });
     var noNum = ongoing.length - withNum.length;
     var completed = d.projects.length - ongoing.length;
 
@@ -6771,9 +6788,10 @@ window.LM_SEED = {
     var h = ['<div class="pg-cols">'];
     h.push('<section class="card progress-board">');
     h.push('<div class="card-head"><h2>各项目实际进度 %</h2>' +
-      '<span class="card-sub">按进度排序 · 柱顶横线 = 计划位置 · 悬停看数字与所处阶段</span></div>');
+      '<span class="card-sub">进度低者在前，未开始靠右 · 柱上横线 = 计划位置 · 悬停看数字与所处阶段 · 图可横向滚动</span></div>');
     h.push('<div class="table-scroll">' + C.columns(cols, {
-      width: Math.max(760, 58 * cols.length + 70), height: 340, max: 100, unit: '%'
+      width: Math.max(760, 88 * cols.length + 70), height: 480, max: 100, unit: '%',
+      labelRotate: true, barMax: 48
     }) + '</div>');
     var tail = [];
     if (noNum) tail.push('另有 ' + noNum + ' 个在施工项目未填报进度');
