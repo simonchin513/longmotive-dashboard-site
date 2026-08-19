@@ -375,39 +375,26 @@ table.tbl tr.total td { font-weight: 700; }
    Fixed layout with a colgroup, so every group shares one set of column
    edges. Auto width made each column start wherever its own longest cell
    happened to end. */
-/* Progress board — page one. A fat bar per project (colour = the variance
-   rule, the same encoding the campus charts use), the number large, and a
-   one-line answer to "where is it" beneath the bar. */
-.progress-board { padding-top: 20px; }
-.pb-cols { columns: 2; column-gap: 56px; column-rule: 1px solid var(--line); }
-.pb-row {
-  display: grid; grid-template-columns: 190px minmax(0, 1fr) 96px;
-  gap: 18px; align-items: center; padding: 14px 0;
-  break-inside: avoid;
+/* Progress board — page one, chart-first: one column per project in a
+   single glance, plus a 卡点 rail keeping the stuck-node facts the old
+   row list carried. */
+.pg-cols {
+  display: grid; grid-template-columns: minmax(0, 1fr) 400px;
+  gap: 20px; align-items: start;
+}
+.pg-cols > .card { margin-bottom: 0; }
+@media (max-width: 1350px) { .pg-cols { grid-template-columns: 1fr; } }
+
+.stuck-list { list-style: none; margin: 0; padding: 0; }
+.stuck-list li {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px; align-items: center; padding: 11px 0;
   border-bottom: 1px solid var(--line);
 }
-.pb-name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
-.pb-name a { font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
-.pb-track {
-  position: relative; height: 12px; border-radius: 6px;
-  background: color-mix(in srgb, var(--ink) 6%, transparent);
-}
-.pb-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 6px; }
-.pb-tick {
-  position: absolute; top: -3px; bottom: -3px; width: 2px;
-  background: var(--ink); transform: translateX(-1px); border-radius: 1px;
-}
-.pb-stage { font-size: 12.5px; color: var(--ink-muted); margin-top: 6px; }
-.pb-stage b { color: var(--ink); font-weight: 650; }
-.pb-stage.bad, .pb-stage.bad b { color: var(--bad); }
-.pb-pct { text-align: right; }
-.pb-pct b {
-  display: block; font-size: 20px; font-weight: 700; line-height: 1.15;
-  font-variant-numeric: tabular-nums; letter-spacing: -.01em;
-}
-.pb-pct b.muted { color: var(--ink-muted); font-weight: 600; }
-.pb-pct span { font-size: 12px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
-@media (max-width: 1150px) { .pb-cols { columns: 1; } }
+.stuck-list li:last-child { border-bottom: 0; }
+.stuck-list a { font-size: 13.5px; font-weight: 650; overflow-wrap: anywhere; }
+.stuck-list .al-pill { grid-row: span 2; justify-self: end; }
+.stuck-what { font-size: 12.5px; color: var(--ink-muted); grid-column: 1; }
 
 /* Alarm list — one container per severity band. The tinted header makes the
    band's single colour statement; rows inside stay ink and hairline, and
@@ -5339,7 +5326,8 @@ window.LM_SEED = {
     var w = opts.width || 760, h = opts.height || 220;
     var padL = 46, padB = 34, padT = 16;
     var plotW = w - padL - 16, plotH = h - padB - padT;
-    var max = Math.max.apply(null, rows.map(function (r) { return r.value || 0; })) || 1;
+    var max = opts.max || Math.max.apply(null, rows.map(function (r) { return r.value || 0; })) || 1;
+    var unit = opts.unit === undefined ? ' MW' : opts.unit;
     var step = plotW / rows.length;
     var bw = Math.min(38, step * 0.62);
     var body = '';
@@ -5351,13 +5339,22 @@ window.LM_SEED = {
     rows.forEach(function (r, i) {
       var x = padL + i * step + (step - bw) / 2;
       var bh = ((r.value || 0) / max) * plotH;
+      var tipTail = r.tip !== undefined ? r.tip : (r.value + unit);
       if (bh > 0) {
         body += '<rect x="' + x + '" y="' + (padT + plotH - bh) + '" width="' + bw + '" height="' + bh + '" rx="4" ' +
-          'fill="' + (r.color || C.categorical(0)) + '" data-tip="' + esc(r.label + ' · ' + r.value + ' MW') + '">' +
-          '<title>' + esc(r.label + ': ' + r.value + ' MW') + '</title></rect>';
-        body += '<text x="' + (x + bw / 2) + '" y="' + Math.max(14, padT + plotH - bh - 5) + '" text-anchor="middle" class="bar-value" fill="' + ink() + '">' + r.value + '</text>';
+          'fill="' + (r.color || C.categorical(0)) + '" data-tip="' + esc(r.label + ' · ' + tipTail) + '">' +
+          '<title>' + esc(r.label + ': ' + tipTail) + '</title></rect>';
+        body += '<text x="' + (x + bw / 2) + '" y="' + Math.max(14, padT + plotH - bh - 5) + '" text-anchor="middle" class="bar-value" fill="' + ink() + '">' +
+          (r.display !== undefined ? r.display : r.value) + '</text>';
       }
-      body += '<text x="' + (x + bw / 2) + '" y="' + (h - 12) + '" text-anchor="middle" class="axis-label" fill="' + inkMuted() + '">' + esc(r.label) + '</text>';
+      /* planned tick — a short ink dash across the bar's slot at plan height */
+      if (typeof r.planned === 'number') {
+        var py = padT + plotH - Math.min(1, r.planned / max) * plotH;
+        body += '<line x1="' + (x - 3) + '" y1="' + py + '" x2="' + (x + bw + 3) + '" y2="' + py +
+          '" stroke="' + ink() + '" stroke-width="2"/>';
+      }
+      body += '<text x="' + (x + bw / 2) + '" y="' + (h - 12) + '" text-anchor="middle" class="axis-label" fill="' + inkMuted() + '">' +
+        esc(fitLabel(r.label, step - 6, 11.5)) + '</text>';
     });
     return svg(w, h, body, 'columns');
   };
@@ -6730,10 +6727,10 @@ window.LM_SEED = {
   V.alarmTable = alarmTable;
 
   /* ── the progress board — page one, before anything else ─────────────
-     One row per on-going project: a fat bar (colour = the 周报's own
-     ≤5% / >5% variance rule, same encoding as the campus charts), the
-     completion number large, and beneath the bar WHERE the project is —
-     its stage chain when one is tracked, otherwise the next dated node. */
+     Chart-first: every on-going project is one column in a single glance,
+     sorted by completion, coloured by the variance rule where a plan
+     exists (accent otherwise), with the plan as a tick across the bar.
+     The stuck-node detail the old rows carried lives on in the 卡点 rail. */
   function progressBoard(d, roll) {
     if (!d.projects.length) {
       return '<section class="card"><div class="pane-empty">' +
@@ -6743,52 +6740,69 @@ window.LM_SEED = {
         '或 ⋯ 菜单「添加项目」手工创建（会顺带创建园区）。</span></div></section>';
     }
     var today = M.parseDate(d.meta.reportDate);
-    var h = ['<section class="card progress-board"><div class="pb-cols">'];
-    var completed = 0;
-    d.campuses.forEach(function (camp) {
-      d.projects.forEach(function (p) {
-        if (p.campus !== camp.id) return;
-        if (p.phase !== 'ongoing') { completed++; return; }
-        h.push(pbRow(p, today));
-      });
+    var ongoing = d.projects.filter(function (p) { return p.phase === 'ongoing'; });
+    var withNum = ongoing.filter(function (p) {
+      return typeof (p.progress || {}).actual === 'number';
+    }).sort(function (a, b) { return b.progress.actual - a.progress.actual; });
+    var noNum = ongoing.length - withNum.length;
+    var completed = d.projects.length - ongoing.length;
+
+    var cols = withNum.map(function (p) {
+      var a = p.progress.actual;
+      var pl = typeof p.progress.planned === 'number' ? p.progress.planned : null;
+      var stage = pbStage(p, today);
+      return {
+        label: p.name,
+        value: +(a * 100).toFixed(1),
+        display: Math.round(a * 100),
+        planned: pl === null ? undefined : +(pl * 100).toFixed(1),
+        color: pl !== null ? C.status(M.varianceStatus(a - pl)) : C.accent(),
+        tip: '实际 ' + (a * 100).toFixed(1) + '%' +
+          (pl !== null ? ' / 计划 ' + (pl * 100).toFixed(1) + '%' : '') +
+          ' · ' + stage.text
+      };
     });
-    h.push('</div>');
-    if (completed) {
-      h.push('<p class="note">另有 ' + completed + ' 个已完成项目在销项管理中，进度见各园区页。</p>');
+
+    /* stuck rail: projects blocked on an already-past node, worst first */
+    var stuck = ongoing.map(function (p) { return { p: p, s: pbStage(p, today) }; })
+      .filter(function (x) { return x.s.cls === 'bad'; })
+      .sort(function (a, b) { return b.s.overdueDays - a.s.overdueDays; });
+
+    var h = ['<div class="pg-cols">'];
+    h.push('<section class="card progress-board">');
+    h.push('<div class="card-head"><h2>各项目实际进度 %</h2>' +
+      '<span class="card-sub">按进度排序 · 柱顶横线 = 计划位置 · 悬停看数字与所处阶段</span></div>');
+    h.push('<div class="table-scroll">' + C.columns(cols, {
+      width: Math.max(760, 58 * cols.length + 70), height: 340, max: 100, unit: '%'
+    }) + '</div>');
+    var tail = [];
+    if (noNum) tail.push('另有 ' + noNum + ' 个在施工项目未填报进度');
+    if (completed) tail.push(completed + ' 个已完成项目在销项管理（见各园区页）');
+    if (tail.length) h.push('<p class="note">' + tail.join(' · ') + '</p>');
+    h.push('</section>');
+
+    h.push('<section class="card stuck-card">');
+    h.push('<div class="card-head"><h2>卡点</h2>' +
+      '<span class="card-sub">最早未完成节点已过期 · ' + stuck.length + ' 个项目</span></div>');
+    if (!stuck.length) {
+      h.push('<p class="note">没有项目卡在过期节点上。</p>');
+    } else {
+      h.push('<ul class="stuck-list">');
+      stuck.slice(0, 8).forEach(function (x) {
+        h.push('<li><a href="#/project/' + x.p.id + '">' + esc(x.p.name) + '</a>' +
+          '<span class="stuck-what">' + esc(x.s.nodeName) + ' · 原计划 ' + esc(x.s.nodeDate) + '</span>' +
+          '<span class="al-pill red">逾期 ' + x.s.overdueDays + ' 天</span></li>');
+      });
+      h.push('</ul>');
+      if (stuck.length > 8) h.push('<p class="note">其余 ' + (stuck.length - 8) + ' 个项目的卡点见下方预警清单。</p>');
     }
     h.push('</section>');
+    h.push('</div>');
     return h.join('');
   }
 
-  function pbRow(p, today) {
-    var pr = p.progress || {};
-    var a = typeof pr.actual === 'number' ? pr.actual : null;
-    var pl = typeof pr.planned === 'number' ? pr.planned : null;
-    /* colour carries the variance dimension when a plan exists; without
-       one the bar is plain magnitude and takes the accent hue (chart
-       colour rule 6c), not the dead nodata grey */
-    var col = (a !== null && pl !== null) ? C.status(M.varianceStatus(a - pl)) : C.accent();
-    var fill = a !== null
-      ? '<i class="pb-fill" style="width:' + Math.min(100, a * 100) + '%;background:' + col + '"></i>'
-      : '';
-    var tick = pl !== null
-      ? '<b class="pb-tick" style="left:' + Math.min(100, pl * 100) + '%"></b>'
-      : '';
-    var stage = pbStage(p, today);
-    return '<div class="pb-row">' +
-      '<div class="pb-name"><a href="#/project/' + p.id + '">' + esc(p.name) + '</a>' +
-      '<span class="al-campus-tag">' + esc(p.campus) + '</span></div>' +
-      '<div class="pb-main"><div class="pb-track">' + fill + tick + '</div>' +
-      '<div class="pb-stage' + (stage.cls ? ' ' + stage.cls : '') + '">' + stage.html + '</div></div>' +
-      '<div class="pb-pct">' + (a === null
-        ? '<b class="muted">—</b><span>未填报</span>'
-        : '<b>' + (a * 100).toFixed(1) + '%</b>' +
-          (pl === null ? '' : '<span>计划 ' + (pl * 100).toFixed(1) + '%</span>')) +
-      '</div></div>';
-  }
-
-  /* Where the project is: prefer a tracked stage chain, else the next
-     dated milestone, else the most overdue one. */
+  /* Where the project is: prefer a tracked stage chain, else the earliest
+     unachieved dated node — already past means the project is stuck there. */
   function pbStage(p, today) {
     var hit = null;
     (p.milestones || []).some(function (m) {
@@ -6798,11 +6812,10 @@ window.LM_SEED = {
       return false;
     });
     if (hit) {
-      return { html: '阶段 <b>' + hit.s.done + '/' + hit.s.total + ' · ' +
-        esc(hit.s.current.split(' ')[0]) + '</b>（' + esc(shortName(hit.m.name)) + '）', cls: '' };
+      var t0 = '阶段 ' + hit.s.done + '/' + hit.s.total + ' · ' +
+        hit.s.current.split(' ')[0] + '（' + shortName(hit.m.name) + '）';
+      return { cls: '', text: t0, nodeName: shortName(hit.m.name), overdueDays: 0, nodeDate: '' };
     }
-    /* the honest "next node" is the EARLIEST unachieved dated node —
-       if that date is already past, the project is stuck there */
     var next = null;
     (p.milestones || []).forEach(function (m) {
       if (m.actual || m.type === 'DLP') return;
@@ -6811,10 +6824,16 @@ window.LM_SEED = {
       if (!next || t < next.t) next = { t: t, m: m };
     });
     if (next && next.t < today) {
-      return { html: '卡在 ' + esc(shortName(next.m.name)) + ' · 原计划 ' + M.fmtDate(next.m.planned), cls: 'bad' };
+      return { cls: 'bad',
+        text: '卡在 ' + shortName(next.m.name) + '（原计划 ' + M.fmtDate(next.m.planned) + '）',
+        nodeName: shortName(next.m.name), nodeDate: M.fmtDate(next.m.planned),
+        overdueDays: M.daysBetween(next.t, today) };
     }
-    if (next) return { html: '下一节点 ' + esc(shortName(next.m.name)) + ' · ' + M.fmtDate(next.m.planned), cls: '' };
-    return { html: '无带日期的未完成节点', cls: 'muted' };
+    if (next) {
+      return { cls: '', text: '下一节点 ' + shortName(next.m.name) + ' · ' + M.fmtDate(next.m.planned),
+        nodeName: shortName(next.m.name), nodeDate: M.fmtDate(next.m.planned), overdueDays: 0 };
+    }
+    return { cls: 'muted', text: '无带日期的未完成节点', nodeName: '', nodeDate: '', overdueDays: 0 };
   }
 
   function shortName(s) {
