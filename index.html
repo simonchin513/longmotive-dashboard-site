@@ -223,6 +223,20 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 .card-sub { font-size: 11.5px; color: var(--ink-muted); }
 .card-head .btn, .panel-head .btn { margin-left: auto; }
 
+/* in-card sort switch — one joined segment, the active order reads accent */
+.sort-seg { margin-left: auto; display: inline-flex; }
+.card-head .sort-seg .btn, .panel-head .sort-seg .btn { margin-left: 0; }
+.sort-seg .btn { border-radius: 0; }
+.sort-seg .btn:first-child { border-radius: 7px 0 0 7px; }
+.sort-seg .btn:last-child { border-radius: 0 7px 7px 0; }
+.sort-seg .btn + .btn { border-left: 0; }
+.sort-seg .btn.on {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  color: var(--accent); font-weight: 650; position: relative; z-index: 1;
+  border-left: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: 18px; }
 .grid-2 > .card, .grid-2 > .panel, .band > .grid-2 > .panel { margin-bottom: 0; }
 
@@ -6872,9 +6886,12 @@ window.LM_SEED = {
     }
     var today = M.parseDate(d.meta.reportDate);
     var ongoing = d.projects.filter(function (p) { return p.phase === 'ongoing'; });
-    /* urgency first — the variance colour IS the sort key: 严重滞后 (red),
-       then 需关注 (amber), 正常 (green) sinks below them, not-started (0%)
-       at the very bottom; within a band, lowest progress first */
+    /* three orderings behind the in-card buttons; the chosen one persists.
+       urgency: the variance colour IS the sort key — 严重滞后 (red), 需关注
+       (amber), 正常 (green) sinks, not-started (0%) at the very bottom */
+    var mode = 'urgency';
+    try { mode = localStorage.getItem('lm-pb-sort') || 'urgency'; } catch (e) { /* ignore */ }
+    if (mode !== 'progress' && mode !== 'name') mode = 'urgency';
     var pbRank = function (p) {
       var pr = p.progress;
       if (pr.actual === 0) return 3;
@@ -6882,13 +6899,22 @@ window.LM_SEED = {
       var st = M.varianceStatus(pr.actual - pr.planned);
       return st === 'red' ? 0 : st === 'amber' ? 1 : 2;
     };
+    var sorters = {
+      urgency: function (a, b) {
+        var ra = pbRank(a), rb = pbRank(b);
+        if (ra !== rb) return ra - rb;
+        return a.progress.actual - b.progress.actual;
+      },
+      progress: function (a, b) {
+        var az = a.progress.actual === 0, bz = b.progress.actual === 0;
+        if (az !== bz) return az ? 1 : -1;
+        return a.progress.actual - b.progress.actual;
+      },
+      name: function (a, b) { return String(a.name).localeCompare(String(b.name), 'zh-Hans-CN'); }
+    };
     var withNum = ongoing.filter(function (p) {
       return typeof (p.progress || {}).actual === 'number';
-    }).sort(function (a, b) {
-      var ra = pbRank(a), rb = pbRank(b);
-      if (ra !== rb) return ra - rb;
-      return a.progress.actual - b.progress.actual;
-    });
+    }).sort(sorters[mode]);
     var noNum = ongoing.length - withNum.length;
     var completed = d.projects.length - ongoing.length;
 
@@ -6906,11 +6932,25 @@ window.LM_SEED = {
 
     var h = ['<div class="pg-cols">'];
     h.push('<section class="card progress-board">');
+    var SORT_SUB = {
+      urgency: '严重滞后 → 需关注 → 正常，未开始（0%）沉底',
+      progress: '进度低者在前，未开始（0%）沉底',
+      name: '按项目名称排列'
+    };
+    var sortBtn = function (key, label) {
+      return '<button class="btn xs' + (mode === key ? ' on' : '') +
+        '" data-action="pb-sort" data-sort="' + key + '">' + label + '</button>';
+    };
     h.push('<div class="card-head"><h2>各项目实际进度</h2>' +
-      '<span class="card-sub">按紧急度排列：严重滞后 → 需关注 → 正常，未开始（0%）沉底 · 黑色竖线 = 计划位置 · 点击条形进入项目页</span></div>');
+      '<span class="card-sub">' + SORT_SUB[mode] + ' · 黑色竖线 = 计划位置 · 点击条形进入项目页</span>' +
+      '<div class="sort-seg" role="group" aria-label="排序方式">' +
+      sortBtn('urgency', '依紧急程度') +
+      sortBtn('progress', '依完成度') +
+      sortBtn('name', '依名称') +
+      '</div></div>');
     h.push('<div class="table-scroll">' + C.actualVsPlanned(rows, {
       width: labelW + 860, labelWidth: labelW, rowH: 42,
-      ariaLabel: '各项目实际进度与计划对比条形图，按紧急度排列，严重滞后在前'
+      ariaLabel: '各项目实际进度与计划对比条形图，' + SORT_SUB[mode]
     }) + '</div>');
     var tail = [];
     if (noNum) tail.push('另有 ' + noNum + ' 个在施工项目未填报进度');
@@ -9135,7 +9175,11 @@ window.LM_SEED = {
       }
       var act = b.getAttribute('data-action');
       var id = b.getAttribute('data-project');
-      if (act === 'edit-project') LM.views.editor.openProject(id, A.render);
+      if (act === 'pb-sort') {
+        try { localStorage.setItem('lm-pb-sort', b.getAttribute('data-sort')); } catch (err) { /* ignore */ }
+        A.render();
+      }
+      else if (act === 'edit-project') LM.views.editor.openProject(id, A.render);
       else if (act === 'add-project') LM.views.editor.openNewProject(b.getAttribute('data-campus'), A.render);
       else if (act === 'edit-analysis') LM.views.editor.openAnalysis(id, A.render);
       else if (act === 'ack-alarm') {
