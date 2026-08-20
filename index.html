@@ -84,6 +84,11 @@
 
 * { box-sizing: border-box; }
 
+/* the vertical scrollbar's gutter is always reserved — otherwise the first
+   render measures a scrollbar-less width, the content then summons the
+   scrollbar, and every fit-to-space chart overshoots by ~17px */
+html { scrollbar-gutter: stable; }
+
 body {
   margin: 0;
   background: var(--bg);
