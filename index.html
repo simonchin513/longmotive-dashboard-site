@@ -5397,11 +5397,15 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
 
 
 /* ===== js/i18n.js ===== */
-/* Chrome-layer language toggle (中 / EN). The page renders Chinese-first;
-   when lang = en, a post-render pass walks the header + main text nodes and
-   swaps exact matches from the dictionary plus a few numeric patterns.
-   DATA stays as data: project names are English already; derivation notes,
-   tooltips and the editor remain Chinese in v1. */
+/* 中 / EN toggle. Chinese-first render; when lang = en a post-render pass
+   translates the header + main — text nodes AND title/data-tip/aria-label
+   attributes. Three layers, per the reviewed glossary (docs/i18n-review.md,
+   user-approved 2026-08-19: Master List, Defect, Boss, to verify):
+     1 exact  — whole trimmed node matches
+     2 FRAG   — substring fragments; generated sentences are literal
+                concatenations, so translating每个片段 rebuilds the sentence
+     3 PAT    — numeric patterns, then full-width punctuation normalising
+   The editor modal stays Chinese by design (data entry is the CN team). */
 (function (LM) {
   'use strict';
 
@@ -5416,20 +5420,17 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     try { localStorage.setItem('lm-lang', I.lang() === 'en' ? 'zh' : 'en'); } catch (e) { /* ignore */ }
   };
 
-  /* exact text-node matches (trimmed) */
+  /* ── 1 · exact whole-node matches ─────────────────────────────────── */
   var D = {
-    /* header + toolbar */
     '海外项目控制台 · Poweringup Progress, Building Excellence': 'Overseas Project Control · Poweringup Progress, Building Excellence',
     '周报设置': 'Report Settings', '保存 PDF': 'Save PDF', '导出 Excel': 'Export Excel',
     '备份数据 JSON': 'Backup JSON', '载入数据 JSON': 'Load JSON',
     '添加项目': 'Add Project', '恢复原始数据': 'Reset Data',
-    '预警': 'Alarms', '● 本地已编辑': '● Edited locally',
-    '分享版本 · 快照': 'Shared snapshot',
+    '预警': 'Alarms', '● 本地已编辑': '● Edited locally', '分享版本 · 快照': 'Shared snapshot',
     'OVERALL 总览': 'OVERVIEW', '图表生成器': 'Chart Builder',
-    /* hero + filter */
     '报告日期': 'Report date', '数据截止': 'Data cutoff', '园区': 'Campus', '全部': 'All',
-    '颜色与标记含义': 'Colour & marker key', '图表配色的读法 · 点击展开 / 收起': 'How to read the palette · click to expand / collapse',
-    /* bands + cards */
+    '颜色与标记含义': 'Colour & marker key',
+    '图表配色的读法 · 点击展开 / 收起': 'How to read the palette · click to expand / collapse',
     '项目进度': 'Project progress', '需要关注什么': 'What needs attention',
     '组合分布': 'Portfolio mix', '交付容量': 'Delivered capacity', '管理层视角': 'Management view',
     '各项目实际进度': 'Actual progress by project', '各项目所处阶段': 'Lifecycle stage by project',
@@ -5439,72 +5440,311 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     '交付台账': 'Delivery ledger', '风险事项': 'Risks', '下周重点作业': 'Next-week priorities',
     '老板关注的事项': 'Boss attention items', '安全绩效（所有园区）': 'Safety (all campuses)',
     '预警加权评分排名 · 前 10': 'Alarm score ranking · top 10',
-    '销项与文档闭合': 'Close-out & documentation',
-    /* KPI zh labels (the EN eyebrow already sits beneath) */
-    '在建总容量': 'Active capacity', '在施工项目数': 'Ongoing projects', '已完成项目数': 'Completed',
-    '2026 已交付容量': 'Delivered 2026', '平均进度': 'Average progress', '预警总数': 'Active alarms',
-    '在建容量': 'Active capacity', '销项管理中': 'in close-out', '仅计已填报项目': 'reported projects only',
+    '销项与文档闭合': 'Close-out & documentation', '本期状况': 'This period', '项目分析': 'Project analysis',
+    '进度与节点': 'Progress & milestones', '周报五个板块': 'The five weekly blocks',
+    '闭合与商务': 'Close-out & commercial', '数据说明': 'Data quality notes',
+    '关键里程碑与未来四周': 'Key milestones & next four weeks', '本项目预警': 'Project alarms',
+    '分期进度': 'Phase progress', '现场问题闭合': 'Site-issue closure', '销项清单': 'Close-out lists',
+    '项目风险': 'Project risks', '乙供设备计划': 'Contractor-supplied equipment plan',
+    '合约与收款': 'Contract & collections', '文档报审 / 闭合进度': 'Document submission / closure',
+    '每月 RFS 交付 · MW': 'Monthly RFS delivery · MW',
+    '在建总容量': 'Active capacity', '在建容量': 'Active capacity', '2026 已交付容量': 'Delivered 2026',
+    '平均进度': 'Average progress', '预警总数': 'Active alarms', '销项管理中': 'in close-out',
+    '仅计已填报项目': 'reported projects only',
     '死亡事故': 'Fatalities', '一般事故率': 'AFR', '严重事故率': 'ASR', '事故累计数': 'Reportables',
-    /* controls */
     '依紧急程度': 'By urgency', '依完成度': 'By progress', '依名称': 'By name',
     '沿用上期': 'Renew', '确认': 'Ack', '撤销': 'Undo', '编辑数据': 'Edit data',
     '+ 添加项目': '+ Add project', '查看清单 →': 'view list →',
-    /* alarm groups */
     '紧急 Critical': 'Critical', '高 High': 'High', '中 Medium': 'Medium', '低 Low': 'Low',
-    /* lifecycle stage names (pill/board headers) */
     '申请': 'Application', '审批': 'Approval', '安装施工': 'Installation',
     '调试测试': 'Commissioning', 'RFS 1 交付': 'RFS 1', 'RFS 2 交付': 'RFS 2', '客户移交': 'Handover',
-    /* table headers */
     '租户 / 范围': 'Tenant / scope', '负责人': 'Owner', '容量': 'MW', '进度': 'Actual',
     '计划': 'Planned', '状态': 'Status', '阶段 Stage': 'Stage', '下一节点': 'Next node',
     '状态分布': 'Status mix', '国家': 'Country', '在施工': 'Ongoing', '已完成': 'Completed',
-    '月份': 'Month', '备注 Remark': 'Remark', '销项进度': 'Close-out %', '销项计划': 'Close-out plan',
-    '待补': 'TBD', '待确认': 'TBC'
+    '月份': 'Month', '备注 Remark': 'Remark', '备注': 'Remark', '销项进度': 'Close-out %',
+    '销项计划': 'Close-out plan', '销项负责人': 'Close-out owner',
+    '待补': 'TBD', '待确认': 'TBC', '待定': 'TBD', '未填报': 'not reported', '未分组': 'Ungrouped',
+    '实际进度': 'Actual', '计划进度': 'Planned', '下一里程碑': 'Next milestone',
+    '达标': 'on target', '低于 1.0': 'below 1.0', '人工撰写': 'manually written',
+    '编辑 / 恢复自动': 'Edit / restore auto', '改为人工撰写': 'Write manually',
+    '类别': 'Category', '类型': 'Type', '清单': 'List', '交付时间': 'Due',
+    '状态 / 进度色': 'Status / progress colours', '预警严重度': 'Alarm severity', '园区颜色': 'Campus colours',
+    '正常 · 纯数量/进度也用此色': 'normal · plain quantities wear it too',
+    '需关注 · 落后 ≤5%': 'attention · behind ≤5%', '严重滞后 >5% · 逾期': 'severe >5% · overdue',
+    '未开始 / 待补': 'not started / no data', '紧急': 'critical', '高': 'high', '中': 'medium', '低': 'low',
+    '园区区分色，对应环图图例': 'campus identity — matches the donut legend',
+    '已逾期': 'overdue', '即将到期': 'due soon', '30 天内到期': 'due in 30 days',
+    'MW 在建': 'MW active', '待核对': 'to verify', '仅报百分比': 'percentage only',
+    '竣工图': 'As-built', '培训手册': 'Training manual', '操作手册': 'O&M manual', '文档整体': 'Docs overall',
+    '整体 Overall': 'Overall', '维保手册 OMM': 'O&M manual', '竣工图 As-Built': 'As-built',
+    '培训手册 Training Manual': 'Training manual',
+    '排序方式': 'Sort order', '园区筛选': 'Campus filter', '未来四周': 'Next 4 weeks', '里程碑': 'Milestone',
+    '序': '#', '币种': 'Currency', '风险性质': 'Risk nature', '目前状态': 'Current status',
+    '行动事项': 'Action item', '设备 / 材料': 'Equipment / material', '预计到场': 'Expected on site',
+    '现场需用': 'Required on site', '当前作业': 'Current works', '区域 / 系统': 'Area / system',
+    '管理层关注 / 决策': 'Management attention / decision', '需管理层关注事项': 'items needing management attention',
+    '总项': 'Total', '闭环': 'Closed', '剩余': 'Remaining', '已完成 %': 'Done %', '周环比': 'WoW',
+    '应交': 'Required', '已交': 'Submitted', '待审': 'Under review', '驳回': 'Rejected', '闭合': 'Closed',
+    '提报率': 'Submission rate', '闭合率': 'Closure rate', '收到 Received': 'Received', '闭合 Closed': 'Closed',
+    '未闭合': 'Open', '合约金额': 'Contract sum', '已收款': 'Collected', '收款比例': 'Collection ratio',
+    '未收款': 'Outstanding', '说明': 'Detail', '涉及项目': 'Projects', '风险 Risk': 'Risk'
   };
 
-  /* numeric / mixed patterns */
-  var P = [
-    [/周报 (\d+)/g, 'Weekly $1'],
-    [/统筹 (\d+)/g, 'Register $1'],
+  /* ── 2 · sentence fragments (generated text is concatenated from these;
+     applied longest-first so specific beats generic) ─────────────────── */
+  var FRAG = {
+    /* analysis generator */
+    '销项进度 ': 'Defect close-out at ', '，计划关闭日 ': ', planned closure ',
+    '销项关闭率低于 70%，交付风险集中在缺陷闭合。': 'Close-out below 70% — delivery risk concentrates in defect closure. ',
+    '销项仍有尾项未闭合。': 'Residual close-out items remain open. ',
+    '本期未填报销项进度。': 'No close-out progress reported this period. ',
+    '实际进度 ': 'Actual progress ', '，计划 ': ' vs planned ',
+    '，领先计划': ' — ahead of plan', '，略滞后于计划': ' — slightly behind plan',
+    '，严重滞后于计划': ' — severely behind plan',
+    '领先计划': 'ahead of plan', '略滞后于计划': 'slightly behind plan', '严重滞后于计划': 'severely behind plan',
+    '偏差超过周报自身的 5% 门槛，按规则应列为 Critical。': "Variance exceeds the report's own 5% threshold — rules as Critical. ",
+    '，进度绩效达标。': '; schedule performance on target. ',
+    '，进度绩效低于 1.0。': '; schedule performance below 1.0. ',
+    '项目尚未开工。': 'Works not yet started. ',
+    '本期未填报实际或计划进度。': 'Actual or planned progress not reported this period. ',
+    '进度栏位为空，无法参与偏差评估。': 'Progress fields empty — excluded from variance assessment. ',
+    ' 个节点已逾期（最长 ': ' milestones overdue (up to ', ' 天）': ' days)',
+    ' 天内有 ': ' days: ', ' 个节点到期': ' milestones due',
+    ' 计划 ': ' planned ', '，逾期 ': ' — overdue ', ' 天未标记完成。': ' days without completion. ',
+    ' 将于 ': ' falls due ', ' 到期，仅剩 ': ' — only ', ' 天。': ' days left. ',
+    ' 天内无到期节点，亦无逾期节点。': ' days: nothing due, nothing overdue. ',
+    '未来 ': 'Next ',
+    '执行摘要中 ': 'Executive summary: ', ' 项标记为红：': ' items flagged red: ',
+    '文档整体闭合率 ': 'Overall documentation closure ',
+    '文档闭合率低于 25%，是移交与结算的主要制约。': 'Documentation closure below 25% — the main constraint on handover and settlement. ',
+    '竣工图闭合率 ': 'As-built closure ',
+    '现场问题（NCR / PMCI / RSS）闭合率 ': 'Site issues (NCR / PMCI / RSS) closure ',
+    '现场问题闭合率低于 30%，积压可能影响 CPC 与结算。': 'Site-issue closure below 30% — the backlog may affect CPC and settlement. ',
+    'LAD / 罚金敞口已登记：': 'LAD / penalty exposure on record: ', 'LAD 敞口：': 'LAD exposure: ',
+    ' 收款比例仅 ': ' collection ratio only ',
+    '数据说明：': 'Data quality: ',
+    /* provenance */
+    '由本表其他字段算出：': 'Derived from other fields: ',
+    '录入值，与规则不一致：': 'Entered value, conflicts with the rule: ',
+    '人工修正 · ': 'Manual override · ', '原值：': 'was: ', '理由：': 'reason: ',
+    '未填写理由': 'no reason given', '未填写': 'not given',
+    '算出': 'derived', '人工修正': 'manual override', '与规则不一致': 'conflicts with rule',
+    '悬停任一数值可看说明': 'hover any value for its provenance',
+    '上期（周报 ': 'In Weekly ', '）曾修正为「': ' this was overridden to "', '」：': '": ',
+    ' — 本期未沿用，如仍适用请在编辑器里续期': ' — not renewed this period; renew in the editor if still valid',
+    '偏差 ': 'Variance ', ' 按规则应为「': ' — the rule says "', '」': '"',
+    '在施工项目的容量 MW 求和': "Sum of ongoing projects' MW",
+    'phase = ongoing 的项目计数': 'Count of ongoing projects',
+    'phase = completed 的项目计数': 'Count of completed projects',
+    '每月 RFS 交付表的单项容量累加': 'Sum of line items in the monthly RFS delivery table',
+    '在施工项目实际进度的算术平均': 'Arithmetic mean of reported actual progress',
+    '同时有实际与计划数的项目上，实际均值减计划均值': 'Paired mean: actual minus planned over projects carrying both',
+    '预警引擎：未完成里程碑的到期/逾期 + 进度偏差；已确认的不计入': 'Alarm engine: due/overdue open milestones + progress variance; acknowledged ones excluded',
+    '预警引擎：未完成里程碑的到期/逾期 + 进度偏差': 'Alarm engine: due/overdue open milestones + progress variance',
+    '预警引擎按里程碑日期与进度偏差算出': 'Alarm engine: milestone dates + progress variance',
+    '预警引擎按本园区项目算出': "Alarm engine over this campus's projects",
+    '逾期与即将到期各自计数': 'overdue and due-soon counted separately',
+    '里程碑中第一个未标记实际日期、且计划日期不早于周报日的节点': 'First milestone without an actual date whose plan is not before the report date',
+    '里程碑中第一个未标记实际日期的节点': 'First milestone without an actual date',
+    '本园区已填报实际进度的项目取平均': "Mean over this campus's reported projects",
+    'Σ(严重度权重 紧急10/高6/中3/低1) + 红灯类别数 × 4': 'Σ(severity weights critical 10 / high 6 / medium 3 / low 1) + red categories × 4',
+    '实际日期 − 计划日期': 'actual date − planned date',
+    '闭合 ÷ 应交': 'closed ÷ required', '闭合 ': 'closed ', ' ÷ 收到 ': ' ÷ received ',
+    '本月及之前各月单项容量累加': 'Running total of line items to date',
+    /* lifecycle */
+    '阶段推导：': 'Stage derivation: ',
+    'phase = completed：项目已在销项/移交管理': 'phase = completed — project is in close-out / handover',
+    '全部 RFS 节点已交付，进入移交': 'All RFS milestones delivered — moving to handover',
+    ' 已交付，': ' delivered — ', 'IST 已完成，': 'IST complete — ', '正在交付 RFS ': 'delivering RFS ',
+    '最早未完成节点是 IST（系统联调测试）': 'Earliest open milestone is IST (integrated system testing)',
+    '施工进度 ': 'Construction at ', '，IST 之前的阶段': ' — pre-IST stage',
+    '已有节点完成但施工未起量': 'Milestones achieved but construction not yet under way',
+    '尚无完成节点，进度未填报或为 0': 'No achieved milestones; progress unreported or zero',
+    '阶段为推导值，悬停当前格看依据 · 点行进入项目页': 'Stages are derived — hover the current cell for evidence · click a row to open the project',
+    '阶段为推导值': 'stage is derived',
+    '项目阶段：当前处于': 'Project stage: currently at ',
+    '申请 → 客户移交 · 早期阶段在前': 'Application → Handover · earliest stages first',
+    ' 交付': ' delivery',
+    /* ack chain */
+    '本期已确认 · 不计入预警数与评分': 'Acknowledged · excluded from counts and scoring',
+    '本期已确认 ': 'Acknowledged this period ',
+    '）曾确认：': ' this was acknowledged: ', ' — 本期需重新确认': ' — needs re-acknowledging this period',
+    '此节点原有确认（': 'Prior acknowledgement (', '），因计划日期已变更而失效': ') voided by a plan-date change',
+    '沿用上期理由，重新确认本期': "Renew with last period's reason",
+    '在清单内滚动查看全部 ': 'Scroll inside for all ', ' 条未确认预警 · 页面可直接滑过本卡': ' open alarms · the page scrolls past this card',
+    /* milestones */
+    ' (已完成)': ' (achieved)', ' (逾期)': ' (overdue)', ' (计划)': ' (planned)',
+    '已改期 ': 'Replanned ', ' 次，每期改动由编辑器自动记录': '× — every change auto-recorded',
+    '至周报日 ': 'plan as of ', ' 的计划': '',
+    '各阶段已全部通过，但「实际完成日期」未填——节点仍按未完成计，预警照常': 'All stages passed but no actual date — the milestone still counts as open; alarms unaffected',
+    '卡在 ': 'Stuck at ', '（原计划 ': ' (planned ', ' · 原计划 ': ' · planned ',
+    '下一节点 ': 'Next node ', '无带日期的未完成节点': 'no dated open milestones',
+    ' 个 · 偏差栏空白 = 按计划完成': ' · blank variance = on plan',
+    '展望区间 ': 'look-ahead window ', ' 条 P6 活动': ' P6 activities', '来源：': 'Source: ',
+    '已完成里程碑 ': 'Achieved milestones ', '尚无已完成里程碑。': 'No achieved milestones yet. ',
+    '本项目尚未登记里程碑。': 'No milestones registered for this project. ',
+    '里程碑甘特图 Milestone Gantt': 'Milestone gantt', '未定日期 Undated': 'Undated',
+    '作业 · ': 'works · ', ' 项': '', '阶段进度': 'stage progress', '，当前：': ' — current: ',
+    ' · 当前：': ' · current: ', ' · 已改期 ': ' · replanned ', ' 通过': ' passed', ' · 计划 ': ' · planned ',
+    ' · 已逾期': ' · overdue', ' 已完成': ' achieved', '（计划 ': ' (planned ',
+    /* notes & subs */
+    '统计规则：读取统筹 Completed Projects 的 RFS1–RFS-N；有明确分期 MW 时按分期计入，否则归入最后一个已完成 RFS 并标记「待核对」。': 'Counting rule: reads RFS1–RFS-N from the Master List\'s Completed Projects; explicit phase MW counts per phase, otherwise it books to the last achieved RFS flagged "to verify". ',
+    '周环比 ▲▼ 与趋势线由每周快照驱动：本周（周报 ': 'Deltas ▲▼ and trends run on weekly snapshots: this week (Weekly ',
+    '）已存入第 ': ') is history entry #', ' 条历史，下次周更后自动亮起。': ' — they light up after the next weekly run. ',
+    '销项进度为缺陷闭合率，不是施工总进度': 'Close-out % is the defect closure rate, not construction progress',
+    '没有项目卡在过期节点上。': 'No project is stuck on an expired milestone. ',
+    '未来 30 天内没有到期或逾期节点。': 'Nothing due or overdue within 30 days. ',
+    '未来 30 天内没有未确认的到期或逾期节点。': 'Nothing unacknowledged due or overdue within 30 days. ',
+    'Infrastructure 不计入 MW': 'Infrastructure carries no MW',
+    ' · 全组合数据，不随园区筛选': ' · portfolio-level, unaffected by the campus filter',
+    '全页只统计 ': 'Counting only ', ' · 交付容量与管理层视角除外': ' · delivered capacity and management view excluded',
+    ' · 全组合口径': ' · portfolio-wide', ' · 只看 ': ' · ',
+    ' 个在施工项目未填报进度': ' more ongoing projects have no reported progress',
+    ' 个已完成项目在销项管理（见各园区页）': ' completed projects in close-out (see campus pages)',
+    ' 个已完成项目全部处于客户移交（销项管理），见下方登记表。': ' completed projects all sit at Handover (close-out) — see the register below. ',
+    '由本期数据自动生成 · 编辑数据即刷新': "Generated from this period's data · refreshes on edit",
+    '源文件中的空白、问号与自相矛盾之处，原样保留': 'Blanks, question marks and contradictions from the source file, kept as-is',
+    '与 PPTX 幻灯片逐项对应': 'maps one-to-one to the PPTX slides',
+    '需管理层关注事项': 'items needing management attention',
+    'RM 与 USD 分开列示，不合并': 'RM and USD listed separately, never merged',
+    '本周 ': 'this week ', ' vs 上周 ': ' vs last week ',
+    '30 天内到期与已逾期': 'due in 30 days and overdue',
+    '竣工图 · 培训手册 · 维保手册': 'As-built · training · O&M manuals',
+    '严重滞后 → 需关注 → 正常，未开始（0%）沉底': 'severe → attention → normal; not-started (0%) last',
+    '进度低者在前，未开始（0%）沉底': 'lowest progress first; not-started (0%) last',
+    '按项目名称排列': 'sorted by name',
+    ' · 黑色竖线 = 计划位置 · 点击条形进入项目页': ' · black tick = plan · click a bar to open the project',
+    '竖线 = 计划 · 条形颜色按 ≤5% / >5% 偏差规则': 'tick = plan · bar colour follows the ≤5% / >5% variance rule',
+    ' 个在施工项目 · 条形 = 实际进度 · 有计划数时竖线示计划、颜色按 ≤5% / >5% 偏差规则': ' ongoing projects · bar = actual · tick = plan where reported · colour by the ≤5% / >5% rule',
+    '以周报日 ': 'Based on report date ', ' 为基准 · 完整预警清单在右侧栏': ' · the full alarm list lives in the right rail',
+    '长度 = 加权评分，从高到低 · 颜色 = 该项目最高预警严重度 · 点击条形进入项目页': "length = weighted score, high to low · colour = the project's worst severity · click a bar to open it",
+    '加权评分 = 严重度权重 + 红灯类别 × 4': 'weighted score = severity weights + red categories × 4',
+    '加权评分 = 严重度权重（紧急 10 · 高 6 · 中 3 · 低 1）+ 红灯类别 × 4。左侧图表是完整排名。': 'Weighted score = severity weights (critical 10 · high 6 · medium 3 · low 1) + red categories × 4. The chart on the left is the full ranking. ',
+    ' 逾期节点': ' overdue milestones', ' 30 天内到期': ' due in 30 days', ' 红灯类别': ' red categories',
+    '按周报自身的 ≤5% / >5% 偏差规则': "by the report's own ≤5% / >5% variance rule",
+    '◆ 绿 = 已完成 · 琥珀 = 计划中 · 红 = 逾期 · 阴影带 = ': '◆ green = achieved · amber = planned · red = overdue · shaded band = ',
+    ' 天预警窗': '-day alarm window',
+    '组合甘特图 · 前后 120 天关键节点': 'Portfolio gantt · key milestones ±120 days',
+    '来自总览表的关注事项、风险与安全绩效': 'attention items, risks and safety from the overview sheet',
+    '√ 已完成 · O 进行中': '√ done · O in progress', '累计 ': 'cumulative ',
+    '点项目名或行尾 → 进入详情': 'click a name or the row end → details',
+    ' · 清单在栏内滚动': ' · the list scrolls inside', '共 ': '',
+    '最早未完成节点已过期 · ': 'earliest open milestone already past · ', ' 个项目': ' projects',
+    ' 个项目的卡点见下方预警清单。': ' more stuck projects appear in the alarm list. ', '其余 ': 'The other ',
+    ' 个待完成': ' open', ' 个已完成 · ': ' achieved · ',
+    '（总负责人 ': ' (lead ', '总负责人': 'lead',
+    ' 项目列表': ' project list', '周报 ': 'Weekly ', '统筹 ': 'Master List ',
+    '落后 ': 'behind ', '今日到期': 'due today', '逾期 ': 'overdue ', ' 天后': 'd', ' 天': 'd',
+    '（销项）': ' (close-out)', ' · 目标 ': ' · target ', '截至 ': 'as of ', '较计划 ': 'vs plan ',
+    'pp · 仅计有计划数的 ': 'pp · paired over the ', '较周报 ': 'vs Weekly ', ' 持平': ' unchanged', '— 与周报 ': '— level with Weekly ',
+    ' 逾期 · ': ' overdue · ', ' 即将到期': ' due soon', ' · 另 ': ' · plus ', ' 条已确认': ' acknowledged',
+    ' 个在施工项目': ' ongoing projects', ' 个园区': ' campuses', ' 个 · ': ' · ',
+    ' 条': '', ' 个': '', '预警 · 未来 ': 'Alarms · next ',
+    '近 ': 'last ', ' 周趋势折线': '-week trend line', ' 周趋势': '-week trend',
+    ' 园区各项目实际与计划进度对比图': ' campus actual vs planned by project',
+    ' 园区各项目生命周期阶段矩阵，行为项目、列为七个阶段': ' campus lifecycle matrix — rows are projects, columns the seven stages',
+    '各项目实际进度与计划对比条形图，': 'Actual vs planned bars by project — ',
+    '预警加权评分排名条形图，前 10 名': 'Alarm score ranking bars, top 10',
+    '园区容量分布环形图': 'Capacity-by-campus donut', '项目状态分布环形图': 'Status-mix donut',
+    '组合甘特图：全部项目前后 120 天关键节点': 'Portfolio gantt: all projects, key milestones ±120 days',
+    '每月 RFS 交付容量柱状图': 'Monthly RFS delivery columns', '分期进度对比图': 'Phase progress chart',
+    '点击跳到预警清单': 'jump to the alarm list', '切换深浅色': 'toggle theme', '切换语言': 'switch language',
+    '经浏览器打印对话框另存为 PDF': "save as PDF via the browser's print dialog",
+    '下载 project-data.json': 'download project-data.json',
+    '读取 project-data.json，整份替换当前数据': 'load project-data.json, replacing the current dataset',
+    '更多': 'more',
+    '甘特图': 'Gantt chart', '条形图': 'Bar chart', '环形图': 'Donut chart', '柱状图': 'Column chart',
+    '堆叠条形图': 'Stacked bars', '实际与计划对比图': 'Actual vs planned chart', '图表': 'Chart',
+    '项目 / Phase': 'Project / Phase', '项目 Project': 'Project', '园区 Campus': 'Campus',
+    '容量 MW': 'MW', '已完成项目 · 销项管理': 'Completed · close-out',
+    '未来四周 Next 4 Weeks': 'Next 4 weeks', '负责人 Owners': 'Owners',
+    '图表生成器 Chart Builder': 'Chart Builder', '参数 Parameters': 'Parameters', '指标 Metric': 'Metric',
+    '图表类型 Chart': 'Chart type', '分组 Group by': 'Group by', '显示数量 Show': 'Show',
+    '阶段 Phase': 'Phase', '在施工 On-going': 'Ongoing', '已完成 Completed': 'Completed',
+    '全部园区 All': 'All',
+    /* second sweep — leftovers found in the full-page census */
+    '报告日期 ': 'Report date ', ' · 数据截止 ': ' · data cutoff ',
+    ' · 查看清单 →': ' · view list →',
+    '严重度 = 紧急 的预警条数': 'count of critical-severity alarms',
+    '周报日 ': 'report date ', ' 年至今': ' ', '另有 ': '',
+    '选择指标、图表类型与分组，图表由当前数据即时生成。编辑数据后图表随之更新。': 'Pick a metric, chart type and grouping — the chart builds instantly from current data and updates when you edit. ',
+    '留空未填报的项目不计入平均值，也不会被当作 0。': 'Blank (unreported) projects are excluded from averages — never treated as 0. ',
+    '进度偏差 ': '', 'SPI 进度绩效指数': 'SPI', '容量 Capacity (MW)': 'Capacity (MW)',
+    '计划进度 Planned progress': 'Planned progress', '实际 vs 计划 Actual vs Planned': 'Actual vs planned',
+    '文档闭合率 Document closure': 'Document closure', '现场问题闭合率 Issue closure': 'Issue closure',
+    '销项闭合率 Defect closure': 'Defect closure', '收款比例 Collection ratio': 'Collection ratio',
+    '预警数量 Alarm count': 'Alarm count', '预警加权评分 Alarm score': 'Alarm score',
+    '横条图 Bar': 'Bar', '环形图 Donut / Pie': 'Donut / pie', '甘特图 Gantt': 'Gantt',
+    '柱状图 Columns': 'Columns', '按项目 By project': 'By project', '按园区 By campus': 'By campus',
+    '按状态 By status': 'By status', '按负责人 By owner': 'By owner',
+    '进度详情': 'Progress detail', '周度执行摘要': 'Weekly executive summary',
+    '环境健康安全 EHS': 'EHS', '本周现场作业': 'Site works this week', '下周工作重点': 'Next-week focus',
+    '本期周报未填报 EHS 数据。': 'No EHS data reported this period. ',
+    '文档报审、现场问题、销项、风险与收款': 'document submission, site issues, close-out, risks and collections',
+    '本项目由导入器于周 ': 'Created by the importer in week ', ' 新建，基础数据待补': ' — base data pending',
+    '计划进度与状态来自周报站（': 'Planned progress and status from the weekly report site (',
+    ' 更新）；实际进度以统筹表为准。': ' update); actual progress follows the Master List. ',
+    '改期 ': 'Replanned ', ' 次，每期改动由编辑器自动记录': '× — every change auto-recorded', ' 次': '×',
+    '申请': 'Application', '审批': 'Approval', '安装施工': 'Installation',
+    '调试测试': 'Commissioning', '客户移交': 'Handover',
+    ' 实际 ': ' actual ', '实际 ': 'actual ', ' / 计划 ': ' / planned ', ' · 计划 ': ' · planned ',
+    ' 计划': ' planned', '待补': 'TBD', '待确认': 'TBC', ' · 在施工项目': ' · ongoing projects'
+  };
+  var FRAG_KEYS = Object.keys(FRAG).sort(function (a, b) { return b.length - a.length; });
+
+  /* ── 3 · numeric patterns + full-width punctuation ────────────────── */
+  var PAT = [
     [/(\d+) 个在施工项目/g, '$1 ongoing projects'],
     [/(\d+) 个园区/g, '$1 campuses'],
     [/(\d+) 个已完成项目/g, '$1 completed projects'],
-    [/(\d+) 个$/g, '$1 items'],
     [/逾期 (\d+) 天/g, '$1d overdue'],
     [/(\d+) 天后/g, 'in $1d'],
-    [/今日到期/g, 'due today'],
-    [/共 (\d+) 条/g, '$1 items'],
-    [/(\d+) 条/g, '$1'],
     [/(\d+) 逾期/g, '$1 overdue'],
     [/(\d+) 即将到期/g, '$1 due soon'],
-    [/(\d+) 紧急/g, '$1 critical'],
-    [/较周报 (\d+)/g, 'vs weekly $1'],
-    [/较计划/g, 'vs plan'],
-    [/目标 /g, 'target '],
-    [/截至 /g, 'as of ']
+    [/(\d+) 紧急/g, '$1 critical']
   ];
+  var PUNCT = [
+    ['。', '. '], ['，', ', '], ['、', ', '], ['：', ': '], ['；', '; '],
+    ['「', '"'], ['」', '"'], ['（', ' ('], ['）', ') '], ['——', ' — ']
+  ];
+
+  function hasCJK(s) { return /[一-鿿]/.test(s); }
+
+  function translate(raw) {
+    var t = raw.trim();
+    if (!t) return raw;
+    if (D[t] !== undefined) return raw.replace(t, D[t]);
+    if (!hasCJK(raw)) return raw;
+    var out = raw;
+    for (var i = 0; i < FRAG_KEYS.length; i++) {
+      var k = FRAG_KEYS[i];
+      if (out.indexOf(k) > -1) out = out.split(k).join(FRAG[k]);
+    }
+    PAT.forEach(function (p) { out = out.replace(p[0], p[1]); });
+    if (hasCJK(out) || /[。，、：；「」（）]/.test(out)) {
+      PUNCT.forEach(function (p) { out = out.split(p[0]).join(p[1]); });
+    }
+    return out;
+  }
+
+  var ATTRS = ['title', 'data-tip', 'aria-label'];
 
   I.apply = function () {
     if (I.lang() !== 'en') return;
-    var roots = [document.querySelector('header.top'), document.getElementById('main')];
-    roots.forEach(function (root) {
+    [document.querySelector('header.top'), document.getElementById('main')].forEach(function (root) {
       if (!root) return;
       var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
       var n;
       while ((n = walker.nextNode())) {
-        var raw = n.nodeValue;
-        var t = raw.trim();
-        if (!t) continue;
-        if (D[t] !== undefined) {
-          n.nodeValue = raw.replace(t, D[t]);
-          continue;
-        }
-        if (/[一-鿿]/.test(t)) {
-          var out = raw;
-          P.forEach(function (pr) { out = out.replace(pr[0], pr[1]); });
-          if (out !== raw) n.nodeValue = out;
-        }
+        var out = translate(n.nodeValue);
+        if (out !== n.nodeValue) n.nodeValue = out;
       }
+      ATTRS.forEach(function (a) {
+        root.querySelectorAll('[' + a + ']').forEach(function (el) {
+          var v = el.getAttribute(a);
+          if (v && hasCJK(v)) el.setAttribute(a, translate(v));
+        });
+      });
     });
   };
 
