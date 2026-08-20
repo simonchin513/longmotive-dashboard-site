@@ -439,6 +439,8 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 }
 .kpi-zh { font-size: 13px; font-weight: 600; margin-top: 4px; }
 .kpi-en { font-family: var(--display); font-size: 11.5px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); }
+/* EN mode: the zh label is translated in place, so the eyebrow would repeat it */
+:root[data-lang="en"] .kpi-en { display: none; }
 .kpi-sub { font-size: 12.5px; line-height: 1.5; color: var(--ink-muted); margin-top: 6px; }
 
 /* The legend panel — colour and marker semantics. Collapsible <details>:
@@ -1261,11 +1263,7 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
     <div class="toolbar">
       <button class="btn flat" id="btn-meta">周报设置</button>
 
-      <!-- 保存 / 载入 are one pair: they write and read the same file. -->
-      <span class="btn-group">
-        <button class="btn" id="btn-save" title="下载 project-data.json">保存</button>
-        <button class="btn" id="btn-load" title="读取 project-data.json，整份替换当前数据">载入</button>
-      </span>
+      <button class="btn" id="btn-save-pdf" title="经浏览器打印对话框另存为 PDF">保存 PDF</button>
 
       <button class="btn primary" id="btn-excel">导出 Excel</button>
 
@@ -1273,14 +1271,18 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
         <button class="btn flat icon" id="btn-more" aria-haspopup="menu" aria-expanded="false" aria-label="更多">⋯</button>
         <div class="menu" id="menu-more" role="menu" hidden>
           <button role="menuitem" id="btn-add-project">添加项目</button>
-          <button role="menuitem" id="btn-print">打印 / 存 PDF</button>
+          <hr>
+          <!-- JSON 备份/载入是数据管线的交换格式（导入器 -b、周更流程都吃它），收在这里 -->
+          <button role="menuitem" id="btn-save" title="下载 project-data.json">备份数据 JSON</button>
+          <button role="menuitem" id="btn-load" title="读取 project-data.json，整份替换当前数据">载入数据 JSON</button>
           <hr>
           <button role="menuitem" class="danger" id="btn-reset">恢复原始数据</button>
-          <p class="menu-note">丢弃浏览器里的全部编辑，回到周报 46。已保存出去的 JSON 不受影响。</p>
+          <p class="menu-note">丢弃浏览器里的全部编辑，回到本期种子数据。已备份出去的 JSON 不受影响。</p>
         </div>
       </span>
 
       <span class="tb-sep" aria-hidden="true"></span>
+      <button class="btn flat icon" id="btn-lang" title="中 / English" aria-label="切换语言">EN</button>
       <button class="btn flat icon" id="btn-theme" title="切换深浅色" aria-label="切换深浅色">◐</button>
     </div>
   </div>
@@ -5390,6 +5392,121 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     return { rows: rows, start: addDays(today, -90), today: today, end: end };
   }
   M.portfolioTimeline = portfolioTimeline;
+
+})(window.LM = window.LM || {});
+
+
+/* ===== js/i18n.js ===== */
+/* Chrome-layer language toggle (中 / EN). The page renders Chinese-first;
+   when lang = en, a post-render pass walks the header + main text nodes and
+   swaps exact matches from the dictionary plus a few numeric patterns.
+   DATA stays as data: project names are English already; derivation notes,
+   tooltips and the editor remain Chinese in v1. */
+(function (LM) {
+  'use strict';
+
+  var I = {};
+  LM.i18n = I;
+
+  I.lang = function () {
+    try { return localStorage.getItem('lm-lang') === 'en' ? 'en' : 'zh'; }
+    catch (e) { return 'zh'; }
+  };
+  I.toggle = function () {
+    try { localStorage.setItem('lm-lang', I.lang() === 'en' ? 'zh' : 'en'); } catch (e) { /* ignore */ }
+  };
+
+  /* exact text-node matches (trimmed) */
+  var D = {
+    /* header + toolbar */
+    '海外项目控制台 · Poweringup Progress, Building Excellence': 'Overseas Project Control · Poweringup Progress, Building Excellence',
+    '周报设置': 'Report Settings', '保存 PDF': 'Save PDF', '导出 Excel': 'Export Excel',
+    '备份数据 JSON': 'Backup JSON', '载入数据 JSON': 'Load JSON',
+    '添加项目': 'Add Project', '恢复原始数据': 'Reset Data',
+    '预警': 'Alarms', '● 本地已编辑': '● Edited locally',
+    '分享版本 · 快照': 'Shared snapshot',
+    'OVERALL 总览': 'OVERVIEW', '图表生成器': 'Chart Builder',
+    /* hero + filter */
+    '报告日期': 'Report date', '数据截止': 'Data cutoff', '园区': 'Campus', '全部': 'All',
+    '颜色与标记含义': 'Colour & marker key', '图表配色的读法 · 点击展开 / 收起': 'How to read the palette · click to expand / collapse',
+    /* bands + cards */
+    '项目进度': 'Project progress', '需要关注什么': 'What needs attention',
+    '组合分布': 'Portfolio mix', '交付容量': 'Delivered capacity', '管理层视角': 'Management view',
+    '各项目实际进度': 'Actual progress by project', '各项目所处阶段': 'Lifecycle stage by project',
+    '实际 vs 计划进度': 'Actual vs planned', '在施工项目': 'Ongoing projects', '已完成项目': 'Completed projects',
+    '预警最高项目': 'Highest-alarm project', '卡点': 'Stuck points', '项目清单': 'Project register',
+    '各园区情况': 'By campus', '园区容量分布': 'Capacity by campus', '项目状态分布': 'Status mix',
+    '交付台账': 'Delivery ledger', '风险事项': 'Risks', '下周重点作业': 'Next-week priorities',
+    '老板关注的事项': 'Boss attention items', '安全绩效（所有园区）': 'Safety (all campuses)',
+    '预警加权评分排名 · 前 10': 'Alarm score ranking · top 10',
+    '销项与文档闭合': 'Close-out & documentation',
+    /* KPI zh labels (the EN eyebrow already sits beneath) */
+    '在建总容量': 'Active capacity', '在施工项目数': 'Ongoing projects', '已完成项目数': 'Completed',
+    '2026 已交付容量': 'Delivered 2026', '平均进度': 'Average progress', '预警总数': 'Active alarms',
+    '在建容量': 'Active capacity', '销项管理中': 'in close-out', '仅计已填报项目': 'reported projects only',
+    '死亡事故': 'Fatalities', '一般事故率': 'AFR', '严重事故率': 'ASR', '事故累计数': 'Reportables',
+    /* controls */
+    '依紧急程度': 'By urgency', '依完成度': 'By progress', '依名称': 'By name',
+    '沿用上期': 'Renew', '确认': 'Ack', '撤销': 'Undo', '编辑数据': 'Edit data',
+    '+ 添加项目': '+ Add project', '查看清单 →': 'view list →',
+    /* alarm groups */
+    '紧急 Critical': 'Critical', '高 High': 'High', '中 Medium': 'Medium', '低 Low': 'Low',
+    /* lifecycle stage names (pill/board headers) */
+    '申请': 'Application', '审批': 'Approval', '安装施工': 'Installation',
+    '调试测试': 'Commissioning', 'RFS 1 交付': 'RFS 1', 'RFS 2 交付': 'RFS 2', '客户移交': 'Handover',
+    /* table headers */
+    '租户 / 范围': 'Tenant / scope', '负责人': 'Owner', '容量': 'MW', '进度': 'Actual',
+    '计划': 'Planned', '状态': 'Status', '阶段 Stage': 'Stage', '下一节点': 'Next node',
+    '状态分布': 'Status mix', '国家': 'Country', '在施工': 'Ongoing', '已完成': 'Completed',
+    '月份': 'Month', '备注 Remark': 'Remark', '销项进度': 'Close-out %', '销项计划': 'Close-out plan',
+    '待补': 'TBD', '待确认': 'TBC'
+  };
+
+  /* numeric / mixed patterns */
+  var P = [
+    [/周报 (\d+)/g, 'Weekly $1'],
+    [/统筹 (\d+)/g, 'Register $1'],
+    [/(\d+) 个在施工项目/g, '$1 ongoing projects'],
+    [/(\d+) 个园区/g, '$1 campuses'],
+    [/(\d+) 个已完成项目/g, '$1 completed projects'],
+    [/(\d+) 个$/g, '$1 items'],
+    [/逾期 (\d+) 天/g, '$1d overdue'],
+    [/(\d+) 天后/g, 'in $1d'],
+    [/今日到期/g, 'due today'],
+    [/共 (\d+) 条/g, '$1 items'],
+    [/(\d+) 条/g, '$1'],
+    [/(\d+) 逾期/g, '$1 overdue'],
+    [/(\d+) 即将到期/g, '$1 due soon'],
+    [/(\d+) 紧急/g, '$1 critical'],
+    [/较周报 (\d+)/g, 'vs weekly $1'],
+    [/较计划/g, 'vs plan'],
+    [/目标 /g, 'target '],
+    [/截至 /g, 'as of ']
+  ];
+
+  I.apply = function () {
+    if (I.lang() !== 'en') return;
+    var roots = [document.querySelector('header.top'), document.getElementById('main')];
+    roots.forEach(function (root) {
+      if (!root) return;
+      var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      var n;
+      while ((n = walker.nextNode())) {
+        var raw = n.nodeValue;
+        var t = raw.trim();
+        if (!t) continue;
+        if (D[t] !== undefined) {
+          n.nodeValue = raw.replace(t, D[t]);
+          continue;
+        }
+        if (/[一-鿿]/.test(t)) {
+          var out = raw;
+          P.forEach(function (pr) { out = out.replace(pr[0], pr[1]); });
+          if (out !== raw) n.nodeValue = out;
+        }
+      }
+    });
+  };
 
 })(window.LM = window.LM || {});
 
@@ -9572,6 +9689,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     main.scrollTop = 0;
     window.scrollTo(0, 0);
     animateCounts(main);
+    LM.i18n.apply();
 
     if (r.view === 'builder') LM.views.builder.bind(main, A.render);
 
@@ -9605,13 +9723,19 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       LM.views.editor.openMeta(A.render);
     });
 
+    /* 保存 PDF = the browser's print-to-PDF; the print stylesheet strips chrome */
+    document.getElementById('btn-save-pdf').addEventListener('click', function () {
+      window.print();
+    });
+
     document.getElementById('btn-save').addEventListener('click', function () {
+      closeMenu();
       var name = D.saveToFile();
-      toast('已保存 ' + name, 'ok');
+      toast('已备份 ' + name, 'ok');
     });
 
     var fileInput = document.getElementById('file-input');
-    document.getElementById('btn-load').addEventListener('click', function () { fileInput.click(); });
+    document.getElementById('btn-load').addEventListener('click', function () { closeMenu(); fileInput.click(); });
     fileInput.addEventListener('change', function () {
       var f = fileInput.files && fileInput.files[0];
       if (!f) return;
@@ -9673,10 +9797,19 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       A.render();
     });
 
-    document.getElementById('btn-print').addEventListener('click', function () {
-      closeMenu();
-      window.print();
+    /* 中 / EN — the label always names the language you would SWITCH TO */
+    var langBtn = document.getElementById('btn-lang');
+    function paintLangBtn() {
+      var lang = LM.i18n.lang();
+      langBtn.textContent = lang === 'en' ? '中' : 'EN';
+      document.documentElement.setAttribute('data-lang', lang);
+    }
+    langBtn.addEventListener('click', function () {
+      LM.i18n.toggle();
+      paintLangBtn();
+      A.render();
     });
+    paintLangBtn();
 
     document.getElementById('btn-add-project').addEventListener('click', function () {
       closeMenu();
