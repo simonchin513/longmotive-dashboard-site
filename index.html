@@ -105,7 +105,7 @@ header.top {
 }
 .top-inner { display: flex; align-items: center; gap: 18px; padding: 10px 22px; flex-wrap: wrap; }
 .brand { display: flex; flex-direction: column; line-height: 1.2; }
-.brand b { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+.brand b { font-family: var(--display); font-weight: 600; font-size: 14.5px; letter-spacing: .12em; text-transform: uppercase; }
 .brand span { font-size: 11px; color: var(--ink-muted); letter-spacing: .06em; }
 .hdr-meta { display: flex; gap: 14px; align-items: center; font-size: 12px; color: var(--ink-muted); }
 .hdr-meta b { color: var(--ink); letter-spacing: .08em; }
@@ -119,46 +119,58 @@ header.top {
 .alarm-badge.warn { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
 .alarm-badge.critical { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); }
 
-nav.tabs { display: flex; gap: 4px; padding: 0 18px 10px; overflow-x: auto; }
+nav.tabs { display: flex; gap: 6px; padding: 0 18px 12px; overflow-x: auto; }
 .nav-item {
   display: flex; flex-direction: column; gap: 1px;
-  padding: 7px 14px; border-radius: 8px; border: 1px solid transparent;
+  padding: 9px 18px; border-radius: 9px; border: 1px solid transparent;
   color: var(--ink-muted); text-decoration: none; white-space: nowrap;
 }
-.nav-item b { font-size: 13px; color: var(--ink); }
-.nav-item span { font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
-.nav-item:hover { background: var(--surface-2); text-decoration: none; }
-.nav-item.on { background: var(--surface-2); border-color: var(--line); }
+.nav-item b { font-size: 14.5px; color: var(--ink); }
+.nav-item span { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; }
+.nav-item:hover { background: var(--surface-2); border-color: var(--line); text-decoration: none; }
+.nav-item.on {
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
 .nav-item.on b { color: var(--accent); }
 
 /* Use the whole screen: wide ceiling, honest side padding. Density comes
    from two-column zones, not from cramming a narrow middle column. */
 main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 
-/* ── buttons ────────────────────────────────────────────────────────── */
+/* ── buttons — every input point must LOOK like one: bigger targets,
+   accent-leaning borders, and a hover that answers "yes, clickable" ── */
 .btn {
-  font: inherit; font-size: 12.5px; padding: 6px 12px; border-radius: 7px;
-  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  font: inherit; font-size: 13.5px; font-weight: 500; padding: 8px 15px;
+  border-radius: 8px; border: 1px solid var(--border-strong, var(--line));
+  border-color: color-mix(in srgb, var(--ink) 16%, var(--line));
+  background: var(--surface); color: var(--ink);
   cursor: pointer;
 }
-.btn:hover { background: var(--surface-2); }
+.btn:hover {
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  border-color: var(--accent); color: var(--accent);
+}
 .btn:disabled { opacity: .55; cursor: default; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
-.btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, #000); }
+.btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, #000); color: var(--on-accent); }
 .btn.ghost { background: transparent; }
-.btn.sm { font-size: 12px; padding: 4px 10px; }
-.btn.xs { font-size: 11px; padding: 2px 8px; }
+.btn.sm { font-size: 12.5px; padding: 5px 12px; }
+.btn.xs { font-size: 11.5px; padding: 3px 9px; }
 .btn.danger { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 35%, var(--line)); }
+.btn.danger:hover { background: color-mix(in srgb, var(--bad) 8%, var(--surface)); border-color: var(--bad); color: var(--bad); }
 
 /* ── toolbar: one primary, one pair, one overflow ────────────────────
    Seven identically framed buttons gave the eye nothing to land on, and put a
    destructive reset next to Print wearing the same clothes. Ranked instead:
    Export is the product, save/load are a pair, print and reset move behind ⋯. */
-.btn.flat { border-color: transparent; background: transparent; color: var(--ink-muted); }
-.btn.flat:hover { background: var(--surface-2); border-color: var(--line); color: var(--ink); }
-.btn.icon { width: 30px; padding: 6px 0; text-align: center; line-height: 1; }
+/* flat toolbar buttons now keep a visible border — quiet, but findable */
+.btn.flat { border-color: var(--line); background: transparent; color: var(--ink); }
+.btn.flat:hover { background: color-mix(in srgb, var(--accent) 7%, var(--surface)); border-color: var(--accent); color: var(--accent); }
+.btn.icon { width: 38px; padding: 8px 0; text-align: center; line-height: 1; font-size: 15px; }
 
-.btn-group { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.btn-group { display: inline-flex; border: 1px solid color-mix(in srgb, var(--ink) 16%, var(--line)); border-radius: 8px; overflow: hidden; }
 .btn-group .btn { border: 0; border-radius: 0; }
 .btn-group .btn + .btn { border-left: 1px solid var(--line); }
 
