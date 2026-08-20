@@ -680,15 +680,18 @@ table.tbl tr.total td { font-weight: 700; }
 @media (max-width: 1350px) { .pg-cols { grid-template-columns: 1fr; } }
 
 .stuck-list { list-style: none; margin: 0; padding: 0; }
+/* fixed anatomy: row 1 name + countdown pill, row 2 node·date, row 3
+   stage pill — identical skeleton for every entry, nothing rewraps */
 .stuck-list li {
   display: grid; grid-template-columns: minmax(0, 1fr) auto;
-  gap: 2px 12px; align-items: center; padding: 11px 0;
+  gap: 3px 12px; padding: 11px 0;
   border-bottom: 1px solid var(--line);
 }
 .stuck-list li:last-child { border-bottom: 0; }
-.stuck-list a { font-size: 13.5px; font-weight: 600; overflow-wrap: anywhere; }
-.stuck-list .al-pill { grid-row: span 2; justify-self: end; }
-.stuck-what { font-size: 12.5px; color: var(--ink-muted); grid-column: 1; }
+.stuck-list a { font-size: 13.5px; font-weight: 600; overflow-wrap: anywhere; grid-column: 1; grid-row: 1; align-self: center; }
+.stuck-list .al-pill { grid-column: 2; grid-row: 1; justify-self: end; align-self: center; }
+.stuck-what { font-size: 12.5px; color: var(--ink-muted); grid-column: 1 / -1; grid-row: 2; }
+.stuck-stage { grid-column: 1 / -1; grid-row: 3; justify-self: start; margin-top: 2px; }
 
 /* Alarm list — one container per severity band. The tinted header makes the
    band's single colour statement; rows inside stay ink and hairline, and
@@ -7890,11 +7893,13 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       h.push('<p class="note">没有项目卡在过期节点上。</p>');
     } else {
       h.push('<ul class="stuck-list">');
+      /* fixed three-line anatomy per entry — name+countdown / node·date /
+         stage pill — so nothing wraps differently row to row */
       stuck.slice(0, 8).forEach(function (x) {
         h.push('<li><a href="#/project/' + x.p.id + '">' + esc(x.p.name) + '</a>' +
-          '<span class="stuck-what">' + esc(x.s.nodeName) + ' · 原计划 ' + esc(x.s.nodeDate) + ' · ' +
-          M.lifecyclePillHtml(x.p) + '</span>' +
-          '<span class="al-pill red">逾期 ' + x.s.overdueDays + ' 天</span></li>');
+          '<span class="al-pill red">逾期 ' + x.s.overdueDays + ' 天</span>' +
+          '<span class="stuck-what">' + esc(x.s.nodeName) + ' · 原计划 ' + esc(x.s.nodeDate) + '</span>' +
+          '<span class="stuck-stage">' + M.lifecyclePillHtml(x.p) + '</span></li>');
       });
       h.push('</ul>');
       if (stuck.length > 8) h.push('<p class="note">其余 ' + (stuck.length - 8) + ' 个项目的卡点见下方预警清单。</p>');
