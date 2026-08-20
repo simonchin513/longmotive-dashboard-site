@@ -536,6 +536,21 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
   100% { box-shadow: 0 0 0 13px color-mix(in srgb, var(--accent) 0%, transparent); }
 }
 
+/* point-to-brighten: muted supporting text lights up to full ink wherever
+   the hand rests — the quiet layer answers when actually being read */
+.card-sub, .kpi-sub, .kpi-en, .al-what, .al-date, .stuck-what, .muted,
+table.tbl td.muted, .note, .hero-sub, .ck-hint { transition: color .13s ease; }
+.card:hover > .card-head .card-sub,
+.panel:hover > .panel-head .card-sub { color: var(--ink); }
+.kpi:hover .kpi-sub, .kpi:hover .kpi-en { color: var(--ink); }
+.al-li:hover .al-what, .al-li:hover .al-date { color: var(--ink); }
+.stuck-list li:hover .stuck-what { color: var(--ink); }
+table.tbl tbody tr:hover .muted, table.tbl tbody tr:hover td.muted { color: var(--ink); }
+.sb-row:hover .sb-name { color: var(--accent); }
+.chart text { transition: fill .13s ease; }
+.chart g.bar-row:hover .bar-value { fill: var(--ink); font-weight: 600; }
+.chart g.bar-row:hover .bar-label { fill: var(--ink); }
+
 /* micro-interactions — replies to the hand, allowed even under
    reduced-motion (user-initiated, tiny, non-vestibular) */
 .btn { transition: background-color .15s, border-color .15s, color .15s, transform .08s; }
@@ -5897,7 +5912,8 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
   C.fitWidth = function (reserve, min, max, frac) {
     var m = document.getElementById('main');
     var w = m ? m.clientWidth : 0;
-    w = (w - (reserve || 0)) * (frac || 1);
+    /* -10: card borders and rounding never get to summon a 2px scrollbar */
+    w = (w - (reserve || 0)) * (frac || 1) - 10;
     return Math.max(min || 1020, Math.min(max || 1880, Math.round(w)));
   };
 
