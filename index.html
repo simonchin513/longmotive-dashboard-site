@@ -1282,7 +1282,7 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
       </span>
 
       <span class="tb-sep" aria-hidden="true"></span>
-      <button class="btn flat icon" id="btn-lang" title="中 / English" aria-label="切换语言">EN</button>
+      <button class="btn flat icon" id="btn-lang" data-no-i18n title="中 / English" aria-label="切换语言">EN</button>
       <button class="btn flat icon" id="btn-theme" title="切换深浅色" aria-label="切换深浅色">◐</button>
     </div>
   </div>
@@ -5736,6 +5736,9 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
       var n;
       while ((n = walker.nextNode())) {
+        /* [data-no-i18n] shields literal UI text — e.g. the 中/EN toggle,
+           whose 中 would otherwise hit the severity entry 中→medium */
+        if (n.parentElement && n.parentElement.closest('[data-no-i18n]')) continue;
         var out = translate(n.nodeValue);
         if (out !== n.nodeValue) n.nodeValue = out;
       }
