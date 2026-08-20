@@ -5434,6 +5434,16 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       esc(label || CHART_LABEL[cls] || '图表') + '" width="' + w + '">' + body + '</svg>';
   }
 
+  /* Fill the space that is actually there: design width = the page's main
+     column minus what the caller reserves (rails, paddings). Falls back to
+     min on narrow windows — CSS max-width:100% still shrinks from there.
+     #main's width is stable across renders, so string-built views can ask. */
+  C.fitWidth = function (reserve, min, max) {
+    var m = document.getElementById('main');
+    var w = m ? m.clientWidth : 0;
+    return Math.max(min || 1020, Math.min(max || 1880, w - (reserve || 0)));
+  };
+
   /* Label column sized to the LONGEST real name — the user's rule: project
      names in charts are the point and are never truncated. */
   C.labelWidthFor = function (names, fs, minW, maxW) {
@@ -7580,7 +7590,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     if (avpRows.length) {
       h.push('<section class="panel"><div class="panel-head"><h3>实际 vs 计划进度</h3>' +
         '<span class="card-sub">竖线 = 计划 · 条形颜色按 ≤5% / &gt;5% 偏差规则</span></div>');
-      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: 1020, labelInside: true, rowH: 40, ariaLabel: campus.id + ' 园区各项目实际与计划进度对比图' }) + '</div>');
+      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: C.fitWidth(90), labelInside: true, rowH: 40, ariaLabel: campus.id + ' 园区各项目实际与计划进度对比图' }) + '</div>');
       h.push('</section>');
     }
 
@@ -7796,7 +7806,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         (pr.note ? '<span class="card-sub">' + esc(pr.note) + '</span>' : '') + '</div>');
       h.push('<div class="table-scroll">' + C.actualVsPlanned(p.phases.map(function (ph) {
         return { label: ph.label + (ph.capacityMW ? ' · ' + ph.capacityMW + ' MW' : ''), actual: ph.actual, planned: ph.planned };
-      }), { width: 1000, labelWidth: 170, ariaLabel: '分期进度对比图' }) + '</div>');
+      }), { width: C.fitWidth(90, 1000), labelWidth: 170, ariaLabel: '分期进度对比图' }) + '</div>');
       h.push('</section>');
     }
     h.push('</div>');
@@ -9290,7 +9300,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         return { label: p.name, actual: p.progress.actual, planned: p.progress.planned };
       });
       if (!avp.length) return head + '<p class="note">所选项目没有填报进度数据。</p>';
-      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: 1020, labelInside: true }) + '</div>' + note();
+      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: C.fitWidth(90), labelInside: true }) + '</div>' + note();
     }
 
     /* ── aggregate into groups ───────────────────────────────────────── */
@@ -9327,7 +9337,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       };
     });
     return head + '<div class="table-scroll">' + C.hbar(barRows, {
-      width: 900, labelInside: true, max: max
+      width: C.fitWidth(90, 900), labelInside: true, max: max
     }) + '</div>' + note();
   }
 
