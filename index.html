@@ -694,11 +694,21 @@ table.tbl tr.total td { font-weight: 700; }
 .al-g-low .al-group-head { color: var(--ink-muted); background: color-mix(in srgb, var(--ink) 3%, var(--surface)); }
 
 .al-list { list-style: none; margin: 0; padding: 0; }
+/* rows pack tight: the text per cell is short, the row should be too */
 .al-li {
-  display: grid; grid-template-columns: minmax(0, 1fr) 150px 128px 138px;
-  gap: 18px; align-items: center; padding: 13px 18px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 140px 118px max-content;
+  gap: 8px 14px; align-items: center; padding: 9px 14px;
   border-top: 1px solid var(--line);
 }
+/* project page: alarms and analysis share the row */
+.proj-cols {
+  display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 20px; align-items: start;
+}
+.proj-cols > .card { margin-bottom: 0; }
+.proj-cols .al-groups { min-width: 0; }
+@media (max-width: 1350px) { .proj-cols { grid-template-columns: 1fr; } }
+
 .al-list .al-li:first-child { border-top: 0; }
 .al-li:hover { background: color-mix(in srgb, var(--ink) 2.5%, transparent); }
 /* chart rows that navigate: the whole bar row is the click target */
@@ -8231,6 +8241,10 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     h.push('<div class="band">');
     h.push('<div class="band-head"><h2>本期状况</h2><p>周报 ' + d.meta.week + ' · ' + M.fmtDate(d.meta.reportDate) + '</p></div>');
 
+    /* alarms + analysis share the row — neither fills a whole-width card
+       on its own, side by side they fill each other's slack */
+    if (mine.length) h.push('<div class="proj-cols">');
+
     if (mine.length) {
       h.push('<section class="card alarm-card"><div class="card-head"><h2>本项目预警</h2>' +
         '<span class="card-sub">30 天内到期与已逾期</span></div>');
@@ -8250,6 +8264,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       }).join('') + '</ul>');
     }
     h.push('</section>');
+    if (mine.length) h.push('</div>');   /* /proj-cols */
     h.push('</div>');
 
     /* ── band: 进度与节点 ────────────────────────────────────────────── */
