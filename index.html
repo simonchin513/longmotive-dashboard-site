@@ -301,7 +301,7 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 /* ── stage board: rows = projects, columns = the 7 lifecycle steps.
    Cell colour is STATE (done/current/ahead); stage identity stays in the
    header icons + text, per the colour-never-alone rule. ── */
-.stage-board { min-width: 860px; }
+.stage-board { min-width: 720px; }
 .sb-row {
   display: grid;
   grid-template-columns: minmax(230px, 1.4fr) repeat(7, minmax(70px, 1fr));
@@ -5842,10 +5842,11 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
      column minus what the caller reserves (rails, paddings). Falls back to
      min on narrow windows — CSS max-width:100% still shrinks from there.
      #main's width is stable across renders, so string-built views can ask. */
-  C.fitWidth = function (reserve, min, max) {
+  C.fitWidth = function (reserve, min, max, frac) {
     var m = document.getElementById('main');
     var w = m ? m.clientWidth : 0;
-    return Math.max(min || 1020, Math.min(max || 1880, w - (reserve || 0)));
+    w = (w - (reserve || 0)) * (frac || 1);
+    return Math.max(min || 1020, Math.min(max || 1880, Math.round(w)));
   };
 
   /* Label column sized to the LONGEST real name — the user's rule: project
@@ -7372,8 +7373,11 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       h.push('<section class="card">');
       h.push('<div class="card-head"><h2>预警加权评分排名 · 前 10</h2>' +
         '<span class="card-sub">长度 = 加权评分，从高到低 · 颜色 = 该项目最高预警严重度 · 点击条形进入项目页</span></div>');
+      var railOn2 = window.matchMedia && window.matchMedia('(min-width: 1501px)').matches;
+      var worstOn = window.matchMedia && window.matchMedia('(min-width: 1351px)').matches;
       h.push('<div class="table-scroll">' + C.hbar(rankedRows, {
-        width: 860, labelInside: true, rowH: 38,
+        width: C.fitWidth(68 + (railOn2 ? 454 : 0) + (worstOn ? 460 : 0) + 48, 560),
+        labelInside: true, rowH: 38,
         ariaLabel: '预警加权评分排名条形图，前 10 名'
       }) + '</div>');
       h.push('</section>');
@@ -7469,9 +7473,11 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     h.push('<section class="panel"><div class="panel-head"><h3>组合甘特图 · 前后 120 天关键节点</h3>' +
       '<span class="card-sub">◆ 绿 = 已完成 · 琥珀 = 计划中 · 红 = 逾期 · 阴影带 = ' + (d.meta.alarmWindowDays || 30) + ' 天预警窗</span></div>');
     var ganttLabelW = C.labelWidthFor(ganttRows.map(function (r) { return r.label; }));
+    var ganttRail = window.matchMedia && window.matchMedia('(min-width: 1501px)').matches ? 454 : 0;
     h.push('<div class="table-scroll">' + C.gantt(ganttRows, {
       start: tl.start, end: tl.end, today: tl.today, todayIso: d.meta.reportDate,
-      alarmDays: d.meta.alarmWindowDays || 30, width: ganttLabelW + 1240, labelWidth: ganttLabelW,
+      alarmDays: d.meta.alarmWindowDays || 30,
+      width: C.fitWidth(68 + ganttRail + 42, ganttLabelW + 620), labelWidth: ganttLabelW,
       ariaLabel: '组合甘特图：全部项目前后 120 天关键节点'
     }) + '</div></section>');
     h.push('</div>');
@@ -7485,7 +7491,12 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       (cf ? ' · 全组合数据，不随园区筛选' : '') + '</p></div>');
     h.push('<div class="deliv-cols">');
     h.push('<section class="panel"><div class="panel-head"><h3>每月 RFS 交付 · MW</h3></div>');
-    h.push('<div class="table-scroll">' + C.columns(months, { width: 940, height: 300, ariaLabel: '每月 RFS 交付容量柱状图' }) + '</div>');
+    var colRail = window.matchMedia && window.matchMedia('(min-width: 1501px)').matches ? 454 : 0;
+    var colSplit = window.matchMedia && window.matchMedia('(min-width: 1351px)').matches ? 0.6 : 1;
+    h.push('<div class="table-scroll">' + C.columns(months, {
+      width: C.fitWidth(68 + colRail + 20, 520, 1880, colSplit) - 54,
+      height: 300, ariaLabel: '每月 RFS 交付容量柱状图'
+    }) + '</div>');
     h.push('<p class="note">统计规则：读取统筹 Completed Projects 的 RFS1–RFS-N；有明确分期 MW 时按分期计入，否则归入最后一个已完成 RFS 并标记「待核对」。</p>');
     h.push('</section>');
     h.push('<section class="panel"><div class="panel-head"><h3>交付台账</h3></div>');
@@ -7805,8 +7816,14 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       sortBtn('progress', '依完成度') +
       sortBtn('name', '依名称') +
       '</div></div>');
+    /* fit the space that is really there: reserves mirror the CSS
+       breakpoints (rail beside ≥1501px, stuck column beside ≥1351px),
+       so the board never needs a horizontal scroll on a normal window */
+    var railOn = window.matchMedia && window.matchMedia('(min-width: 1501px)').matches;
+    var stuckOn = window.matchMedia && window.matchMedia('(min-width: 1351px)').matches;
     h.push('<div class="table-scroll">' + C.actualVsPlanned(rows, {
-      width: 1020, labelInside: true, rowH: 42,
+      width: C.fitWidth(68 + (railOn ? 454 : 0) + (stuckOn ? 420 : 0) + 58, 560),
+      labelInside: true, rowH: 42,
       ariaLabel: '各项目实际进度与计划对比条形图，' + SORT_SUB[mode]
     }) + '</div>');
     var tail = [];
