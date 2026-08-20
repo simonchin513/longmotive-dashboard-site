@@ -490,29 +490,63 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
   margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--line);
   font-size: 13px; gap: 22px;
 }
-/* ── chart entrance motion ──────────────────────────────────────────────
-   Every data mark grows from zero on render: horizontal marks sweep from
-   the baseline (scaleX), columns rise (scaleY), diamonds and donuts bloom.
-   Reference marks (grids, tracks, plan ticks, value labels) fade in AFTER
-   the marks, so the eye reads data first. Off under reduced-motion; print
-   always gets the finished state. */
+/* ── motion system: "control room powering up" ─────────────────────────
+   One choreography per render, three beats: the page rises, the KPI wall
+   cascades tile by tile, then every chart sweeps its data in row by row
+   (each row carries --d, an inline per-row delay from the renderer).
+   Reference marks — grids, ticks, value labels — always land AFTER the
+   data they describe. Everything is transform/opacity only; reduced-motion
+   and print jump straight to the finished state. */
 @media (prefers-reduced-motion: no-preference) {
-  .chart .mark-x { transform-box: fill-box; transform-origin: left center; animation: lm-grow-x .65s cubic-bezier(.22,.75,.3,1) both; }
-  .chart .mark-y { transform-box: fill-box; transform-origin: 50% 100%; animation: lm-grow-y .65s cubic-bezier(.22,.75,.3,1) both; }
-  .chart .mark-pop { transform-box: fill-box; transform-origin: center; animation: lm-pop .5s cubic-bezier(.3,1.35,.5,1) both; }
-  .chart .mark-fade { animation: lm-fade .4s ease-out .35s both; }
-  svg.donut { transform-origin: center; animation: lm-pop .55s cubic-bezier(.25,1,.4,1) both; }
+  /* beat 1 · the page rises */
+  .hero, .band { animation: lm-rise .38s ease-out both; }
+  /* beat 2 · the KPI wall cascades */
+  .kpi-row .kpi { animation: lm-rise .45s cubic-bezier(.22,.75,.3,1) both; }
+  .kpi-row .kpi:nth-child(2) { animation-delay: .05s; }
+  .kpi-row .kpi:nth-child(3) { animation-delay: .10s; }
+  .kpi-row .kpi:nth-child(4) { animation-delay: .15s; }
+  .kpi-row .kpi:nth-child(5) { animation-delay: .20s; }
+  .kpi-row .kpi:nth-child(6) { animation-delay: .25s; }
+  .kpi-delta { animation: lm-rise .4s ease-out .55s both; }
+  /* beat 3 · data marks sweep in, staggered per row via --d */
+  .chart .mark-x { transform-box: fill-box; transform-origin: left center; animation: lm-grow-x .6s cubic-bezier(.22,.75,.3,1) both; animation-delay: var(--d, 0ms); }
+  .chart .mark-y { transform-box: fill-box; transform-origin: 50% 100%; animation: lm-grow-y .6s cubic-bezier(.22,.75,.3,1) both; animation-delay: var(--d, 0ms); }
+  .chart .mark-pop { transform-box: fill-box; transform-origin: center; animation: lm-pop .5s cubic-bezier(.3,1.35,.5,1) both; animation-delay: var(--d, 0ms); }
+  .chart .mark-fade { animation: lm-fade .4s ease-out both; animation-delay: calc(.35s + var(--d, 0ms)); }
   .kpi-seg { transform-origin: left center; animation: lm-grow-x .65s cubic-bezier(.22,.75,.3,1) both; }
   .kpi-fill { transform-origin: left center; animation: lm-grow-x .65s cubic-bezier(.22,.75,.3,1) both; }
   .kpi-cols i { transform-origin: center bottom; animation: lm-grow-y .65s cubic-bezier(.22,.75,.3,1) both; }
+  /* sparkline draws itself left to right */
+  .kpi-spark polyline { stroke-dasharray: 1; stroke-dashoffset: 1; animation: lm-draw .9s ease-out .25s forwards; }
+  /* stage board rows slide in */
+  .sb-row:not(.sb-head) { animation: lm-rise .35s ease-out both; animation-delay: var(--d, 0ms); }
+  /* lifecycle pipeline: the current step announces itself, three pulses */
+  .lc-step.now b { animation: lm-ring 1.5s ease-out .6s 3; }
+  /* alarm severity groups rise with the page */
+  .al-group { animation: lm-rise .38s ease-out both; }
 }
 @keyframes lm-grow-x { from { transform: scaleX(0); } }
 @keyframes lm-grow-y { from { transform: scaleY(0); } }
 @keyframes lm-pop { from { transform: scale(0); opacity: 0; } }
 @keyframes lm-fade { from { opacity: 0; } }
+@keyframes lm-rise { from { opacity: 0; transform: translateY(7px); } }
+@keyframes lm-draw { to { stroke-dashoffset: 0; } }
+@keyframes lm-ring {
+  0% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+  100% { box-shadow: 0 0 0 13px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+
+/* micro-interactions — replies to the hand, allowed even under
+   reduced-motion (user-initiated, tiny, non-vestibular) */
+.btn { transition: background-color .15s, border-color .15s, color .15s, transform .08s; }
+.btn:active { transform: scale(.96); }
+.kpi[data-action] { transition: transform .18s, box-shadow .18s, border-color .18s; }
+.kpi[data-action]:hover { transform: translateY(-2px); }
+.al-li, .sb-row, table.tbl tbody tr, .nav-item { transition: background-color .15s, border-color .15s; }
+.chart g[data-goto] rect.mark-x { transition: filter .12s; }
+
 @media print {
-  .chart .mark-x, .chart .mark-y, .chart .mark-pop, .chart .mark-fade,
-  svg.donut, .kpi-seg, .kpi-fill, .kpi-cols i { animation: none !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
 /* KPI micro-visuals: a data mark per tile so the shape reads before the text */
@@ -5943,7 +5977,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         'A', inner, inner, 0, large, 0, r + Math.cos(a0) * inner, r + Math.sin(a0) * inner,
         'Z'
       ].join(' ');
-      parts.push('<path d="' + p + '" fill="' + (s.color || C.categorical(i)) + '" ' +
+      parts.push('<path class="mark-pop" style="--d:' + parts.length * 70 + 'ms" d="' + p + '" fill="' + (s.color || C.categorical(i)) + '" ' +
         'stroke="' + surface() + '" stroke-width="2" ' +
         'data-tip="' + esc(s.label + ' · ' + (opts.fmt ? opts.fmt(s.value) : s.value) + ' · ' + (frac * 100).toFixed(1) + '%') + '">' +
         '<title>' + esc(s.label + ': ' + (opts.fmt ? opts.fmt(s.value) : s.value)) + '</title></path>');
@@ -5951,8 +5985,8 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     var centre = '';
     if (opts.centreValue !== undefined) {
       centre =
-        '<text x="' + r + '" y="' + (r - 2) + '" text-anchor="middle" class="donut-value" fill="' + ink() + '">' + esc(opts.centreValue) + '</text>' +
-        '<text x="' + r + '" y="' + (r + 16) + '" text-anchor="middle" class="donut-label" fill="' + inkMuted() + '">' + esc(opts.centreLabel || '') + '</text>';
+        '<text x="' + r + '" y="' + (r - 2) + '" text-anchor="middle" class="donut-value mark-fade" fill="' + ink() + '">' + esc(opts.centreValue) + '</text>' +
+        '<text x="' + r + '" y="' + (r + 16) + '" text-anchor="middle" class="donut-label mark-fade" fill="' + inkMuted() + '">' + esc(opts.centreLabel || '') + '</text>';
     }
     return svg(size, size, parts.join('') + centre, 'donut', opts.ariaLabel);
   };
@@ -5990,6 +6024,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         ? '<rect class="mark-x" x="' + labelW + '" y="' + (y + 5) + '" width="' + bw + '" height="' + (rowH - 10) + '" rx="4" fill="' + col + '"/>'
         : '';
       return '<g class="bar-row"' + (r.goto ? ' data-goto="' + esc(r.goto) + '"' : '') +
+        ' style="--d:' + Math.min(i, 14) * 40 + 'ms"' +
         ' data-tip="' + esc(r.label + ' · ' + (r.display !== undefined ? r.display : r.value)) + '">' +
         '<rect x="' + labelW + '" y="' + (y + 5) + '" width="' + plotW + '" height="' + (rowH - 10) + '" rx="4" fill="' + grid() + '" opacity="0.45"/>' +
         bar +
@@ -6033,6 +6068,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       var col = variance !== null ? C.status(LM.model.varianceStatus(variance))
         : hasA ? C.accent() : C.status('nodata');
       body += '<g class="bar-row"' + (r.goto ? ' data-goto="' + esc(r.goto) + '"' : '') +
+        ' style="--d:' + Math.min(i, 14) * 40 + 'ms"' +
         ' data-tip="' + esc(r.label + ' · 实际 ' + (hasA ? (r.actual * 100).toFixed(2) + '%' : '待补') + ' · 计划 ' + (hasP ? (r.planned * 100).toFixed(2) + '%' : '待补')) + '">';
       body += '<rect x="' + labelW + '" y="' + (y + 6) + '" width="' + plotW + '" height="' + (rowH - 12) + '" rx="4" fill="' + grid() + '" opacity="0.45"/>';
       if (hasA) {
@@ -6107,13 +6143,13 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         var cx = x(it.start);
         if (it.end && it.end > it.start) {
           var bw = Math.max(3, x(it.end) - cx);
-          body += '<rect class="mark-x" x="' + cx + '" y="' + (y + 6) + '" width="' + bw + '" height="' + (rowH - 12) + '" rx="4" ' +
+          body += '<rect class="mark-x" style="--d:' + Math.min(i, 16) * 30 + 'ms" x="' + cx + '" y="' + (y + 6) + '" width="' + bw + '" height="' + (rowH - 12) + '" rx="4" ' +
             'fill="' + it.color + '" stroke="' + surface() + '" stroke-width="2" data-tip="' + esc(it.title) + '">' +
             '<title>' + esc(it.title) + '</title></rect>';
         } else {
           /* milestone diamond — legible marker with a 2px surface ring */
           var s = 10;
-          body += '<path class="mark-pop" d="M ' + cx + ' ' + (y + rowH / 2 - s) + ' L ' + (cx + s) + ' ' + (y + rowH / 2) +
+          body += '<path class="mark-pop" style="--d:' + Math.min(i, 16) * 30 + 'ms" d="M ' + cx + ' ' + (y + rowH / 2 - s) + ' L ' + (cx + s) + ' ' + (y + rowH / 2) +
             ' L ' + cx + ' ' + (y + rowH / 2 + s) + ' L ' + (cx - s) + ' ' + (y + rowH / 2) + ' Z" ' +
             'fill="' + it.color + '" stroke="' + surface() + '" stroke-width="2" data-tip="' + esc(it.title) + '">' +
             '<title>' + esc(it.title) + '</title></path>';
@@ -6189,7 +6225,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
           '" stroke="' + ink() + '" stroke-width="2"/>';
       }
       if (bh > 0) {
-        body += '<rect class="mark-y" x="' + x + '" y="' + topY + '" width="' + bw + '" height="' + bh + '" rx="4" ' +
+        body += '<rect class="mark-y" style="--d:' + Math.min(i, 14) * 45 + 'ms" x="' + x + '" y="' + topY + '" width="' + bw + '" height="' + bh + '" rx="4" ' +
           'fill="' + (r.color || C.accent()) + '" data-tip="' + esc(r.label + ' · ' + tipTail) + '">' +
           '<title>' + esc(r.label + ': ' + tipTail) + '</title></rect>';
         /* the number clears BOTH the bar top and the plan tick */
@@ -7660,7 +7696,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     }).join(' ');
     return '<svg class="kpi-spark" viewBox="0 0 ' + w + ' ' + hgt + '" ' +
       'preserveAspectRatio="none" role="img" aria-label="近 ' + vals.length + ' 周趋势折线">' +
-      '<polyline points="' + pts + '" fill="none" stroke-width="2"/></svg>';
+      '<polyline points="' + pts + '" pathLength="1" fill="none" stroke-width="2"/></svg>';
   }
 
   /* bullet: actual bar coloured by the variance rule, plan as an ink tick —
@@ -8044,8 +8080,8 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         M.LIFECYCLE.map(function (st) {
           return '<span class="sb-col">' + M.stageIconSvg(st.key, 14) + '<i>' + esc(st.zh) + '</i></span>';
         }).join('') + '</div>');
-      sbRows.forEach(function (x) {
-        h.push('<div class="sb-row" data-goto="#/project/' + x.p.id + '">' +
+      sbRows.forEach(function (x, ri) {
+        h.push('<div class="sb-row" style="--d:' + Math.min(ri, 14) * 35 + 'ms" data-goto="#/project/' + x.p.id + '">' +
           '<span class="sb-name">' + esc(x.p.name) + '</span>' +
           M.LIFECYCLE.map(function (st, i) {
             var cls = i < x.s.idx ? 'done' : i === x.s.idx ? 'now' : 'ahead';
