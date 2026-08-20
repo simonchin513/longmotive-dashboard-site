@@ -286,6 +286,38 @@ main { padding: 26px 34px 90px; max-width: 1880px; margin: 0 auto; }
 }
 .lc-link.done { background: var(--fill-good); }
 
+/* ── stage board: rows = projects, columns = the 7 lifecycle steps.
+   Cell colour is STATE (done/current/ahead); stage identity stays in the
+   header icons + text, per the colour-never-alone rule. ── */
+.stage-board { min-width: 860px; }
+.sb-row {
+  display: grid;
+  grid-template-columns: minmax(230px, 1.4fr) repeat(7, minmax(70px, 1fr));
+  align-items: center; padding: 8px 6px; border-top: 1px solid var(--line);
+}
+.sb-row.sb-head { border-top: 0; padding-bottom: 10px; }
+.sb-head .sb-col {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 11.5px; color: var(--ink-muted);
+}
+.sb-head .sb-col i { font-style: normal; }
+.sb-name { font-size: 13.5px; font-weight: 600; padding-right: 14px; overflow-wrap: anywhere; }
+.sb-cell {
+  justify-self: center; width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: flex; align-items: center; justify-content: center; color: var(--ink-muted);
+}
+.sb-cell.done { background: var(--fill-good); border-color: var(--fill-good); }
+.sb-cell.now {
+  width: 27px; height: 27px; border-color: var(--accent); color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.sb-cell.ahead { opacity: .5; }
+.sb-row[data-goto] { cursor: pointer; }
+.sb-row[data-goto]:hover { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+.sb-row[data-goto]:hover .sb-name { color: var(--accent); text-decoration: underline; }
+
 /* inline bar labels: name rides inside (or just past) the bar; the surface
    halo keeps it readable on any fill without per-colour contrast math */
 .bar-label-in {
@@ -7590,7 +7622,39 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     if (avpRows.length) {
       h.push('<section class="panel"><div class="panel-head"><h3>实际 vs 计划进度</h3>' +
         '<span class="card-sub">竖线 = 计划 · 条形颜色按 ≤5% / &gt;5% 偏差规则</span></div>');
-      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: C.fitWidth(90), labelInside: true, rowH: 40, ariaLabel: campus.id + ' 园区各项目实际与计划进度对比图' }) + '</div>');
+      h.push('<div class="table-scroll">' + C.actualVsPlanned(avpRows, { width: C.fitWidth(120), labelInside: true, rowH: 40, ariaLabel: campus.id + ' 园区各项目实际与计划进度对比图' }) + '</div>');
+      h.push('</section>');
+    }
+
+    /* ── stage board: every ongoing project on the 7-step lifecycle ──── */
+    if (ongoing.length) {
+      var sbRows = ongoing.map(function (p) { return { p: p, s: M.lifecycleStage(p) }; })
+        .sort(function (a, b) {
+          return a.s.idx - b.s.idx || String(a.p.name).localeCompare(String(b.p.name));
+        });
+      h.push('<section class="panel"><div class="panel-head"><h3>各项目所处阶段</h3>' +
+        '<span class="card-sub">申请 → 客户移交 · 早期阶段在前 · 阶段为推导值，悬停当前格看依据 · 点行进入项目页</span></div>');
+      h.push('<div class="table-scroll"><div class="stage-board" role="img" aria-label="' + esc(campus.id) +
+        ' 园区各项目生命周期阶段矩阵，行为项目、列为七个阶段">');
+      h.push('<div class="sb-row sb-head"><span class="sb-name"></span>' +
+        M.LIFECYCLE.map(function (st) {
+          return '<span class="sb-col">' + M.stageIconSvg(st.key, 14) + '<i>' + esc(st.zh) + '</i></span>';
+        }).join('') + '</div>');
+      sbRows.forEach(function (x) {
+        h.push('<div class="sb-row" data-goto="#/project/' + x.p.id + '">' +
+          '<span class="sb-name">' + esc(x.p.name) + '</span>' +
+          M.LIFECYCLE.map(function (st, i) {
+            var cls = i < x.s.idx ? 'done' : i === x.s.idx ? 'now' : 'ahead';
+            var tip = i === x.s.idx
+              ? ' data-tip="' + esc(x.p.name + ' · ' + x.s.label + ' — ' + x.s.note) + '"' : '';
+            return '<span class="sb-cell ' + cls + '"' + tip + '>' +
+              (i === x.s.idx ? M.stageIconSvg(st.key, 13) : '') + '</span>';
+          }).join('') + '</div>');
+      });
+      h.push('</div></div>');
+      if (completed.length) {
+        h.push('<p class="note">另有 ' + completed.length + ' 个已完成项目全部处于客户移交（销项管理），见下方登记表。</p>');
+      }
       h.push('</section>');
     }
 
@@ -7806,7 +7870,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         (pr.note ? '<span class="card-sub">' + esc(pr.note) + '</span>' : '') + '</div>');
       h.push('<div class="table-scroll">' + C.actualVsPlanned(p.phases.map(function (ph) {
         return { label: ph.label + (ph.capacityMW ? ' · ' + ph.capacityMW + ' MW' : ''), actual: ph.actual, planned: ph.planned };
-      }), { width: C.fitWidth(90, 1000), labelWidth: 170, ariaLabel: '分期进度对比图' }) + '</div>');
+      }), { width: C.fitWidth(120, 1000), labelWidth: 170, ariaLabel: '分期进度对比图' }) + '</div>');
       h.push('</section>');
     }
     h.push('</div>');
@@ -9300,7 +9364,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
         return { label: p.name, actual: p.progress.actual, planned: p.progress.planned };
       });
       if (!avp.length) return head + '<p class="note">所选项目没有填报进度数据。</p>';
-      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: C.fitWidth(90), labelInside: true }) + '</div>' + note();
+      return head + '<div class="table-scroll">' + C.actualVsPlanned(avp, { width: C.fitWidth(120), labelInside: true }) + '</div>' + note();
     }
 
     /* ── aggregate into groups ───────────────────────────────────────── */
@@ -9337,7 +9401,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
       };
     });
     return head + '<div class="table-scroll">' + C.hbar(barRows, {
-      width: C.fitWidth(90, 900), labelInside: true, max: max
+      width: C.fitWidth(120, 900), labelInside: true, max: max
     }) + '</div>' + note();
   }
 
