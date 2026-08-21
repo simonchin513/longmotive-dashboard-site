@@ -1362,20 +1362,19 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
   .ck-cols { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 
   /* 3 · page breaks: keep a card whole, keep a heading with its content */
-  .card, .panel, .kpi, .worst-card, .legend-panel, .al-group, .lc-pipe,
+  .card, .panel, .kpi, .worst-card, .al-group, .lc-pipe,
   .stuck-list li, .sb-row, .al-li { break-inside: avoid; page-break-inside: avoid; }
   .band-head, .card-head, .panel-head, h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
   .band { break-inside: auto; margin-bottom: 22px !important; }
   table.tbl thead { display: table-header-group; }   /* repeat headers per page */
   table.tbl tr { break-inside: avoid; }
 
-  /* the collapsed colour key must print open — it explains the whole sheet */
-  .legend-panel .ck-body { display: block !important; }
-  .legend-panel summary { list-style: none; }
-  .legend-panel summary::before { display: none; }
+  /* the colour key is a screen affordance — on paper it costs a band and
+     the reader has the printed chart in front of them */
+  .legend-panel { display: none !important; }
 
   /* flatten decoration, keep the hairlines that carry structure */
-  .card, .panel, .kpi, .legend-panel { box-shadow: none !important; }
+  .card, .panel, .kpi { box-shadow: none !important; }
   a { color: var(--ink) !important; text-decoration: none !important; }
 }
 
