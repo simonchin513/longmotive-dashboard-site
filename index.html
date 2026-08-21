@@ -1296,11 +1296,73 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
 
 #dirty { font-size: 11px; color: var(--warn); }
 
+/* ── print / save-as-PDF ──────────────────────────────────────────────
+   Same layout as the site, laid across as many pages as it needs. Three
+   things break a screen dashboard on paper and all three are handled here:
+   scroll boxes clip their content, sticky rails float, and browsers drop
+   background fills — which for a colour-coded panel destroys the meaning. */
 @media print {
-  header.top, nav.tabs, .toolbar, .btn, .chart-tip, .toast { display: none !important; }
-  body { background: #fff; }
-  .card { break-inside: avoid; box-shadow: none; }
-  main { padding: 0; max-width: none; }
+  @page { size: A4 landscape; margin: 10mm; }
+
+  /* colours ARE data here — force the browser to actually ink them */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* paper is always the light theme, whatever the screen was showing */
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
+    --bg: #ffffff; --surface: #ffffff; --surface-2: #f7fafd;
+    --ink: #1d3048; --ink-muted: #5d6f86; --line: #dfe7f1; --grid: #e3eaf4;
+    --accent: #0f52a0; --on-accent: #ffffff;
+    --good: #15803d; --fill-good: #16a34a; --warn: #b45309; --bad: #b91c1c;
+    --shadow: none;
+  }
+
+  /* chrome and screen-only affordances leave */
+  header.top, nav.tabs, .toolbar, .btn, .chart-tip, .toast,
+  .al-more, .al-fade, .filter-row, .sort-seg, .crumb { display: none !important; }
+
+  html, body { background: #fff !important; }
+  main { padding: 0 !important; max-width: none !important; }
+
+  /* 1 · nothing scrolls on paper — a clipped box prints as a blank hole */
+  .table-scroll, .al-scroll, .al-clip, .lookahead, .stage-board,
+  .ov-rail .al-scroll, .ca-scroll {
+    overflow: visible !important; max-height: none !important;
+    min-width: 0 !important;
+  }
+  /* charts keep their aspect but fit the page instead of their design width */
+  .table-scroll .chart, .chart { max-width: 100% !important; height: auto !important; }
+
+  /* 2 · the sticky alarm rail becomes a normal block, in reading order */
+  .ov-rail { position: static !important; grid-column: 1 !important; grid-row: auto !important; }
+  .ov-main { grid-column: 1 !important; grid-row: auto !important; }
+  .ov-cols, .attn-cols, .deliv-cols, .pg-cols, .proj-cols, .grid-2, .ck-cols {
+    display: block !important;
+  }
+  .ov-cols > *, .attn-cols > *, .deliv-cols > *, .pg-cols > *, .proj-cols > * {
+    margin-bottom: 16px !important;
+  }
+  /* the KPI wall keeps its grid — it is the one block that reads as a row */
+  .kpi-row { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+
+  /* 3 · page breaks: keep a card whole, keep a heading with its content */
+  .card, .panel, .kpi, .worst-card, .legend-panel, .al-group, .lc-pipe,
+  .stuck-list li, .sb-row { break-inside: avoid; page-break-inside: avoid; }
+  .band-head, .card-head, .panel-head, h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
+  .band { break-inside: auto; margin-bottom: 22px !important; }
+  table.tbl thead { display: table-header-group; }   /* repeat headers per page */
+  table.tbl tr { break-inside: avoid; }
+
+  /* the collapsed colour key must print open — it explains the whole sheet */
+  .legend-panel .ck-body { display: block !important; }
+  .legend-panel summary { list-style: none; }
+  .legend-panel summary::before { display: none; }
+
+  /* flatten decoration, keep the hairlines that carry structure */
+  .card, .panel, .kpi, .legend-panel { box-shadow: none !important; }
+  a { color: var(--ink) !important; text-decoration: none !important; }
 }
 
 @media (max-width: 860px) {
@@ -10232,6 +10294,25 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
     });
   }
 
+  /* Collapsed <details> print empty — Chrome hides their content with
+     content-visibility, which CSS cannot override. Open every one for the
+     duration of the print job (covers Ctrl+P as well as 保存 PDF) and put
+     them back exactly as the reader had them. */
+  function bindPrintExpansion() {
+    var reopened = [];
+    window.addEventListener('beforeprint', function () {
+      reopened = [];
+      document.querySelectorAll('details:not([open])').forEach(function (d) {
+        d.setAttribute('open', '');
+        reopened.push(d);
+      });
+    });
+    window.addEventListener('afterprint', function () {
+      reopened.forEach(function (d) { d.removeAttribute('open'); });
+      reopened = [];
+    });
+  }
+
   A.start = function () {
     main = document.getElementById('main');
     nav = document.getElementById('nav');
@@ -10244,6 +10325,7 @@ window.LM_HISTORY = [{"week":39,"reportDate":"2026-06-22","savedAt":"2026-08-19"
 
     D.load();
     bindToolbar();
+    bindPrintExpansion();
     LM.charts.initTooltips(document.body);
     window.addEventListener('hashchange', A.render);
     A.render();
