@@ -1298,12 +1298,16 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
 
 /* ── print / save-as-PDF ──────────────────────────────────────────────
    The paper version is the SCREEN version, shrunk to fit — not a reflow.
-   #main is pinned to 1560px (the narrowest width that still keeps the
-   two-column zones and the right-hand alarm rail) and then zoomed to the
-   A4-landscape content box, so the PDF looks like the site does on a
-   desktop and simply continues onto as many pages as it needs.
-   zoom (not transform: scale) because zoom participates in layout, so
-   pagination and break-inside still work. */
+   #main is pinned to a desktop width and zoomed into the A4-landscape
+   content box, so the PDF looks like the site does on a desktop and simply
+   continues onto as many pages as it needs.
+   Current: 1325px × 0.8 = 1060px. Bigger type than a harder shrink would
+   give; the price is more pages. Change the width and the zoom TOGETHER
+   (width × zoom must equal the content box), and the pinned rail widths
+   below with them. Previous setting: 1560px × 0.68.
+   zoom, not transform: scale — zoom participates in layout, so pagination
+   and break-inside still work; a transform would squash everything onto
+   one clipped page. */
 @media print {
   @page { size: A4 landscape; margin: 8mm; }
 
@@ -1328,12 +1332,13 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
 
   html, body { background: #fff !important; width: auto !important; }
 
-  /* the whole sheet, shrunk to the page: 1560 × 0.68 ≈ 1061px = A4
-     landscape content width at 8mm margins */
+  /* the whole sheet, shrunk to the page: 1325 × 0.8 = 1060px = A4
+     landscape content width at 8mm margins. Bigger type than a harder
+     shrink; the price is more pages. Change width and zoom together. */
   main {
-    width: 1560px !important; max-width: none !important;
+    width: 1325px !important; max-width: none !important;
     padding: 0 !important; margin: 0 !important;
-    zoom: 0.68;
+    zoom: 0.8;
   }
 
   /* 1 · nothing scrolls on paper — a clipped box prints as a blank hole */
@@ -1352,11 +1357,11 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
      the <1501px single-column fallbacks — so the desktop grids are pinned
      back explicitly. main is 1560px wide, they have the room. */
   .ov-rail { position: static !important; }
-  .ov-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 430px !important; }
+  .ov-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 380px !important; }
   .ov-main { grid-column: 1 !important; grid-row: 1 !important; }
   .ov-rail { grid-column: 2 !important; grid-row: 1 !important; }
-  .attn-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 440px !important; }
-  .pg-cols   { display: grid !important; grid-template-columns: minmax(0, 1fr) 400px !important; }
+  .attn-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 390px !important; }
+  .pg-cols   { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px !important; }
   .deliv-cols, .proj-cols { display: grid !important; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) !important; }
   .grid-2 { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .ck-cols { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
@@ -1367,6 +1372,9 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
   .band-head, .card-head, .panel-head, h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
   .band { break-inside: auto; margin-bottom: 22px !important; }
   table.tbl thead { display: table-header-group; }   /* repeat headers per page */
+  /* headers may wrap on paper: a nowrap header is what pushes a narrow
+     ledger past its column and summons a scrollbar that prints blank */
+  table.tbl th { white-space: normal !important; }
   table.tbl tr { break-inside: avoid; }
 
   /* the colour key is a screen affordance — on paper it costs a band and
