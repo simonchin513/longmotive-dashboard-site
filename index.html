@@ -1297,12 +1297,15 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
 #dirty { font-size: 11px; color: var(--warn); }
 
 /* ── print / save-as-PDF ──────────────────────────────────────────────
-   Same layout as the site, laid across as many pages as it needs. Three
-   things break a screen dashboard on paper and all three are handled here:
-   scroll boxes clip their content, sticky rails float, and browsers drop
-   background fills — which for a colour-coded panel destroys the meaning. */
+   The paper version is the SCREEN version, shrunk to fit — not a reflow.
+   #main is pinned to 1560px (the narrowest width that still keeps the
+   two-column zones and the right-hand alarm rail) and then zoomed to the
+   A4-landscape content box, so the PDF looks like the site does on a
+   desktop and simply continues onto as many pages as it needs.
+   zoom (not transform: scale) because zoom participates in layout, so
+   pagination and break-inside still work. */
 @media print {
-  @page { size: A4 landscape; margin: 10mm; }
+  @page { size: A4 landscape; margin: 8mm; }
 
   /* colours ARE data here — force the browser to actually ink them */
   *, *::before, *::after {
@@ -1321,10 +1324,17 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
 
   /* chrome and screen-only affordances leave */
   header.top, nav.tabs, .toolbar, .btn, .chart-tip, .toast,
-  .al-more, .al-fade, .filter-row, .sort-seg, .crumb { display: none !important; }
+  .al-more, .al-fade, .crumb { display: none !important; }
 
-  html, body { background: #fff !important; }
-  main { padding: 0 !important; max-width: none !important; }
+  html, body { background: #fff !important; width: auto !important; }
+
+  /* the whole sheet, shrunk to the page: 1560 × 0.68 ≈ 1061px = A4
+     landscape content width at 8mm margins */
+  main {
+    width: 1560px !important; max-width: none !important;
+    padding: 0 !important; margin: 0 !important;
+    zoom: 0.68;
+  }
 
   /* 1 · nothing scrolls on paper — a clipped box prints as a blank hole */
   .table-scroll, .al-scroll, .al-clip, .lookahead, .stage-board,
@@ -1332,24 +1342,28 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
     overflow: visible !important; max-height: none !important;
     min-width: 0 !important;
   }
-  /* charts keep their aspect but fit the page instead of their design width */
-  .table-scroll .chart, .chart { max-width: 100% !important; height: auto !important; }
+  /* wide charts fill their column at the pinned width; donuts keep their
+     natural size (they are not in scrollers) */
+  .table-scroll .chart { width: 100% !important; max-width: none !important; height: auto !important; }
+  .chart { max-width: 100%; height: auto; }
 
-  /* 2 · the sticky alarm rail becomes a normal block, in reading order */
-  .ov-rail { position: static !important; grid-column: 1 !important; grid-row: auto !important; }
-  .ov-main { grid-column: 1 !important; grid-row: auto !important; }
-  .ov-cols, .attn-cols, .deliv-cols, .pg-cols, .proj-cols, .grid-2, .ck-cols {
-    display: block !important;
-  }
-  .ov-cols > *, .attn-cols > *, .deliv-cols > *, .pg-cols > *, .proj-cols > * {
-    margin-bottom: 16px !important;
-  }
-  /* the KPI wall keeps its grid — it is the one block that reads as a row */
-  .kpi-row { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+  /* 2 · the rail keeps its column, it just stops floating.
+     Print media queries measure the PAGE box (~1062px), which would trip
+     the <1501px single-column fallbacks — so the desktop grids are pinned
+     back explicitly. main is 1560px wide, they have the room. */
+  .ov-rail { position: static !important; }
+  .ov-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 430px !important; }
+  .ov-main { grid-column: 1 !important; grid-row: 1 !important; }
+  .ov-rail { grid-column: 2 !important; grid-row: 1 !important; }
+  .attn-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 440px !important; }
+  .pg-cols   { display: grid !important; grid-template-columns: minmax(0, 1fr) 400px !important; }
+  .deliv-cols, .proj-cols { display: grid !important; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) !important; }
+  .grid-2 { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .ck-cols { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 
   /* 3 · page breaks: keep a card whole, keep a heading with its content */
   .card, .panel, .kpi, .worst-card, .legend-panel, .al-group, .lc-pipe,
-  .stuck-list li, .sb-row { break-inside: avoid; page-break-inside: avoid; }
+  .stuck-list li, .sb-row, .al-li { break-inside: avoid; page-break-inside: avoid; }
   .band-head, .card-head, .panel-head, h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
   .band { break-inside: auto; margin-bottom: 22px !important; }
   table.tbl thead { display: table-header-group; }   /* repeat headers per page */
