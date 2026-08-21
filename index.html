@@ -1301,10 +1301,10 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
    #main is pinned to a desktop width and zoomed into the A4-landscape
    content box, so the PDF looks like the site does on a desktop and simply
    continues onto as many pages as it needs.
-   Current: 1325px × 0.8 = 1060px. Bigger type than a harder shrink would
+   Current: 1180px × 0.9 = 1062px. Bigger type than a harder shrink would
    give; the price is more pages. Change the width and the zoom TOGETHER
    (width × zoom must equal the content box), and the pinned rail widths
-   below with them. Previous setting: 1560px × 0.68.
+   below with them. Earlier settings: 1560 × 0.68, 1325 × 0.8.
    zoom, not transform: scale — zoom participates in layout, so pagination
    and break-inside still work; a transform would squash everything onto
    one clipped page. */
@@ -1336,9 +1336,9 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
      landscape content width at 8mm margins. Bigger type than a harder
      shrink; the price is more pages. Change width and zoom together. */
   main {
-    width: 1325px !important; max-width: none !important;
+    width: 1180px !important; max-width: none !important;
     padding: 0 !important; margin: 0 !important;
-    zoom: 0.8;
+    zoom: 0.9;
   }
 
   /* 1 · nothing scrolls on paper — a clipped box prints as a blank hole */
@@ -1357,11 +1357,11 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
      the <1501px single-column fallbacks — so the desktop grids are pinned
      back explicitly. main is 1560px wide, they have the room. */
   .ov-rail { position: static !important; }
-  .ov-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 380px !important; }
+  .ov-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 340px !important; }
   .ov-main { grid-column: 1 !important; grid-row: 1 !important; }
   .ov-rail { grid-column: 2 !important; grid-row: 1 !important; }
-  .attn-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 390px !important; }
-  .pg-cols   { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px !important; }
+  .attn-cols { display: grid !important; grid-template-columns: minmax(0, 1fr) 350px !important; }
+  .pg-cols   { display: grid !important; grid-template-columns: minmax(0, 1fr) 330px !important; }
   .deliv-cols, .proj-cols { display: grid !important; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) !important; }
   .grid-2 { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
   .ck-cols { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
@@ -1375,6 +1375,10 @@ pre.err { font-family: var(--mono); font-size: 11px; white-space: pre-wrap; colo
   /* headers may wrap on paper: a nowrap header is what pushes a narrow
      ledger past its column and summons a scrollbar that prints blank */
   table.tbl th { white-space: normal !important; }
+  /* the compact ledger sits in the narrowest column on the sheet — give it
+     one step less type rather than letting it wrap dates mid-number */
+  table.tbl.compact { font-size: 11.5px !important; }
+  table.tbl.compact th, table.tbl.compact td { padding: 5px 6px !important; }
   table.tbl tr { break-inside: avoid; }
 
   /* the colour key is a screen affordance — on paper it costs a band and
